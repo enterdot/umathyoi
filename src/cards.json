@@ -1,0 +1,340 @@
+[
+  {
+    "id": 30024,
+    "name": "oguri-cap",
+    "view_name": "Oguri Cap",
+    "rarity": 3,
+    "type": 3,
+    "limit_breaks": {
+      "0": {
+        "friendship_bonus": 15,
+        "mood_effect": 40,
+        "power_bonus": 1,
+        "specialty_priority": 20
+      },
+      "1": {
+        "friendship_bonus": 16,
+        "mood_effect": 45,
+        "power_bonus": 2,
+        "specialty_priority": 25
+      },
+      "2": {
+        "friendship_bonus": 18,
+        "mood_effect": 50,
+        "power_bonus": 2,
+        "specialty_priority": 30
+      },
+      "3": {
+        "friendship_bonus": 20,
+        "mood_effect": 55,
+        "power_bonus": 2,
+        "training_effectiveness": 5,
+        "specialty_priority": 35
+      },
+      "4": {
+        "friendship_bonus": 20,
+        "mood_effect": 60,
+        "power_bonus": 2,
+        "training_effectiveness": 10,
+        "specialty_priority": 35
+      }
+    }
+  },
+  {
+    "id": 30025,
+    "name": "special-week",
+    "view_name": "Special Week",
+    "rarity": 3,
+    "type": 1,
+    "limit_breaks": {
+      "0": {
+        "friendship_bonus": 25,
+        "mood_effect": 20
+      },
+      "1": {
+        "friendship_bonus": 27,
+        "mood_effect": 23,
+        "speed_bonus": 1
+      },
+      "2": {
+        "friendship_bonus": 30,
+        "training_effectiveness": 5,
+        "mood_effect": 26,
+        "speed_bonus": 1
+      },
+      "3": {
+        "friendship_bonus": 32,
+        "training_effectiveness": 5,
+        "mood_effect": 30,
+        "speed_bonus": 1,
+        "specialty_priority": 15
+      },
+      "4": {
+        "friendship_bonus": 35,
+        "training_effectiveness": 5,
+        "mood_effect": 30,
+        "speed_bonus": 1,
+        "specialty_priority": 30
+      }
+    }
+  },
+  {
+    "id": 20028,
+    "name": "zenno-rob-roy",
+    "view_name": "Zenno Rob Roy",
+    "rarity": 2,
+    "type": 2,
+    "limit_breaks": {
+      "0": {
+        "friendship_bonus": 25,
+        "mood_effect": 30,
+        "training_effectiveness": 5
+      },
+      "1": {
+        "friendship_bonus": 26,
+        "mood_effect": 32,
+        "training_effectiveness": 5,
+        "specialty_priority": 30
+      },
+      "2": {
+        "friendship_bonus": 28,
+        "mood_effect": 35,
+        "training_effectiveness": 5,
+        "specialty_priority": 45
+      },
+      "3": {
+        "friendship_bonus": 30,
+        "mood_effect": 37,
+        "training_effectiveness": 5,
+        "specialty_priority": 60
+      },
+      "4": {
+        "friendship_bonus": 30,
+        "mood_effect": 40,
+        "training_effectiveness": 5,
+        "specialty_priority": 60,
+        "stamina_bonus": 1
+      }
+    }
+  },
+  {
+    "id": 10021,
+    "name": "tazuna-hayakawa",
+    "view_name": "Tazuna Hayakawa",
+    "rarity": 1,
+    "type": 6,
+    "limit_breaks": {
+      "0": {
+        "energy_cost_reduction": 10
+      },
+      "1": {
+        "energy_cost_reduction": 11
+      },
+      "2": {
+        "energy_cost_reduction": 12
+      },
+      "3": {
+        "energy_cost_reduction": 13
+      },
+      "4": {
+        "energy_cost_reduction": 15,
+        "training_effectiveness": 5
+      }
+    }
+  },
+  {
+    "id": 30039,
+    "name": "kawakami-princess",
+    "view_name": "Kawakami Princess",
+    "rarity": 3,
+    "type": 1,
+    "limit_breaks": {
+      "0": {
+        "friendship_bonus": 25,
+        "mood_effect": 20,
+        "speed_bonus": 1,
+        "specialty_priority": 20
+      },
+      "1": {
+        "friendship_bonus": 26,
+        "mood_effect": 23,
+        "speed_bonus": 1,
+        "power_bonus": 1,
+        "specialty_priority": 25
+      },
+      "2": {
+        "friendship_bonus": 27,
+        "mood_effect": 26,
+        "speed_bonus": 1,
+        "power_bonus": 1,
+        "specialty_priority": 30
+      },
+      "3": {
+        "friendship_bonus": 28,
+        "mood_effect": 30,
+        "speed_bonus": 1,
+        "power_bonus": 1,
+        "specialty_priority": 35
+      },
+      "4": {
+        "friendship_bonus": 30,
+        "mood_effect": 30,
+        "speed_bonus": 1,
+        "power_bonus": 1,
+        "specialty_priority": 35
+      }
+    }
+  },
+  {
+    "id": 20019,
+    "name": "nice-nature",
+    "view_name": "Nice Nature",
+    "rarity": 2,
+    "type": 4,
+    "limit_breaks": {
+      "0": {
+        "friendship_bonus": 15,
+        "mood_effect": 35,
+        "training_effectiveness": 5        
+      },
+      "1": {
+        "friendship_bonus": 16,
+        "mood_effect": 38,
+        "training_effectiveness": 5
+      },
+      "2": {
+        "friendship_bonus": 18,
+        "mood_effect": 41,
+        "training_effectiveness": 5
+      },
+      "3": {
+        "friendship_bonus": 20,
+        "mood_effect": 45,
+        "training_effectiveness": 5
+      },
+      "4": {
+        "friendship_bonus": 20,
+        "mood_effect": 45,
+        "training_effectiveness": 5
+      }
+    }
+  },
+  {
+    "id": 20017,
+    "name": "meisho-doto",
+    "view_name": "Meisho Doto",
+    "rarity": 2,
+    "type": 4,
+    "limit_breaks": {
+      "0": {
+        "friendship_bonus": 20,
+        "training_effectiveness": 10,
+        "specialty_priority": 20
+      },
+      "1": {
+        "friendship_bonus": 21,
+        "training_effectiveness": 11,
+        "specialty_priority": 25
+      },
+      "2": {
+        "friendship_bonus": 22,
+        "training_effectiveness": 12,
+        "specialty_priority": 30
+      },
+      "3": {
+        "friendship_bonus": 23,
+        "training_effectiveness": 13,
+        "specialty_priority": 35
+      },
+      "4": {
+        "friendship_bonus": 25,
+        "guts_bonus": 1,
+        "training_effectiveness": 15,
+        "specialty_priority": 35
+      }
+    }
+  },
+  {
+    "id": 30032,
+    "name": "yaeno-muteki",
+    "view_name": "Yaeno Muteki",
+    "rarity": 3,
+    "type": 3,
+    "limit_breaks": {
+      "0": {
+        "friendship_bonus": 15,
+        "mood_effect": 30,
+        "training_effectiveness": 10,
+        "specialty_priority": 20
+      },
+      "1": {
+        "friendship_bonus": 16,
+        "mood_effect": 33,
+        "power_bonus": 1,
+        "training_effectiveness": 10,
+        "specialty_priority": 20
+      },
+      "2": {
+        "friendship_bonus": 18,
+        "mood_effect": 36,
+        "power_bonus": 1,
+        "training_effectiveness": 10,
+        "specialty_priority": 20
+      },
+      "3": {
+        "friendship_bonus": 20,
+        "mood_effect": 40,
+        "power_bonus": 1,
+        "training_effectiveness": 10,
+        "specialty_priority": 20
+      },
+      "4": {
+        "friendship_bonus": 20,
+        "mood_effect": 40,
+        "power_bonus": 1,
+        "training_effectiveness": 10,
+        "specialty_priority": 20
+      }
+    }
+  },
+  {
+    "id": 20015,
+    "name": "marvelous-sunday",
+    "view_name": "Marvelous Sunday",
+    "rarity": 2,
+    "type": 5,
+    "limit_breaks": {
+      "0": {
+        "friendship_bonus": 15,
+        "mood_effect": 45,
+        "specialty_priority": 35,
+        "wit_energy_recovery": 3
+      },
+      "1": {
+        "friendship_bonus": 16,
+        "mood_effect": 47,
+        "specialty_priority": 38,
+        "wit_energy_recovery": 3
+      },
+      "2": {
+        "friendship_bonus": 18,
+        "mood_effect": 50,
+        "specialty_priority": 42,
+        "wit_energy_recovery": 3
+      },
+      "3": {
+        "friendship_bonus": 20,
+        "mood_effect": 52,
+        "specialty_priority": 46,
+        "wit_energy_recovery": 3
+      },
+      "4": {
+        "friendship_bonus": 20,
+        "mood_effect": 55,
+        "wit_bonus": 1,
+        "specialty_priority": 50,
+        "wit_energy_recovery": 4
+      }
+    }
+  }
+]
