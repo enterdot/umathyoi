@@ -39,8 +39,14 @@ class CardSelection(Adw.Bin):
         self.set_child(view_stack)
 
     def connect_signals(self):
+        # Existing deck list events
         self.app.deck_list.slot_deactivated.subscribe(self._on_active_deck_deactivated)
         self.app.deck_list.slot_activated.subscribe(self._on_active_deck_activated)
+        
+        # NEW: Listen to individual deck events for card visibility updates
+        for slot, deck in self.app.deck_list:
+            deck.card_added_at_slot.subscribe(self._on_deck_card_added)
+            deck.card_removed_at_slot.subscribe(self._on_deck_card_removed)
 
     def refresh_all_action_rows(self):
         """Refresh visibility of all action rows based on current deck state."""
@@ -156,7 +162,28 @@ class CardSelection(Adw.Bin):
         
         return content
 
-    # Callback events
+    # NEW: Event handlers for deck card changes
+    def _on_deck_card_added(self, deck, **kwargs):
+        """Handle when a card is added to any deck."""
+        card = kwargs.get('card')
+        if card:
+            # Find and hide the corresponding row
+            for row in self.action_rows:
+                if row.card == card:
+                    self.select_row(row)
+                    break
+
+    def _on_deck_card_removed(self, deck, **kwargs):
+        """Handle when a card is removed from any deck."""
+        card = kwargs.get('card')
+        if card:
+            # Find and show the corresponding row
+            for row in self.action_rows:
+                if row.card == card:
+                    self.deselect_row(row)
+                    break
+
+    # Existing callback events
     def _update_stats_scrolled_window(self, caller, **kwargs):
         print(f"{caller}: {kwargs} for {self.app.card_stats}")
 

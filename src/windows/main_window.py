@@ -21,7 +21,6 @@ class MainWindow(Adw.ApplicationWindow):
         self.height_breakpoint: Adw.Breakpoint
         self._setup_breakpoints(848, None)
 
-
         self._load_css()
         self._setup_ui()
         self.present()
@@ -31,8 +30,8 @@ class MainWindow(Adw.ApplicationWindow):
             self.width_breakpoint = Adw.Breakpoint.new(Adw.BreakpointCondition.parse(f"max-width: {str(width)}sp"))
             self.add_breakpoint(self.width_breakpoint)
         if height:
-            self.heigh_breakpoint = Adw.Breakpoint.new(Adw.BreakpointCondition.parse(f"max-height: {str(height)}sp"))
-            self.add_breakpoint(self.height_breakpoint)  
+            self.height_breakpoint = Adw.Breakpoint.new(Adw.BreakpointCondition.parse(f"max-height: {str(height)}sp"))
+            self.add_breakpoint(self.height_breakpoint)
     
     def _setup_ui(self):
         header_bar = Adw.HeaderBar()
@@ -57,6 +56,7 @@ class MainWindow(Adw.ApplicationWindow):
     def _load_css(self):
         css_provider = Gtk.CssProvider()
         css = """
+            /* Carousel animations */
             .carousel-side {
                 transform: scale(0.85);
                 transition: transform 150ms ease;
@@ -67,6 +67,19 @@ class MainWindow(Adw.ApplicationWindow):
                 transform: scale(1.0);
                 transition: transform 150ms ease;
                 opacity: 1.0;
+            }
+            
+            /* Empty card slot styling */
+            .empty-card-slot {
+                background-color: alpha(@theme_fg_color, 0.1);
+                border: 2px dashed alpha(@theme_fg_color, 0.3);
+                border-radius: 8px;
+            }
+
+            .empty-slot-indicator {
+                font-size: 24px;
+                font-weight: bold;
+                color: alpha(@theme_fg_color, 0.5);
             }
         """
         css_provider.load_from_data(css.encode())

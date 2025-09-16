@@ -75,6 +75,19 @@ class DeckList:
     def previous_deck(self):
         return self.get_deck_at_offset(-1)
 
+    def find_deck_slot(self, target_deck: Deck) -> int | None:
+        """Find which slot number contains the given deck."""
+        for slot, deck in self:
+            if deck is target_deck:
+                return slot
+        return None
+
+    def find_deck_by_slot(self, slot: int) -> Deck | None:
+        """Get deck at specific slot (convenience method)."""
+        if 0 <= slot < self._size:
+            return self._decks[slot]
+        return None
+
     def __contains__(self, deck: Deck) -> bool:
         return deck in self._decks
 
@@ -87,4 +100,3 @@ class DeckList:
     
     def __str__(self):
         return f"{self._decks}"
-

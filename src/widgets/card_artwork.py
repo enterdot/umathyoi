@@ -23,9 +23,18 @@ class CardArtwork(Gtk.Box):
         self.artwork = Gtk.Picture()
         self.artwork.set_size_request(width, height)
         
-        # Create empty frame for None card
+        # Create consistent empty frame (same size as artwork)
         self.empty_frame = Gtk.Frame()
         self.empty_frame.set_size_request(width, height)
+        self.empty_frame.add_css_class("empty-card-slot")
+        
+        # Add empty slot indicator
+        empty_label = Gtk.Label()
+        empty_label.set_text("+")
+        empty_label.add_css_class("empty-slot-indicator")
+        empty_label.set_halign(Gtk.Align.CENTER)
+        empty_label.set_valign(Gtk.Align.CENTER)
+        self.empty_frame.set_child(empty_label)
         
         # Create loading spinner
         self.spinner = Gtk.Spinner()
@@ -33,7 +42,7 @@ class CardArtwork(Gtk.Box):
         self.spinner.set_halign(Gtk.Align.CENTER)
         self.spinner.set_valign(Gtk.Align.CENTER)
         
-        # Create frame for loading state
+        # Create frame for loading state (same size)
         self.loading_frame = Gtk.Frame()
         self.loading_frame.set_size_request(width, height)
         self.loading_frame.set_child(self.spinner)
@@ -44,7 +53,7 @@ class CardArtwork(Gtk.Box):
             self.show_empty_frame()
     
     def show_empty_frame(self):
-        """Show empty frame when card is None."""
+        """Show consistent empty frame when card is None."""
         self._clear_children()
         self.append(self.empty_frame)
     
@@ -55,7 +64,7 @@ class CardArtwork(Gtk.Box):
         self.append(self.loading_frame)
     
     def show_artwork(self, pixbuf):
-        """Show the loaded artwork without frame."""
+        """Show the loaded artwork with consistent sizing."""
         self.spinner.stop()
         
         if pixbuf:

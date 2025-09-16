@@ -19,8 +19,8 @@ class CardSlot(Gtk.Box):
         self.level = level
         self.width = width
         self.height = height
-        self.deck = deck  # NEW: Reference to deck
-        self.slot_index = slot_index  # NEW: Index in deck
+        self.deck = deck  # Reference to deck
+        self.slot_index = slot_index  # Index in deck
         
         self.setup_ui()
         self.connect_signals()
@@ -59,7 +59,7 @@ class CardSlot(Gtk.Box):
         """Connect widget signals."""
         self.level_scale.connect("value-changed", self._on_level_changed)
         
-        # NEW: Subscribe to deck events if we have a deck reference
+        # Subscribe to deck events if we have a deck reference
         if self.deck is not None:
             self.deck.limit_break_set_at_slot.subscribe(self._on_deck_limit_break_changed)
     
@@ -84,20 +84,31 @@ class CardSlot(Gtk.Box):
             self.level_adjustment.set_value(limit_break)
             self.level_scale.handler_unblock_by_func(self._on_level_changed)
     
-    def set_card(self, card: Card):
-        """Set the card for this slot."""
-        self.card = card
-        self.card_art.set_card(card)
+    def set_card(self, card: Card) -> bool:
+        """Set the card for this slot (in-place update)."""
+        if self.card is not card:
+            self.card = card
+            self.card_art.set_card(card)
+            return True
+        return False
     
+    #TODO: replace with @property
     def get_card(self) -> Card:
         """Get the current card."""
         return self.card
     
-    def set_level(self, level: int):
-        """Set the limit break level."""
-        self.level = level
-        self.level_adjustment.set_value(level)
+    def set_level(self, level: int) -> bool:
+        """Set the limit break level (in-place update)."""
+        if self.level != level:
+            self.level = level
+            # Block signal to prevent triggering deck update
+            self.level_scale.handler_block_by_func(self._on_level_changed)
+            self.level_adjustment.set_value(level)
+            self.level_scale.handler_unblock_by_func(self._on_level_changed)
+            return True
+        return False
     
+    #TODO: replace with @property
     def get_level(self) -> int:
         """Get the current limit break level."""
         return self.level
