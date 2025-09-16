@@ -43,6 +43,7 @@ class CardSelection(Adw.Bin):
         self.app.deck_list.slot_activated.subscribe(self._on_active_deck_activated)
 
     def refresh_all_action_rows(self):
+        """Refresh visibility of all action rows based on current deck state."""
         for row in self.action_rows:
             if row.card in self.app.deck_list.active_deck:
                 self.select_row(row)
@@ -50,9 +51,11 @@ class CardSelection(Adw.Bin):
                 self.deselect_row(row)
 
     def select_row(self, row):
+        """Hide row when card is selected (added to deck)."""
         row.set_visible(False)
     
     def deselect_row(self, row):
+        """Show row when card is deselected (removed from deck)."""
         row.set_visible(True)
 
     def _create_card_list_view(self):
@@ -158,15 +161,18 @@ class CardSelection(Adw.Bin):
         print(f"{caller}: {kwargs} for {self.app.card_stats}")
 
     def _on_active_deck_deactivated(self, caller, **kwargs):
+        """Handle when active deck is deactivated."""
         self.list_box.set_visible(False)
     
     def _on_active_deck_activated(self, caller, **kwargs):
+        """Handle when active deck is activated."""
         self.refresh_all_action_rows()
         self.list_box.set_visible(True)
     
     # UI events
 
     def _on_card_row_activated(self, list_box, row):
+        """Handle when a card row is activated (clicked)."""
         if self.app.deck_list.active_deck.is_full:
             return
         if self.app.deck_list.active_deck.add_card(row.card) is not None:
@@ -177,24 +183,27 @@ class CardSelection(Adw.Bin):
             raise RuntimeError(f"Could not add or remove {row.card} to {self.app.deck_list.active_deck} even though it's not full") 
     
     def _on_card_list_view_clicked(self, gesture, n_press, x, y, list_box):
+        """Handle clicking on the card list view."""
         split_view = list_box.get_ancestor(Adw.NavigationSplitView)
         split_view.set_show_content(True)
     
     def _on_card_info_button_clicked(self, info_button, card: Card):
+        """Handle clicking the info button on a card."""
         self.app.card_stats.card = card
         view_stack = info_button.get_ancestor(Adw.ViewStack)
         view_stack.set_visible_child_name("stats_info_view")
     
     def _on_stats_info_view_back_button_clicked(self, button):
+        """Handle clicking the back button in stats info view."""
         view_stack = button.get_ancestor(Adw.ViewStack)
         view_stack.set_visible_child_name("card_selection_view")
     
     def _on_stats_info_view_slider_changed(self, slider):
+        """Handle limit break slider change in stats info view."""
         limit_break = int(slider.get_value())
         self.app.card_stats.limit_break = limit_break
     
     def _on_stats_info_view_add_button_clicked(self, button):
+        """Handle clicking the add button in stats info view."""
         card_stats = self.app.card_stats
         print(f"Adding {card_stats.card.view_name} at limit break {card_stats.limit_break} to deck")
-    
-
