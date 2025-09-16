@@ -39,7 +39,6 @@ class DeckList:
                 self.slot_deactivated.trigger(self, index=self.active_slot, deck=self.active_deck)
                 self._active_slot = index
                 self.slot_activated.trigger(self, index=self.active_slot, deck=self.active_deck)
-                print(f"activated deck in slot {self._active_slot}")
         else:
             raise ValueError(f"Slot {index} is out of bounds") 
 
