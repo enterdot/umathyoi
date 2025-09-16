@@ -57,6 +57,7 @@ class MainWindow(Adw.ApplicationWindow):
         css_provider = Gtk.CssProvider()
         css = """
             /* Carousel animations */
+
             .carousel-side {
                 transform: scale(0.85);
                 transition: transform 150ms ease;
@@ -68,8 +69,9 @@ class MainWindow(Adw.ApplicationWindow):
                 transition: transform 150ms ease;
                 opacity: 1.0;
             }
-            
+
             /* Empty card slot styling */
+
             .empty-card-slot {
                 background-color: alpha(@theme_fg_color, 0.1);
                 border: 2px dashed alpha(@theme_fg_color, 0.3);
