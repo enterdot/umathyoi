@@ -18,7 +18,10 @@ class DeckCarousel(Adw.Bin):
         
     def setup_ui(self):
         
-        container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=40)
+        container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        container.set_spacing(20)
+        container.set_margin_bottom(30)
+        container.set_margin_top(30)
         
         self.carousel = Adw.Carousel()
         self.carousel.set_allow_mouse_drag(True)
@@ -54,6 +57,7 @@ class DeckCarousel(Adw.Bin):
         # Subscribe to deck events for real-time updates
         self.app.deck_list.slot_activated.subscribe(self._on_active_deck_changed)
         for slot, deck in self.app.deck_list:
+            # TODO: use partial instead
             deck.card_added_at_slot.subscribe(self._on_card_added_to_deck)
             deck.card_removed_at_slot.subscribe(self._on_card_removed_from_deck)
             deck.limit_break_set_at_slot.subscribe(self._on_limit_break_changed)
@@ -126,6 +130,11 @@ class DeckCarousel(Adw.Bin):
             self._update_single_card_slot(deck_slot, index, card, limit_break)
 
     def _refresh_carousel_page(self, slot_index):
+        return # TODO: is it safe to remove?
+        # the state of the carousel page only would've changed if there was a 
+        # way to add cards to a non-active deck, if that feature was ever added
+        # we should have a more sophisticated way of updating the page instead
+        # of just creating a whole new deck grid which causes flickering.
         """Refresh a specific carousel page to reflect current deck state."""
         if 0 <= slot_index < self.carousel.get_n_pages():
             _, deck = list(self.app.deck_list)[slot_index]
