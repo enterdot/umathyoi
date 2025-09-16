@@ -39,14 +39,10 @@ class CardSelection(Adw.Bin):
         self.set_child(view_stack)
 
     def connect_signals(self):
-        # Existing deck list events
         self.app.deck_list.slot_deactivated.subscribe(self._on_active_deck_deactivated)
         self.app.deck_list.slot_activated.subscribe(self._on_active_deck_activated)
-        
-        # NEW: Listen to individual deck events for card visibility updates
-        for slot, deck in self.app.deck_list:
-            deck.card_added_at_slot.subscribe(self._on_deck_card_added)
-            deck.card_removed_at_slot.subscribe(self._on_deck_card_removed)
+        self.app.deck_list.card_added_to_active_deck_at_slot.subscribe(self._on_active_deck_card_added)
+        self.app.deck_list.card_removed_from_active_deck_at_slot.subscribe(self._on_active_deck_card_removed)
 
     def refresh_all_action_rows(self):
         """Refresh visibility of all action rows based on current deck state."""
@@ -162,9 +158,9 @@ class CardSelection(Adw.Bin):
         
         return content
 
-    # NEW: Event handlers for deck card changes
-    def _on_deck_card_added(self, deck, **kwargs):
-        """Handle when a card is added to any deck."""
+    # Updated event handlers - now they don't need to check if deck is active
+    def _on_active_deck_card_added(self, deck_list, **kwargs):
+        """Handle when a card is added to the active deck."""
         card = kwargs.get('card')
         if card:
             # Find and hide the corresponding row
@@ -173,8 +169,8 @@ class CardSelection(Adw.Bin):
                     self.select_row(row)
                     break
 
-    def _on_deck_card_removed(self, deck, **kwargs):
-        """Handle when a card is removed from any deck."""
+    def _on_active_deck_card_removed(self, deck_list, **kwargs):
+        """Handle when a card is removed from the active deck."""
         card = kwargs.get('card')
         if card:
             # Find and show the corresponding row

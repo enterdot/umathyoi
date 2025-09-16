@@ -23,6 +23,54 @@ class DeckList:
 
         self.slot_activated: Event = Event()
         self.slot_deactivated: Event = Event()
+        
+        # Active deck events to match all Deck events
+        self.card_added_to_active_deck_at_slot: Event = Event()
+        self.card_removed_from_active_deck_at_slot: Event = Event()
+        self.limit_break_set_for_active_deck_at_slot: Event = Event()
+        self.active_deck_was_cleared: Event = Event()
+        self.active_deck_reached_capacity: Event = Event()
+        self.active_deck_pushed_past_capacity: Event = Event()
+
+        # Set up event forwarding for all decks
+        self._setup_deck_event_forwarding()
+
+    def _setup_deck_event_forwarding(self):
+        """Subscribe to all deck events and forward active deck events."""
+        # Mapping of deck events to their corresponding active deck events
+        event_mapping = {
+            'card_added_at_slot': self.card_added_to_active_deck_at_slot,
+            'card_removed_at_slot': self.card_removed_from_active_deck_at_slot,
+            'limit_break_set_at_slot': self.limit_break_set_for_active_deck_at_slot,
+            'deck_was_cleared': self.active_deck_was_cleared,
+            'deck_reached_capacity': self.active_deck_reached_capacity,
+            'deck_pushed_past_capacity': self.active_deck_pushed_past_capacity,
+        }
+
+        # Assert that we have a mapping for every Deck event
+        sample_deck = Deck()
+        deck_events = {name for name, attr in vars(sample_deck).items() 
+                      if isinstance(attr, Event)}
+        mapped_events = set(event_mapping.keys())
+        
+        assert mapped_events == deck_events, (
+            f"Event mapping mismatch!\n"
+            f"Missing from mapping: {deck_events - mapped_events}\n"
+            f"Extra in mapping: {mapped_events - deck_events}"
+        )
+
+        for deck in self._decks:
+            for deck_event_name, active_event in event_mapping.items():
+                deck_event = getattr(deck, deck_event_name)
+                # Create a closure that captures the current active_event
+                def create_handler(target_event):
+                    def handler(source_deck, **kwargs):
+                        # Only forward if this deck is the active deck
+                        if source_deck is self.active_deck:
+                            target_event.trigger(self, **kwargs)
+                    return handler
+                
+                deck_event.subscribe(create_handler(active_event))
 
     @property
     def active_deck(self) -> Deck | None:
@@ -57,22 +105,6 @@ class DeckList:
 
     def get_deck_at_slot(self, index: int):
         return self._decks[index]
-
-    @property
-    def next_slot(self):
-        return self.get_slot_at_offset(1)
-
-    @property
-    def previous_slot(self):
-        return self.get_slot_at_offset(-1)
-    
-    @property
-    def next_deck(self) -> Deck | None:
-        return self.get_deck_at_offset(1)  
-
-    @property
-    def previous_deck(self):
-        return self.get_deck_at_offset(-1)
 
     def find_deck_slot(self, target_deck: Deck) -> int | None:
         """Find which slot number contains the given deck."""

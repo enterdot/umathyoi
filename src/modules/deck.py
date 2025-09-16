@@ -26,7 +26,6 @@ class Deck:
                 self._limit_breaks = limit_breaks[:size]
             else:
                 self._limit_breaks = limit_breaks + [0] * (size - len(limit_breaks))
-        
 
         self.card_added_at_slot: Event = Event()
         self.card_removed_at_slot: Event = Event()
