@@ -5,12 +5,12 @@ from .event import Event
 class DeckList:
     def __init__(self, size: int = 5, decks: list[Deck | None] | None = None) -> None:
         if size < 1:
-            raise ValueError(f"Size {size} is not valid, it must be positive")  # Fixed f-string
+            raise ValueError(f"Size {size} is not valid, it must be positive")
         self._size: int = size
 
         if decks is not None:
             if len(decks) > size:
-                print(f"DeckList size is {size} but {len(decks)} decks were given, discarding {len(decks) - size}")  # Fixed calculation
+                print(f"DeckList size is {size} but {len(decks)} decks were given, discarding {len(decks) - size}")
                 decks = decks[:size]
             self._decks = [deck if deck is not None else Deck() for deck in decks]
 
@@ -21,6 +21,7 @@ class DeckList:
             
         self._active_slot: int = 0
 
+        # Existing deck list events
         self.slot_activated: Event = Event()
         self.slot_deactivated: Event = Event()
         
@@ -46,7 +47,7 @@ class DeckList:
             'deck_reached_capacity': self.active_deck_reached_capacity,
             'deck_pushed_past_capacity': self.active_deck_pushed_past_capacity,
         }
-
+        
         # Assert that we have a mapping for every Deck event
         sample_deck = Deck()
         deck_events = {name for name, attr in vars(sample_deck).items() 
@@ -67,6 +68,9 @@ class DeckList:
                     def handler(source_deck, **kwargs):
                         # Only forward if this deck is the active deck
                         if source_deck is self.active_deck:
+                            # Convert 'index' parameter to 'slot' for consistency
+                            if 'index' in kwargs:
+                                kwargs['slot'] = kwargs.pop('index')
                             target_event.trigger(self, **kwargs)
                     return handler
                 
@@ -87,6 +91,7 @@ class DeckList:
                 self.slot_deactivated.trigger(self, index=self.active_slot, deck=self.active_deck)
                 self._active_slot = index
                 self.slot_activated.trigger(self, index=self.active_slot, deck=self.active_deck)
+                print(f"activated deck in slot {self._active_slot}")
         else:
             raise ValueError(f"Slot {index} is out of bounds") 
 

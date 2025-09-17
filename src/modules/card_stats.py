@@ -1,37 +1,61 @@
-from typing import Iterator
 from .card import Card
 from .event import Event
 
+
 class CardStats:
-    def __init__(self, card: Card = None, limit_break: int = 0) -> None:
-        self._card: Card = card
+    """Tracks currently inspected card and limit break level for info display."""
+    
+    def __init__(self, card: Card | None = None, limit_break: int = 0) -> None:
+        """Initialize card stats tracker.
+        
+        Args:
+            card: Initial card to inspect
+            limit_break: Initial limit break level (0-4)
+        """
+        self._card: Card | None = card
         self._limit_break: int = limit_break
 
         self.card_changed: Event = Event()
         self.limit_break_changed: Event = Event()
 
     @property
-    def card(self):
+    def card(self) -> Card | None:
+        """Currently inspected card."""
         return self._card
 
     @card.setter
-    def card(self, card: Card) -> None:
-        prev_card = self._card
-        self._card = card
-        self.card_changed.trigger(self, card=self._card, prev_card=prev_card)
+    def card(self, card: Card | None) -> None:
+        """Set currently inspected card.
+        
+        Args:
+            card: Card to inspect, or None to clear
+        """
+        if card != self._card:
+            prev_card = self._card
+            self._card = card
+            self.card_changed.trigger(self, card=self._card, prev_card=prev_card)
 
     @property
-    def limit_break(self):
+    def limit_break(self) -> int:
+        """Currently selected limit break level."""
         return self._limit_break
 
     @limit_break.setter
     def limit_break(self, limit_break: int) -> None:
-        prev_limit_break = self._limit_break
-        self._limit_break = limit_break
-        self.limit_break_changed.trigger(self, card=self._card, prev_limit_break=prev_limit_break)
-
-    def get_limit_break(self) -> int:
-        return self._limit_break
-
-    def get_card(self) -> Card:
-        return self._card
+        """Set limit break level.
+        
+        Args:
+            limit_break: Limit break level (0-4)
+        """
+        if not (0 <= limit_break <= 4):
+            raise ValueError(f"Limit break must be 0-4, got {limit_break}")
+        
+        if limit_break != self._limit_break:
+            prev_limit_break = self._limit_break
+            self._limit_break = limit_break
+            self.limit_break_changed.trigger(
+                self, 
+                card=self._card, 
+                limit_break=self._limit_break,
+                prev_limit_break=prev_limit_break
+            )
