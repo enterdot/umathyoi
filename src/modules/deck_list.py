@@ -1,11 +1,12 @@
 from typing import Iterator
 from .deck import Deck
 from .event import Event
+from utils import DeckConstants, Logger
 
 class DeckList:
-    def __init__(self, size: int = 5, decks: list[Deck | None] | None = None) -> None:
-        if size < 1:
-            raise ValueError(f"Size {size} is not valid, it must be positive")
+    def __init__(self, size: int = DeckConstants.DEFAULT_DECK_LIST_SIZE, decks: list[Deck | None] | None = None) -> None:
+        if size < DeckConstants.MIN_DECK_SIZE:
+            raise ValueError(f"Size {size} is not valid, it must be at least {DeckConstants.MIN_DECK_SIZE}")
         self._size: int = size
 
         if decks is not None:
@@ -68,9 +69,6 @@ class DeckList:
                     def handler(source_deck, **kwargs):
                         # Only forward if this deck is the active deck
                         if source_deck is self.active_deck:
-                            # Convert 'index' parameter to 'slot' for consistency
-                            if 'index' in kwargs:
-                                kwargs['slot'] = kwargs.pop('index')
                             target_event.trigger(self, **kwargs)
                     return handler
                 
@@ -91,7 +89,7 @@ class DeckList:
                 self.slot_deactivated.trigger(self, index=self.active_slot, deck=self.active_deck)
                 self._active_slot = index
                 self.slot_activated.trigger(self, index=self.active_slot, deck=self.active_deck)
-                print(f"activated deck in slot {self._active_slot}")
+                Logger.debug("Activated deck in slot", slot=self._active_slot)
         else:
             raise ValueError(f"Slot {index} is out of bounds") 
 

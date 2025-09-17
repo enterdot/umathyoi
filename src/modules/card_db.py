@@ -8,6 +8,7 @@ from typing import Optional, Iterator
 from pathlib import Path
 
 from .card import Rarity, CardType, Card
+from utils import CardConstants, NetworkConstants
 
 
 class CardDatabase:
@@ -68,9 +69,9 @@ class CardDatabase:
         # Format should be: {'card_id': owned_copies, ...}
         # where (owned_copies - 1) = max achievable limit break
         
-        # Temporary: Set all cards to 3 copies for testing
+        # Temporary: Set all cards to default copies for testing
         for card_id in self.cards:
-            self.owned_copies[card_id] = 3
+            self.owned_copies[card_id] = CardConstants.DEFAULT_OWNED_COPIES
 
     def get_all_cards(self) -> Iterator[Card]:
         """Get iterator over all cards in database.
@@ -213,10 +214,10 @@ class CardDatabase:
             return cached_pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
         # Download image from remote server
-        url = f"https://gametora.com/images/umamusume/supports/tex_support_card_{card_id}.png"
+        url = NetworkConstants.IMAGE_BASE_URL.format(card_id=card_id)
 
         try:
-            timeout = aiohttp.ClientTimeout(total=10)
+            timeout = aiohttp.ClientTimeout(total=NetworkConstants.IMAGE_TIMEOUT_SECONDS)
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 async with session.get(url) as response:
                     if response.status == 200:

@@ -1,24 +1,25 @@
 from typing import Iterator
 from .card import Card
 from .event import Event
+from utils import DeckConstants
 
 
 class Deck:
     """A deck containing up to 6 cards with limit break levels."""
     
-    def __init__(self, name: str = "New Deck", size: int = 6, cards: list[Card | None] | None = None, limit_breaks: list[int] | None = None) -> None:
+    def __init__(self, name: str = "New Deck", size: int = DeckConstants.DEFAULT_DECK_SIZE, cards: list[Card | None] | None = None, limit_breaks: list[int] | None = None) -> None:
         """Initialize a new deck.
         
         Args:
             name: Display name for the deck
-            size: Maximum number of cards (default 6)
+            size: Maximum number of cards
             cards: Optional list of initial cards
             limit_breaks: Optional list of limit break levels for initial cards
         """
         self.name: str = name
 
-        if size < 1:
-            raise ValueError(f"Size {size} is not valid, it must be positive")
+        if size < DeckConstants.MIN_DECK_SIZE:
+            raise ValueError(f"Size {size} is not valid, it must be at least {DeckConstants.MIN_DECK_SIZE}")
         self._size: int = size
 
         self._cards: list[Card | None] = [None] * size

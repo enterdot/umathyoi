@@ -1,5 +1,6 @@
 from .card import Card
 from .event import Event
+from utils import CardConstants
 
 
 class CardStats:
@@ -45,10 +46,10 @@ class CardStats:
         """Set limit break level.
         
         Args:
-            limit_break: Limit break level (0-4)
+            limit_break: Limit break level
         """
-        if not (0 <= limit_break <= 4):
-            raise ValueError(f"Limit break must be 0-4, got {limit_break}")
+        if not (CardConstants.MIN_LIMIT_BREAKS <= limit_break <= CardConstants.MAX_LIMIT_BREAKS):
+            raise ValueError(f"Limit break must be {CardConstants.MIN_LIMIT_BREAKS}-{CardConstants.MAX_LIMIT_BREAKS}, got {limit_break}")
         
         if limit_break != self._limit_break:
             prev_limit_break = self._limit_break

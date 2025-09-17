@@ -2,24 +2,30 @@ import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
+from typing import TYPE_CHECKING
 
 from modules import Card, Deck
-from widgets import CardSlot, Placeholder
-from utils import auto_tag_from_instance, auto_title_from_instance
+from .card_slot import CardSlot
+from .placeholder import Placeholder
+from utils import auto_tag_from_instance, auto_title_from_instance, UIConstants
+
+if TYPE_CHECKING:
+    from application import MainApplication
+    from windows import MainWindow
 
 
 class DeckCarousel(Adw.Bin):
     """Carousel widget displaying multiple decks with visual scaling animations."""
     
-    def __init__(self, window):
+    def __init__(self, window: 'MainWindow'):
         """Initialize deck carousel.
         
         Args:
             window: Parent window reference
         """
         super().__init__()
-        self.app = window.app
-        self.window = window
+        self.app: 'MainApplication' = window.app
+        self.window: 'MainWindow' = window
         self.setup_ui()
         self.connect_signals()
         
@@ -50,7 +56,7 @@ class DeckCarousel(Adw.Bin):
         deck_efficiency = Placeholder("Deck Efficiency Box")
         deck_efficiency.set_vexpand(False)
         deck_efficiency.set_valign(Gtk.Align.END)
-        deck_efficiency.set_margin_bottom(40)
+        deck_efficiency.set_margin_bottom(UIConstants.DECK_EFFICIENCY_MARGIN_BOTTOM)
         
         container.append(self.carousel)
         container.append(deck_efficiency)
@@ -138,8 +144,8 @@ class DeckCarousel(Adw.Bin):
             Grid widget containing card slots
         """
         deck_grid = Gtk.Grid()
-        deck_grid.set_row_spacing(24)
-        deck_grid.set_column_spacing(24)
+        deck_grid.set_row_spacing(UIConstants.DECK_GRID_SPACING)
+        deck_grid.set_column_spacing(UIConstants.DECK_GRID_SPACING)
 
         for slot, card, limit_break in deck:
             card_slot_widget = self._create_card_slot_widget(card, limit_break, slot)
@@ -160,7 +166,7 @@ class DeckCarousel(Adw.Bin):
             Configured CardSlot widget
         """
         active_deck = self.app.deck_list.active_deck
-        card_slot = CardSlot(card, limit_break, 150, 200, deck=active_deck, slot=slot)
+        card_slot = CardSlot(card, limit_break, UIConstants.CARD_SLOT_WIDTH, UIConstants.CARD_SLOT_HEIGHT, deck=active_deck, slot=slot)
         
         # Add click handler for card removal if slot contains a card
         if card is not None:
@@ -258,7 +264,7 @@ class DeckCarousel(Adw.Bin):
         self.update_carousel_hints(carousel)
 
     def _on_active_deck_changed(self, deck_list, **kwargs) -> None:
-        """Handle when the active deck changes.
+        """Handle when the active deck changes - refresh current page.
         
         Args:
             deck_list: DeckList that triggered the event

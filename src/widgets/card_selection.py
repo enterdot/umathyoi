@@ -2,32 +2,30 @@ import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
+from typing import TYPE_CHECKING
 
 from modules import Card, CardStats
-from widgets import CardArtwork
-from utils import auto_tag_from_instance, auto_title_from_instance
+from .card_artwork import CardArtwork
+from utils import auto_tag_from_instance, auto_title_from_instance, UIConstants, CardConstants
+
+if TYPE_CHECKING:
+    from application import MainApplication
+    from windows import MainWindow
 
 
 class CardSelection(Adw.Bin):
     """Card selection sidebar with card list and detailed stats view."""
     
-    # Configuration constants
-    MAX_LIMIT_BREAKS = 4
-    CARD_THUMBNAIL_WIDTH = 45
-    CARD_THUMBNAIL_HEIGHT = 60
-    STATS_ARTWORK_WIDTH = 45 * 3
-    STATS_ARTWORK_HEIGHT = 60 * 3
-    
-    def __init__(self, window):
+    def __init__(self, window: 'MainWindow'):
         """Initialize card selection widget.
         
         Args:
             window: Parent window reference
         """
         super().__init__()
-        self.app = window.app
-        self.window = window
-        self._list_box = None
+        self.app: 'MainApplication' = window.app
+        self.window: 'MainWindow' = window
+        self._list_box: Gtk.ListBox | None = None
 
         self.setup_ui()
         self.connect_signals()
@@ -119,10 +117,10 @@ class CardSelection(Adw.Bin):
         self._populate_card_list(list_box)
         
         # Set margins
-        list_box.set_margin_start(18)
-        list_box.set_margin_end(18)
-        list_box.set_margin_top(12)
-        list_box.set_margin_bottom(12)
+        list_box.set_margin_start(UIConstants.CARD_LIST_MARGIN)
+        list_box.set_margin_end(UIConstants.CARD_LIST_MARGIN)
+        list_box.set_margin_top(UIConstants.CARD_LIST_PADDING_VERTICAL)
+        list_box.set_margin_bottom(UIConstants.CARD_LIST_PADDING_VERTICAL)
         
         # Wrap in scrolled window
         scrolled_window = Gtk.ScrolledWindow()
@@ -158,7 +156,7 @@ class CardSelection(Adw.Bin):
         row.set_activatable(True)
         
         # Add card thumbnail
-        thumbnail = CardArtwork(card, self.CARD_THUMBNAIL_WIDTH, self.CARD_THUMBNAIL_HEIGHT)
+        thumbnail = CardArtwork(card, UIConstants.CARD_THUMBNAIL_WIDTH, UIConstants.CARD_THUMBNAIL_HEIGHT)
         row.add_prefix(thumbnail)
         
         # Add info button
@@ -196,7 +194,7 @@ class CardSelection(Adw.Bin):
         content.append(header_bar)
         
         # Large card artwork display
-        card_artwork = CardArtwork(None, self.STATS_ARTWORK_WIDTH, self.STATS_ARTWORK_HEIGHT)
+        card_artwork = CardArtwork(None, UIConstants.CARD_THUMBNAIL_WIDTH * UIConstants.STATS_ARTWORK_SCALE, UIConstants.CARD_THUMBNAIL_HEIGHT * UIConstants.STATS_ARTWORK_SCALE)
         card_artwork.set_halign(Gtk.Align.CENTER)
         content.append(card_artwork)
 
@@ -244,8 +242,8 @@ class CardSelection(Adw.Bin):
         current_value = self.app.card_stats.limit_break
         slider_adjustment = Gtk.Adjustment(
             value=current_value, 
-            lower=0, 
-            upper=self.MAX_LIMIT_BREAKS, 
+            lower=CardConstants.MIN_LIMIT_BREAKS, 
+            upper=CardConstants.MAX_LIMIT_BREAKS, 
             step_increment=1, 
             page_increment=1
         )
@@ -257,7 +255,7 @@ class CardSelection(Adw.Bin):
         slider_scale.set_round_digits(0)
         
         # Add marks for each limit break level
-        for i in range(self.MAX_LIMIT_BREAKS + 1):
+        for i in range(CardConstants.MAX_LIMIT_BREAKS + 1):
             slider_scale.add_mark(i, Gtk.PositionType.BOTTOM, str(i))
 
         slider_scale.connect("value-changed", self._on_stats_info_view_slider_changed)

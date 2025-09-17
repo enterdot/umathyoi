@@ -2,30 +2,48 @@ import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Gdk, Adw
+from typing import TYPE_CHECKING
 
-from views.deck_builder import DeckBuilderView
-from views.legacy_manager import LegacyManagerView
+from views import DeckBuilderView
+from views import LegacyManagerView
+from utils import UIConstants
+
+if TYPE_CHECKING:
+    from application import MainApplication
 
 
 class MainWindow(Adw.ApplicationWindow):
+    """Main application window with responsive design and CSS styling."""
     
-    def __init__(self, app, app_name: str):
+    def __init__(self, app: 'MainApplication', app_name: str):
+        """Initialize main window.
+        
+        Args:
+            app: Application instance
+            app_name: Display name for window title
+        """
         super().__init__(application=app)
-        self.app = app
+        self.app: 'MainApplication' = app
         
         self.set_title(app_name)
-        self.set_default_size(1024, 720)
-        self.set_size_request(560, 720)
+        self.set_default_size(UIConstants.DEFAULT_WINDOW_WIDTH, UIConstants.DEFAULT_WINDOW_HEIGHT)
+        self.set_size_request(UIConstants.MIN_WINDOW_WIDTH, UIConstants.MIN_WINDOW_HEIGHT)
 
         self.width_breakpoint: Adw.Breakpoint
         self.height_breakpoint: Adw.Breakpoint
-        self._setup_breakpoints(848, None)
+        self._setup_breakpoints(UIConstants.DEFAULT_BREAKPOINT_WIDTH, None)
 
         self._load_css()
         self._setup_ui()
         self.present()
 
     def _setup_breakpoints(self, width: int | None, height: int | None) -> None:
+        """Set up responsive breakpoints for different screen sizes.
+        
+        Args:
+            width: Breakpoint width in pixels, or None to skip
+            height: Breakpoint height in pixels, or None to skip
+        """
         if width:
             self.width_breakpoint = Adw.Breakpoint.new(Adw.BreakpointCondition.parse(f"max-width: {str(width)}sp"))
             self.add_breakpoint(self.width_breakpoint)
@@ -33,7 +51,8 @@ class MainWindow(Adw.ApplicationWindow):
             self.height_breakpoint = Adw.Breakpoint.new(Adw.BreakpointCondition.parse(f"max-height: {str(height)}sp"))
             self.add_breakpoint(self.height_breakpoint)
     
-    def _setup_ui(self):
+    def _setup_ui(self) -> None:
+        """Set up the main window UI components."""
         header_bar = Adw.HeaderBar()
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         
@@ -53,36 +72,37 @@ class MainWindow(Adw.ApplicationWindow):
         
         self.set_content(main_box)
 
-    def _load_css(self):
+    def _load_css(self) -> None:
+        """Load custom CSS styling for the application."""
         css_provider = Gtk.CssProvider()
-        css = """
+        css = f"""
             /* Carousel animations */
 
-            .carousel-side {
+            .carousel-side {{
                 transform: scale(0.85);
-                transition: transform 150ms ease;
+                transition: transform {UIConstants.CSS_TRANSITION_DURATION}ms ease;
                 opacity: 0.8;
-            }
+            }}
 
-            .carousel-active {
+            .carousel-active {{
                 transform: scale(1.0);
-                transition: transform 150ms ease;
+                transition: transform {UIConstants.CSS_TRANSITION_DURATION}ms ease;
                 opacity: 1.0;
-            }
+            }}
 
             /* Empty card slot styling */
 
-            .empty-card-slot {
+            .empty-card-slot {{
                 background-color: alpha(@theme_fg_color, 0.1);
                 border: 2px dashed alpha(@theme_fg_color, 0.3);
                 border-radius: 8px;
-            }
+            }}
 
-            .empty-slot-indicator {
+            .empty-slot-indicator {{
                 font-size: 24px;
                 font-weight: bold;
                 color: alpha(@theme_fg_color, 0.5);
-            }
+            }}
         """
         css_provider.load_from_data(css.encode())
         
