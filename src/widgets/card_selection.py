@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from modules import Card, CardStats
 from .card_artwork import CardArtwork
-from utils import auto_tag_from_instance, auto_title_from_instance, UIConstants, CardConstants
+from utils import auto_tag_from_instance, auto_title_from_instance, UIConstants, CardConstants, Logger
 
 if TYPE_CHECKING:
     from application import MainApplication
@@ -136,8 +136,8 @@ class CardSelection(Adw.Bin):
         Args:
             list_box: List box to populate
         """
-        cards = self.app.card_db.get_all_cards()
-        for card in sorted(cards, key=lambda c: c.view_name):
+        #cards = self.app.card_db.get_all_cards()
+        for card in sorted(self.app.card_db, key=lambda c: c.view_name):
             row = self._create_card_action_row(card)
             list_box.append(row)
 
@@ -327,7 +327,9 @@ class CardSelection(Adw.Bin):
         """
         # Update the large artwork display when card changes
         # This would be implemented when stats view is fully developed
-        print(f"Card stats changed: {kwargs}")
+        to_card_id = kwargs.get("card").id
+        from_card_id = kwargs.get("prev_car").id if kwargs.get("prev_car") else "none"
+        Logger.debug(f"Card stats changed", caller=card_stats, to_card=to_card_id, from_card=from_card_id)
 
     # UI event handlers
     def _on_card_row_activated(self, list_box: Gtk.ListBox, row: Adw.ActionRow) -> None:
@@ -410,6 +412,6 @@ class CardSelection(Adw.Bin):
         
         if card_stats.card and active_deck and not active_deck.is_full:
             if active_deck.add_card(card_stats.card, card_stats.limit_break) is not None:
-                print(f"Added {card_stats.card.view_name} at limit break {card_stats.limit_break} to deck")
+                Logger.debug(f"Added card {card_stats.card.id} at limit break {card_stats.limit_break} to active deck", name=active_deck.name)
             else:
-                print(f"Could not add {card_stats.card.view_name} - already in deck")
+                Logger.debug(f"Could not add card {card_stats.card.id}, already in active deck", name=active_deck.name)

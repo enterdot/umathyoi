@@ -70,6 +70,7 @@ class DeckList:
                         # Only forward if this deck is the active deck
                         if source_deck is self.active_deck:
                             target_event.trigger(self, **kwargs)
+                    handler.__name__ = f"{deck_event_name} (forward event by {self.__class__.__name__})"
                     return handler
                 
                 deck_event.subscribe(create_handler(active_event))
@@ -89,7 +90,7 @@ class DeckList:
                 self.slot_deactivated.trigger(self, index=self.active_slot, deck=self.active_deck)
                 self._active_slot = index
                 self.slot_activated.trigger(self, index=self.active_slot, deck=self.active_deck)
-                Logger.debug("Activated deck in slot", slot=self._active_slot)
+                Logger.debug(f"Activated deck in slot {self._active_slot}", name=self.active_deck.name)
         else:
             raise ValueError(f"Slot {index} is out of bounds") 
 

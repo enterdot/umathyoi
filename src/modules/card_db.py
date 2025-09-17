@@ -8,7 +8,7 @@ from typing import Optional, Iterator
 from pathlib import Path
 
 from .card import Rarity, CardType, Card
-from utils import CardConstants, NetworkConstants
+from utils import CardConstants, NetworkConstants, Logger
 
 
 class CardDatabase:
@@ -27,6 +27,10 @@ class CardDatabase:
         self._load_cards_from_file(cards_file)
         self._load_ownership_data()
 
+    @property
+    def card_count(self) -> int:
+        return len(self.cards)
+
     def _load_cards_from_file(self, cards_file: str) -> None:
         """Load card data from JSON file.
         
@@ -40,6 +44,7 @@ class CardDatabase:
         try:
             with open(cards_file, 'r', encoding='utf-8') as f:
                 cards_data = json.load(f)
+                Logger.debug("Card data parsed from JSON file", file=f, count=len(cards_data))
         except FileNotFoundError:
             raise FileNotFoundError(f"Cards file not found: {cards_file}")
         except json.JSONDecodeError as e:
@@ -55,8 +60,10 @@ class CardDatabase:
                     type=CardType(card_data["type"]),
                     limit_breaks={int(k): v for k, v in card_data["limit_breaks"].items()}
                 )
+                Logger.debug("Card added to database", id=card_data["id"], view_name=card_data["view_name"], type=card_data["type"], rarity=card_data["rarity"])
             except (KeyError, ValueError) as e:
-                print(f"Warning: Skipping invalid card data for ID {card_data.get('id', 'unknown')}: {e}")
+                Logger.warning(f"Skipping invalid card data for ID {card_data.get('id', 'unknown')}: {e}")
+        Logger.info(f"Loaded data for {self.card_count} cards")
 
     def _load_ownership_data(self) -> None:
         """Load card ownership data from persistent storage.
@@ -72,25 +79,6 @@ class CardDatabase:
         # Temporary: Set all cards to default copies for testing
         for card_id in self.cards:
             self.owned_copies[card_id] = CardConstants.DEFAULT_OWNED_COPIES
-
-    def get_all_cards(self) -> Iterator[Card]:
-        """Get iterator over all cards in database.
-        
-        Yields:
-            Card instances in the database
-        """
-        yield from self.cards.values()
-
-    def get_card(self, card: Card) -> Card | None:
-        """Get card by Card instance.
-        
-        Args:
-            card: Card instance to look up
-            
-        Returns:
-            Card from database, or None if not found
-        """
-        return self.get_card_by_id(card.id)
 
     def get_card_by_id(self, card_id: int) -> Card | None:
         """Get card by ID.
@@ -227,11 +215,11 @@ class CardDatabase:
                             self.image_cache[cache_key] = pixbuf
                             return pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
                     else:
-                        print(f"HTTP {response.status} when loading artwork for card {card_id}")
+                        Logger.error(f"HTTP {response.status} when loading artwork for card {card_id}")
         except aiohttp.ClientError as e:
-            print(f"Network error loading artwork for card {card_id}: {e}")
+            Logger.error(f"Could not load artwork for card {card_id}: {e}")
         except Exception as e:
-            print(f"Unexpected error loading artwork for card {card_id}: {e}")
+            Logger.error(f"Could not load artwork for card {card_id}: {e}")
 
         return None  # Caller handles fallback
 
@@ -250,7 +238,7 @@ class CardDatabase:
             loader.close()
             return loader.get_pixbuf()
         except Exception as e:
-            print(f"Error creating pixbuf from image data: {e}")
+            Logger.error(f"Could not create pixbuf from image data: {e}")
             return None
 
     def save_ownership_data(self, file_path: str | None = None) -> bool:
@@ -268,7 +256,15 @@ class CardDatabase:
         # TODO: Implement actual persistence
         # Should save self.owned_copies to JSON file
         if file_path:
-            print(f"Would save ownership data to: {file_path}")
+            Logger.debug(f"Would save ownership data to: {file_path}")
         else:
-            print("Would save ownership data to default location")
+            Logger.debug("Would save ownership data to default location")
         return True
+
+    def __iter__(self) -> Iterator[Card]:
+        """Iterate over all cards in database.
+        
+        Yields:
+            Card instances in the database
+        """
+        yield from self.cards.values()

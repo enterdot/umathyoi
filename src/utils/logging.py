@@ -7,7 +7,7 @@ from typing import Any
 class Logger:
     """Simple logger for development and debugging."""
     
-    DEBUG = False  # Set to True for debug output
+    DEBUG = True
     
     @classmethod
     def debug(cls, message: str, **kwargs: Any) -> None:
