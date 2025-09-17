@@ -6,15 +6,6 @@ from gi.repository import Gtk, Gio, Adw
 from modules import CardDatabase, Deck, CardStats, DeckList
 from windows import MainWindow
 
-# Global app instance for widgets to access
-_app_instance = None
-
-
-def get_app():
-    """Get the current application instance."""
-    return _app_instance
-
-
 class MainApplication(Adw.Application):
     """Main application class handling application-level logic and data."""
     
@@ -27,9 +18,6 @@ class MainApplication(Adw.Application):
             app_reverse_dns: Reverse DNS identifier for the application
         """
         super().__init__(application_id=app_reverse_dns)
-        
-        global _app_instance
-        _app_instance = self
         
         self.app_name = app_name
         self.app_version = app_version
