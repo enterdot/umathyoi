@@ -150,13 +150,17 @@ class Deck:
         self.set_limit_break_at_slot(limit_break, slot)
         return True
 
-    def find_first_empty_slot(self) -> int | None:
+    def find_first_empty_slot(self, reverse: bool = False) -> int | None:
         """Find first empty slot in deck.
         
+        Args:
+            reverse: If True, search from last slot to first
+            
         Returns:
             Slot position, or None if deck is full
         """
-        for slot in range(self._size):
+        slots = range(self._size - 1, -1, -1) if reverse else range(self._size)
+        for slot in slots:
             if self._cards[slot] is None:
                 return slot
         return None
