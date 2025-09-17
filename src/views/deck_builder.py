@@ -5,7 +5,7 @@ from gi.repository import Gtk, Adw
 from typing import TYPE_CHECKING
 
 from modules import Card
-from widgets import CardSlot, CardSelection, DeckCarousel
+from widgets import CardSelection, DeckCarousel
 from utils import auto_title_from_instance, auto_tag_from_instance
 
 if TYPE_CHECKING:
@@ -23,8 +23,8 @@ class DeckBuilderView(Adw.Bin):
             window: Parent window reference
         """
         super().__init__()
-        self.app: 'MainApplication' = window.app
-        self.window: 'MainWindow' = window
+        self.app: MainApplication = window.app
+        self.window: MainWindow = window
         self.setup_ui()
         self.setup_responsive_ui()
         self.connect_signals()

@@ -24,17 +24,17 @@ class DeckCarousel(Adw.Bin):
             window: Parent window reference
         """
         super().__init__()
-        self.app: 'MainApplication' = window.app
-        self.window: 'MainWindow' = window
+        self.app: MainApplication = window.app
+        self.window: MainWindow = window
         self.setup_ui()
         self.connect_signals()
         
     def setup_ui(self) -> None:
         """Set up the carousel UI components."""
         container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        container.set_spacing(20)
-        container.set_margin_bottom(30)
-        container.set_margin_top(30)
+        container.set_spacing(UIConstants.CAROUSEL_SPACING)
+        container.set_margin_bottom(UIConstants.CAROUSEL_MARGIN)
+        container.set_margin_top(UIConstants.CAROUSEL_MARGIN)
         
         self.carousel = Adw.Carousel()
         self.carousel.set_allow_mouse_drag(True)
@@ -166,7 +166,7 @@ class DeckCarousel(Adw.Bin):
             Configured CardSlot widget
         """
         active_deck = self.app.deck_list.active_deck
-        card_slot = CardSlot(card, limit_break, UIConstants.CARD_SLOT_WIDTH, UIConstants.CARD_SLOT_HEIGHT, deck=active_deck, slot=slot)
+        card_slot = CardSlot(self.window, card, limit_break, UIConstants.CARD_SLOT_WIDTH, UIConstants.CARD_SLOT_HEIGHT, deck=active_deck, slot=slot)
         
         # Add click handler for card removal if slot contains a card
         if card is not None:

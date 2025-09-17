@@ -21,8 +21,8 @@ class LegacyManagerView(Adw.Bin):
             window: Parent window reference
         """
         super().__init__()
-        self.app: 'MainApplication' = window.app
-        self.window: 'MainWindow' = window
+        self.app: MainApplication = window.app
+        self.window: MainWindow = window
         self.setup_ui()
         self.setup_responsive_ui()
         self.connect_signals()

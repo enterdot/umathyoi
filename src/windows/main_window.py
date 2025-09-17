@@ -23,7 +23,7 @@ class MainWindow(Adw.ApplicationWindow):
             app_name: Display name for window title
         """
         super().__init__(application=app)
-        self.app: 'MainApplication' = app
+        self.app: MainApplication = app
         
         self.set_title(app_name)
         self.set_default_size(UIConstants.DEFAULT_WINDOW_WIDTH, UIConstants.DEFAULT_WINDOW_HEIGHT)

@@ -23,8 +23,8 @@ class CardSelection(Adw.Bin):
             window: Parent window reference
         """
         super().__init__()
-        self.app: 'MainApplication' = window.app
-        self.window: 'MainWindow' = window
+        self.app: MainApplication = window.app
+        self.window: MainWindow = window
         self._list_box: Gtk.ListBox | None = None
 
         self.setup_ui()
@@ -156,7 +156,7 @@ class CardSelection(Adw.Bin):
         row.set_activatable(True)
         
         # Add card thumbnail
-        thumbnail = CardArtwork(card, UIConstants.CARD_THUMBNAIL_WIDTH, UIConstants.CARD_THUMBNAIL_HEIGHT)
+        thumbnail = CardArtwork(self.window, card, UIConstants.CARD_THUMBNAIL_WIDTH, UIConstants.CARD_THUMBNAIL_HEIGHT)
         row.add_prefix(thumbnail)
         
         # Add info button
@@ -194,7 +194,7 @@ class CardSelection(Adw.Bin):
         content.append(header_bar)
         
         # Large card artwork display
-        card_artwork = CardArtwork(None, UIConstants.CARD_THUMBNAIL_WIDTH * UIConstants.STATS_ARTWORK_SCALE, UIConstants.CARD_THUMBNAIL_HEIGHT * UIConstants.STATS_ARTWORK_SCALE)
+        card_artwork = CardArtwork(self.window, None, UIConstants.CARD_THUMBNAIL_WIDTH * UIConstants.STATS_ARTWORK_SCALE, UIConstants.CARD_THUMBNAIL_HEIGHT * UIConstants.STATS_ARTWORK_SCALE)
         card_artwork.set_halign(Gtk.Align.CENTER)
         content.append(card_artwork)
 

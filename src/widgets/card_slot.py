@@ -9,16 +9,18 @@ from .card_artwork import CardArtwork
 from utils import auto_title_from_instance, UIConstants, CardConstants
 
 if TYPE_CHECKING:
-    pass
+    from application import MainApplication
+    from windows import MainWindow
 
 
 class CardSlot(Gtk.Box):
     """Widget representing a single card slot in a deck with artwork and limit break selector."""
     
-    def __init__(self, card: Card | None = None, limit_break: int = CardConstants.MIN_LIMIT_BREAKS, width: int = UIConstants.CARD_SLOT_WIDTH, height: int = UIConstants.CARD_SLOT_HEIGHT, deck: Deck | None = None, slot: int | None = None):
+    def __init__(self, window: 'MainWindow', card: Card | None = None, limit_break: int = CardConstants.MIN_LIMIT_BREAKS, width: int = UIConstants.CARD_SLOT_WIDTH, height: int = UIConstants.CARD_SLOT_HEIGHT, deck: Deck | None = None, slot: int | None = None):
         """Initialize card slot widget.
         
         Args:
+            window: Parent window reference
             card: Card to display, or None for empty slot
             limit_break: Current limit break level
             width: Width of card artwork in pixels
@@ -27,6 +29,9 @@ class CardSlot(Gtk.Box):
             slot: Slot position in deck (0-based)
         """
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
+        self.app: MainApplication = window.app
+        self.window: MainWindow = window
+
         self.set_name(auto_title_from_instance(self))
         
         self._card = card
@@ -62,7 +67,7 @@ class CardSlot(Gtk.Box):
     def setup_ui(self) -> None:
         """Set up the UI components."""
         # Card artwork
-        self.card_art = CardArtwork(self._card, self.width, self.height)
+        self.card_art = CardArtwork(self.window, self._card, self.width, self.height)
         self.append(self.card_art)
         
         # Limit break selector

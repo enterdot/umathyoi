@@ -2,17 +2,32 @@ import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Gdk', '4.0')
 from gi.repository import Gtk, Gdk, GLib
+from typing import TYPE_CHECKING
 
 import threading
 import asyncio
 from modules import Card
 from utils import auto_title_from_instance
 
+if TYPE_CHECKING:
+    from application import MainApplication
+    from windows import MainWindow
+
 class CardArtwork(Gtk.Box):
     """A widget that displays card artwork with async loading and placeholder."""
     
-    def __init__(self, card: Card = None, width: int = 45, height: int = 60):
+    def __init__(self, window: 'MainWindow', card: Card = None, width: int = 45, height: int = 60):
+        """Initialize card artwork widget.
+        
+        Args:
+            window: Parent window reference
+            card: Card to retrieve artwork for, or None for empty
+            width: Width of card artwork in pixels
+            height: Height of card artwork in pixels
+        """
         super().__init__()
+        self.app: MainApplication = window.app
+        self.window: MainWindow = window
         self.set_name(auto_title_from_instance(self))
         self.card = card
         self.width = width
@@ -106,10 +121,7 @@ class CardArtwork(Gtk.Box):
         
         def load_artwork():
             async def _load():
-                # Import here to avoid circular imports
-                from application import get_app
-                app = get_app()
-                pixbuf = await app.card_db.load_card_image(
+                pixbuf = await self.app.card_db.load_card_image(
                     self.card.id, self.width, self.height
                 )
                 
