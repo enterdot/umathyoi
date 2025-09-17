@@ -1,6 +1,0 @@
-deck.py
-- add reverse: bool option to find_first_empty_slot
-
-deck_list.py
-- replace with debug: print(f"activated deck in slot {self._active_slot}")
-- # Convert 'index' parameter to 'slot' for consistency -> shouldn't be slot already?
