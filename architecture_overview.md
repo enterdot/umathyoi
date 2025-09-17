@@ -37,15 +37,18 @@
 - Basic UI structure complete
 - Image loading working
 - Event system in place
+- Logging system in place
+- Type hints everywhere
 
 **TODOs:**
-- Data persistence
-- some event connections, stats display
-- Decks in carousel currently do not reflect state
-- For previous point, cards in the deck should be clickable so they can be removed
+- Add deck efficency calculation and display (currently a placeholder). This should be done asynchronously because the calculation is not smart, it's brute-forced via continuous iterations until it converges.
+- Data persistence: serialize decks to save and load them
+- Stats display
 - Add button to the header bar when the view is collapsed and only the carousel is visible, otherwise the user is not able to add cards anymore
-- Utilize Card Stats class which holds information on the currently inspected class. It is used by the secondary view in the sidebar of the Deck Builder. It gets activated when clicking the info button on one of the action rows or potentially the info button on the cards currently in the active deck in the carousel (if I decide to add this functionality).
+- Stats display: utilize CardStats class which holds information on the currently inspected card. It is used by the secondary view in the sidebar of the Deck Builder. It gets activated when clicking the info button on one of the action rows
+- Maybe add the info button also on the cards added to decks in the carousel
+- There needs to be a way to filter cards in the selection list sidebar because eventually there'll be hundreds of cards. This might be achieved via filter buttons but I would prefer a fuzzy search solution with a search box in a Revealer widget controlled by a search button.
 
 **Development Questions:**
-- Data serialization strategy needed
+- Data serialization strategy needed, what options are there? Preferably built-in in Python library.
 - Drag and drop to move a card already in the deck to different slot should be considered. How hard would it be to implement?
