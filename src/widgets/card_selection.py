@@ -7,226 +7,411 @@ from modules import Card, CardStats
 from widgets import CardArtwork
 from utils import auto_tag_from_instance, auto_title_from_instance
 
+
 class CardSelection(Adw.Bin):
+    """Card selection sidebar with card list and detailed stats view."""
+    
+    # Configuration constants
+    MAX_LIMIT_BREAKS = 4
+    CARD_THUMBNAIL_WIDTH = 45
+    CARD_THUMBNAIL_HEIGHT = 60
+    STATS_ARTWORK_WIDTH = 45 * 3
+    STATS_ARTWORK_HEIGHT = 60 * 3
     
     def __init__(self, window):
+        """Initialize card selection widget.
+        
+        Args:
+            window: Parent window reference
+        """
         super().__init__()
         self.app = window.app
         self.window = window
+        self._list_box = None
 
         self.setup_ui()
         self.connect_signals()
 
     @property
-    def list_box(self):
+    def list_box(self) -> Gtk.ListBox:
+        """Main card list box widget."""
         return self._list_box
 
     @list_box.setter
-    def list_box(self, list_box):
+    def list_box(self, list_box: Gtk.ListBox) -> None:
+        """Set the main card list box widget."""
         self._list_box = list_box
 
     @property
     def action_rows(self):
+        """Generator yielding all action rows in the list box."""
         row = self.list_box.get_first_child()
         while row:
             yield row
-            row = row.get_next_sibling()  
+            row = row.get_next_sibling()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
+        """Set up the card selection UI with view stack."""
         view_stack = Adw.ViewStack()
         view_stack.add_named(self._create_card_list_view(), "card_selection_view")
         view_stack.add_named(self._create_stats_info_view(), "stats_info_view")
         self.set_child(view_stack)
 
-    def connect_signals(self):
+    def connect_signals(self) -> None:
+        """Connect all event signals."""
+        # Deck list events for active deck changes
         self.app.deck_list.slot_deactivated.subscribe(self._on_active_deck_deactivated)
         self.app.deck_list.slot_activated.subscribe(self._on_active_deck_activated)
+        
+        # Active deck card change events
         self.app.deck_list.card_added_to_active_deck_at_slot.subscribe(self._on_active_deck_card_added)
         self.app.deck_list.card_removed_from_active_deck_at_slot.subscribe(self._on_active_deck_card_removed)
 
-    def refresh_all_action_rows(self):
-        """Refresh visibility of all action rows based on current deck state."""
-        for row in self.action_rows:
-            if row.card in self.app.deck_list.active_deck:
-                self.select_row(row)
-            else:
-                self.deselect_row(row)
+        # Card stats events
+        self.app.card_stats.card_changed.subscribe(self._on_card_stats_changed)
 
-    def select_row(self, row):
-        """Hide row when card is selected (added to deck)."""
+    def refresh_all_action_rows(self) -> None:
+        """Refresh visibility of all action rows based on current active deck state."""
+        active_deck = self.app.deck_list.active_deck
+        if not active_deck:
+            return
+            
+        for row in self.action_rows:
+            if row.card in active_deck:
+                self._hide_row(row)
+            else:
+                self._show_row(row)
+
+    def _hide_row(self, row: Adw.ActionRow) -> None:
+        """Hide row when card is added to deck.
+        
+        Args:
+            row: Action row to hide
+        """
         row.set_visible(False)
     
-    def deselect_row(self, row):
-        """Show row when card is deselected (removed from deck)."""
+    def _show_row(self, row: Adw.ActionRow) -> None:
+        """Show row when card is removed from deck.
+        
+        Args:
+            row: Action row to show
+        """
         row.set_visible(True)
 
-    def _create_card_list_view(self):
+    def _create_card_list_view(self) -> Gtk.ScrolledWindow:
+        """Create the main card list view.
+        
+        Returns:
+            Scrolled window containing the card list
+        """
         list_box = Gtk.ListBox()
         list_box.set_selection_mode(Gtk.SelectionMode.NONE)
         list_box.add_css_class("boxed-list-separate")
         
+        # Connect list box signals
         list_box.connect("row-activated", self._on_card_row_activated)
         
         click_gesture = Gtk.GestureClick()
         click_gesture.connect("pressed", self._on_card_list_view_clicked, list_box)
         list_box.add_controller(click_gesture)
         
-        cards = self.app.card_db.get_all_cards()
-        for card in sorted(cards, key=lambda c: c.view_name):
-            row = Adw.ActionRow()
-            row.card = card
-            row.set_title(card.view_name)
-            row.set_activatable(True)
-            
-            thumbnail = CardArtwork(card, 45, 60)
-            row.add_prefix(thumbnail)
-            
-            info_button = Gtk.Button()
-            info_button.set_icon_name("dialog-information-symbolic")
-            info_button.add_css_class("flat")
-            info_button.add_css_class("circular")
-            info_button.connect("clicked", self._on_card_info_button_clicked, card)
-            row.add_suffix(info_button)
-            list_box.append(row)
+        # Populate with all cards
+        self._populate_card_list(list_box)
         
+        # Set margins
         list_box.set_margin_start(18)
         list_box.set_margin_end(18)
         list_box.set_margin_top(12)
         list_box.set_margin_bottom(12)
         
+        # Wrap in scrolled window
         scrolled_window = Gtk.ScrolledWindow()
         scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scrolled_window.set_child(list_box)
         
         self.list_box = list_box
         return scrolled_window
+
+    def _populate_card_list(self, list_box: Gtk.ListBox) -> None:
+        """Populate the card list with all available cards.
+        
+        Args:
+            list_box: List box to populate
+        """
+        cards = self.app.card_db.get_all_cards()
+        for card in sorted(cards, key=lambda c: c.view_name):
+            row = self._create_card_action_row(card)
+            list_box.append(row)
+
+    def _create_card_action_row(self, card: Card) -> Adw.ActionRow:
+        """Create an action row for a card.
+        
+        Args:
+            card: Card to create row for
+            
+        Returns:
+            Configured action row
+        """
+        row = Adw.ActionRow()
+        row.card = card  # Store card reference
+        row.set_title(card.view_name)
+        row.set_activatable(True)
+        
+        # Add card thumbnail
+        thumbnail = CardArtwork(card, self.CARD_THUMBNAIL_WIDTH, self.CARD_THUMBNAIL_HEIGHT)
+        row.add_prefix(thumbnail)
+        
+        # Add info button
+        info_button = self._create_info_button(card)
+        row.add_suffix(info_button)
+        
+        return row
+
+    def _create_info_button(self, card: Card) -> Gtk.Button:
+        """Create info button for card row.
+        
+        Args:
+            card: Card for the info button
+            
+        Returns:
+            Configured info button
+        """
+        info_button = Gtk.Button()
+        info_button.set_icon_name("dialog-information-symbolic")
+        info_button.add_css_class("flat")
+        info_button.add_css_class("circular")
+        info_button.connect("clicked", self._on_card_info_button_clicked, card)
+        return info_button
     
-    def _create_stats_info_view(self):
+    def _create_stats_info_view(self) -> Gtk.Box:
+        """Create the detailed card stats view.
+        
+        Returns:
+            Box containing the stats view components
+        """
         content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         
+        # Header with back button
+        header_bar = self._create_stats_header()
+        content.append(header_bar)
+        
+        # Large card artwork display
+        card_artwork = CardArtwork(None, self.STATS_ARTWORK_WIDTH, self.STATS_ARTWORK_HEIGHT)
+        card_artwork.set_halign(Gtk.Align.CENTER)
+        content.append(card_artwork)
+
+        # Limit break selector with add button
+        limit_break_selector = self._create_limit_break_selector()
+        content.append(limit_break_selector)
+        
+        # Separator
+        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        content.append(separator)
+        
+        # Stats display area (placeholder for now)
+        stats_scrolled_window = Gtk.ScrolledWindow()
+        content.append(stats_scrolled_window)
+        
+        return content
+
+    def _create_stats_header(self) -> Adw.HeaderBar:
+        """Create header bar for stats view with back button.
+        
+        Returns:
+            Configured header bar
+        """
         header_bar = Adw.HeaderBar()
         header_bar.add_css_class("flat")
+        
         back_button = Gtk.Button()
         back_button.set_icon_name("go-previous-symbolic")
         back_button.add_css_class("flat")
         back_button.connect("clicked", self._on_stats_info_view_back_button_clicked)
         header_bar.pack_start(back_button)
         
-        content.append(header_bar)
-        
-        # Artwork display
-        card_artwork = CardArtwork(None, 45*3, 60*3)
-        card_artwork.set_halign(Gtk.Align.CENTER)
-        
-        content.append(card_artwork)
+        return header_bar
 
-        # Limit Break selector
+    def _create_limit_break_selector(self) -> Gtk.Box:
+        """Create limit break selector with slider and add button.
+        
+        Returns:
+            Box containing selector components
+        """
         limit_break_selector = Gtk.Box()
         limit_break_selector.set_halign(Gtk.Align.CENTER)
         
-        value = self.app.card_stats.get_limit_break()
-        slider_adjustment = Gtk.Adjustment(value=value, lower=0, upper=4, step_increment=1, page_increment=1)
-        slider_scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=slider_adjustment)
+        # Limit break slider
+        current_value = self.app.card_stats.limit_break
+        slider_adjustment = Gtk.Adjustment(
+            value=current_value, 
+            lower=0, 
+            upper=self.MAX_LIMIT_BREAKS, 
+            step_increment=1, 
+            page_increment=1
+        )
+        slider_scale = Gtk.Scale(
+            orientation=Gtk.Orientation.HORIZONTAL, 
+            adjustment=slider_adjustment
+        )
         slider_scale.set_draw_value(False)
         slider_scale.set_round_digits(0)
         
-        #TODO: the max limit breaks should be stored somewhere instead of being hardcoded
-        for i in range(5):
+        # Add marks for each limit break level
+        for i in range(self.MAX_LIMIT_BREAKS + 1):
             slider_scale.add_mark(i, Gtk.PositionType.BOTTOM, str(i))
 
         slider_scale.connect("value-changed", self._on_stats_info_view_slider_changed)
         limit_break_selector.append(slider_scale)
         
+        # Add button
         add_button = Gtk.Button()
         add_button.set_icon_name("list-add-symbolic")
         add_button.add_css_class("flat")
         add_button.connect("clicked", self._on_stats_info_view_add_button_clicked)
         limit_break_selector.append(add_button)
         
-        content.append(limit_break_selector)
-        
-        # Separator
-        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        
-        content.append(separator)
-        
-        # Stats display area
-        stats_scrolled_window = Gtk.ScrolledWindow()
-        self.app.card_stats.card_changed.subscribe(self._update_stats_scrolled_window)
+        return limit_break_selector
 
-        content.append(stats_scrolled_window)
+    # Event handlers for deck changes
+    def _on_active_deck_card_added(self, deck_list, **kwargs) -> None:
+        """Handle when a card is added to the active deck.
         
-        return content
-
-    # Updated event handlers - now they don't need to check if deck is active
-    def _on_active_deck_card_added(self, deck_list, **kwargs):
-        """Handle when a card is added to the active deck."""
+        Args:
+            deck_list: DeckList that triggered the event
+            **kwargs: Event parameters including 'card'
+        """
         card = kwargs.get('card')
         if card:
-            # Find and hide the corresponding row
             for row in self.action_rows:
                 if row.card == card:
-                    self.select_row(row)
+                    self._hide_row(row)
                     break
 
-    def _on_active_deck_card_removed(self, deck_list, **kwargs):
-        """Handle when a card is removed from the active deck."""
+    def _on_active_deck_card_removed(self, deck_list, **kwargs) -> None:
+        """Handle when a card is removed from the active deck.
+        
+        Args:
+            deck_list: DeckList that triggered the event
+            **kwargs: Event parameters including 'card'
+        """
         card = kwargs.get('card')
         if card:
-            # Find and show the corresponding row
             for row in self.action_rows:
                 if row.card == card:
-                    self.deselect_row(row)
+                    self._show_row(row)
                     break
 
-    # Existing callback events
-    def _update_stats_scrolled_window(self, caller, **kwargs):
-        print(f"{caller}: {kwargs} for {self.app.card_stats}")
-
-    def _on_active_deck_deactivated(self, caller, **kwargs):
-        """Handle when active deck is deactivated."""
+    def _on_active_deck_deactivated(self, deck_list, **kwargs) -> None:
+        """Handle when active deck is deactivated.
+        
+        Args:
+            deck_list: DeckList that triggered the event
+            **kwargs: Event parameters
+        """
         self.list_box.set_visible(False)
     
-    def _on_active_deck_activated(self, caller, **kwargs):
-        """Handle when active deck is activated."""
+    def _on_active_deck_activated(self, deck_list, **kwargs) -> None:
+        """Handle when active deck is activated.
+        
+        Args:
+            deck_list: DeckList that triggered the event
+            **kwargs: Event parameters
+        """
         self.refresh_all_action_rows()
         self.list_box.set_visible(True)
-    
-    # UI events
 
-    def _on_card_row_activated(self, list_box, row):
-        """Handle when a card row is activated (clicked)."""
-        if self.app.deck_list.active_deck.is_full:
+    def _on_card_stats_changed(self, card_stats: CardStats, **kwargs) -> None:
+        """Handle when card stats selection changes.
+        
+        Args:
+            card_stats: CardStats instance that changed
+            **kwargs: Event parameters including 'card' and 'prev_card'
+        """
+        # Update the large artwork display when card changes
+        # This would be implemented when stats view is fully developed
+        print(f"Card stats changed: {kwargs}")
+
+    # UI event handlers
+    def _on_card_row_activated(self, list_box: Gtk.ListBox, row: Adw.ActionRow) -> None:
+        """Handle when a card row is activated (clicked).
+        
+        Args:
+            list_box: List box containing the row
+            row: Activated action row
+        """
+        active_deck = self.app.deck_list.active_deck
+        if not active_deck:
             return
-        if self.app.deck_list.active_deck.add_card(row.card) is not None:
-            self.select_row(row)
-        elif self.app.deck_list.active_deck.remove_card(row.card) is not None:
-            self.deselect_row(row)
+            
+        if active_deck.is_full:
+            return
+            
+        # Try to add card to deck
+        if active_deck.add_card(row.card) is not None:
+            self._hide_row(row)
+        elif active_deck.remove_card(row.card) is not None:
+            self._show_row(row)
         else:
-            raise RuntimeError(f"Could not add or remove {row.card} to {self.app.deck_list.active_deck} even though it's not full") 
+            raise RuntimeError(
+                f"Could not add or remove {row.card} to {active_deck} even though it's not full"
+            )
     
-    def _on_card_list_view_clicked(self, gesture, n_press, x, y, list_box):
-        """Handle clicking on the card list view."""
+    def _on_card_list_view_clicked(self, gesture: Gtk.GestureClick, n_press: int, x: float, y: float, list_box: Gtk.ListBox) -> None:
+        """Handle clicking on the card list view.
+        
+        Args:
+            gesture: Click gesture
+            n_press: Number of presses
+            x: X coordinate
+            y: Y coordinate
+            list_box: List box that was clicked
+        """
         split_view = list_box.get_ancestor(Adw.NavigationSplitView)
-        split_view.set_show_content(True)
+        if split_view:
+            split_view.set_show_content(True)
     
-    def _on_card_info_button_clicked(self, info_button, card: Card):
-        """Handle clicking the info button on a card."""
+    def _on_card_info_button_clicked(self, info_button: Gtk.Button, card: Card) -> None:
+        """Handle clicking the info button on a card.
+        
+        Args:
+            info_button: Info button that was clicked
+            card: Card to show info for
+        """
         self.app.card_stats.card = card
         view_stack = info_button.get_ancestor(Adw.ViewStack)
-        view_stack.set_visible_child_name("stats_info_view")
+        if view_stack:
+            view_stack.set_visible_child_name("stats_info_view")
     
-    def _on_stats_info_view_back_button_clicked(self, button):
-        """Handle clicking the back button in stats info view."""
+    def _on_stats_info_view_back_button_clicked(self, button: Gtk.Button) -> None:
+        """Handle clicking the back button in stats info view.
+        
+        Args:
+            button: Back button that was clicked
+        """
         view_stack = button.get_ancestor(Adw.ViewStack)
-        view_stack.set_visible_child_name("card_selection_view")
+        if view_stack:
+            view_stack.set_visible_child_name("card_selection_view")
     
-    def _on_stats_info_view_slider_changed(self, slider):
-        """Handle limit break slider change in stats info view."""
+    def _on_stats_info_view_slider_changed(self, slider: Gtk.Scale) -> None:
+        """Handle limit break slider change in stats info view.
+        
+        Args:
+            slider: Scale widget that changed
+        """
         limit_break = int(slider.get_value())
         self.app.card_stats.limit_break = limit_break
     
-    def _on_stats_info_view_add_button_clicked(self, button):
-        """Handle clicking the add button in stats info view."""
+    def _on_stats_info_view_add_button_clicked(self, button: Gtk.Button) -> None:
+        """Handle clicking the add button in stats info view.
+        
+        Args:
+            button: Add button that was clicked
+        """
         card_stats = self.app.card_stats
-        print(f"Adding {card_stats.card.view_name} at limit break {card_stats.limit_break} to deck")
+        active_deck = self.app.deck_list.active_deck
+        
+        if card_stats.card and active_deck and not active_deck.is_full:
+            if active_deck.add_card(card_stats.card, card_stats.limit_break) is not None:
+                print(f"Added {card_stats.card.view_name} at limit break {card_stats.limit_break} to deck")
+            else:
+                print(f"Could not add {card_stats.card.view_name} - already in deck")

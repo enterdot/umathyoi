@@ -7,17 +7,24 @@ from modules import Card, Deck
 from widgets import CardSlot, Placeholder
 from utils import auto_tag_from_instance, auto_title_from_instance
 
+
 class DeckCarousel(Adw.Bin):
+    """Carousel widget displaying multiple decks with visual scaling animations."""
     
     def __init__(self, window):
+        """Initialize deck carousel.
+        
+        Args:
+            window: Parent window reference
+        """
         super().__init__()
         self.app = window.app
         self.window = window
         self.setup_ui()
         self.connect_signals()
         
-    def setup_ui(self):
-        
+    def setup_ui(self) -> None:
+        """Set up the carousel UI components."""
         container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         container.set_spacing(20)
         container.set_margin_bottom(30)
@@ -33,185 +40,283 @@ class DeckCarousel(Adw.Bin):
         self.carousel.set_vexpand(True)
         self.carousel.set_valign(Gtk.Align.CENTER)
             
+        # Create pages for all decks in deck list
         for slot, deck in self.app.deck_list:
             self.carousel.append(self.create_carousel_page(slot, deck))
 
         self.update_carousel_hints(self.carousel)
 
-        deck_efficency = Placeholder("Deck Efficency Box")
-        deck_efficency.set_vexpand(False)  # Don't expand
-        deck_efficency.set_valign(Gtk.Align.END)  # Stay at bottom
-        deck_efficency.set_margin_bottom(40)
+        # Deck efficiency placeholder
+        deck_efficiency = Placeholder("Deck Efficiency Box")
+        deck_efficiency.set_vexpand(False)
+        deck_efficiency.set_valign(Gtk.Align.END)
+        deck_efficiency.set_margin_bottom(40)
         
         container.append(self.carousel)
-        container.append(deck_efficency)
+        container.append(deck_efficiency)
         self.set_child(container)
     
-    def connect_signals(self):
-        # Existing carousel signals
-        self.carousel.connect("page-changed", self.on_page_changed)
-        self.carousel.connect("notify::position", self.on_notify_position)
-        self.window.connect("notify::default-width", self.on_window_width_changed)
-        self.window.connect("notify::default-height", self.on_window_height_changed)
+    def connect_signals(self) -> None:
+        """Connect carousel and deck event signals."""
+        # Carousel navigation signals
+        self.carousel.connect("page-changed", self._on_page_changed)
+        self.carousel.connect("notify::position", self._on_notify_position)
         
-        # Subscribe to deck events for real-time updates
+        # Window resize signals for responsive spacing
+        self.window.connect("notify::default-width", self._on_window_width_changed)
+        self.window.connect("notify::default-height", self._on_window_height_changed)
+        
+        # Active deck change signals
         self.app.deck_list.slot_activated.subscribe(self._on_active_deck_changed)
-        for slot, deck in self.app.deck_list:
-            # TODO: use partial instead
-            deck.card_added_at_slot.subscribe(self._on_card_added_to_deck)
-            deck.card_removed_at_slot.subscribe(self._on_card_removed_from_deck)
-            deck.limit_break_set_at_slot.subscribe(self._on_limit_break_changed)
+        
+        # Active deck content change signals
+        self.app.deck_list.card_added_to_active_deck_at_slot.subscribe(self._on_card_added_to_active_deck)
+        self.app.deck_list.card_removed_from_active_deck_at_slot.subscribe(self._on_card_removed_from_active_deck)
+        self.app.deck_list.limit_break_set_for_active_deck_at_slot.subscribe(self._on_limit_break_changed_in_active_deck)
 
-    def update_carousel_spacing(self, carousel):
+    def update_carousel_spacing(self, carousel: Adw.Carousel) -> None:
+        """Update carousel spacing based on window width for responsive design.
+        
+        Args:
+            carousel: Carousel widget to update
+        """
         nav_page = self.get_parent()
         nav_page_width = float(nav_page.get_width())
+        
         if hasattr(self, 'last_nav_page_width'):
             if not hasattr(carousel, 'target_spacing'):
                 carousel.target_spacing = float(carousel.get_spacing())
             carousel.target_spacing += (nav_page_width - self.last_nav_page_width) / 2
             carousel.set_spacing(round(max(carousel.minimum_spacing, carousel.target_spacing)))
+        
         self.last_nav_page_width = float(nav_page_width)
     
-    def update_carousel_hints(self, carousel):
+    def update_carousel_hints(self, carousel: Adw.Carousel) -> None:
+        """Update visual hints (scaling) for carousel pages based on position.
+        
+        Args:
+            carousel: Carousel widget to update
+        """
         position = carousel.get_position()
         current_page_index = round(position)
 
-        for nth_page_index in range(carousel.get_n_pages()):
-            nth_page = carousel.get_nth_page(nth_page_index)
-            distance = abs(nth_page_index - current_page_index)
+        for page_index in range(carousel.get_n_pages()):
+            page = carousel.get_nth_page(page_index)
+            distance = abs(page_index - current_page_index)
+            
             if distance == 0:
-                nth_page.remove_css_class("carousel-side")
-                nth_page.add_css_class("carousel-active")
+                page.remove_css_class("carousel-side")
+                page.add_css_class("carousel-active")
             else:
-                nth_page.remove_css_class("carousel-active")
-                nth_page.add_css_class("carousel-side")
+                page.remove_css_class("carousel-active")
+                page.add_css_class("carousel-side")
 
-    def on_window_width_changed(self, window, param):
-        self.update_carousel_spacing(self.carousel)
-
-    def on_window_height_changed(self, window, param):
-        pass
-
-    def on_page_changed(self, carousel, page_index):
-        self.app.deck_list.active_slot = page_index
-
-    def on_notify_position(self, carousel, param):
-        self.update_carousel_hints(carousel)
-
-    # Event handlers for deck state changes
-    def _on_active_deck_changed(self, caller, **kwargs):
-        """Handle when the active deck changes - refresh current page."""
-        current_page_index = round(self.carousel.get_position())
-        self._refresh_carousel_page(current_page_index)
-
-    def _on_card_added_to_deck(self, deck, **kwargs):
-        """Handle when a card is added to any deck."""
-        deck_slot = self.app.deck_list.find_deck_slot(deck)  # Use DeckList method
-        if deck_slot is not None:
-            card = kwargs.get('card')
-            index = kwargs.get('index')
-            self._update_single_card_slot(deck_slot, index, card, 0)  # New card starts at level 0
-
-    def _on_card_removed_from_deck(self, deck, **kwargs):
-        """Handle when a card is removed from any deck."""
-        deck_slot = self.app.deck_list.find_deck_slot(deck)  # Use DeckList method
-        if deck_slot is not None:
-            index = kwargs.get('index')
-            self._update_single_card_slot(deck_slot, index, None, 0)  # Empty slot
-
-    def _on_limit_break_changed(self, deck, **kwargs):
-        """Handle when a limit break level changes in any deck."""
-        deck_slot = self.app.deck_list.find_deck_slot(deck)  # Use DeckList method
-        if deck_slot is not None:
-            index = kwargs.get('index')
-            limit_break = kwargs.get('limit_break')
-            # Get current card at that slot
-            card = deck.get_card_at_slot(index)
-            self._update_single_card_slot(deck_slot, index, card, limit_break)
-
-    def _refresh_carousel_page(self, slot_index):
-        return # TODO: is it safe to remove?
-        # the state of the carousel page only would've changed if there was a 
-        # way to add cards to a non-active deck, if that feature was ever added
-        # we should have a more sophisticated way of updating the page instead
-        # of just creating a whole new deck grid which causes flickering.
-        """Refresh a specific carousel page to reflect current deck state."""
-        if 0 <= slot_index < self.carousel.get_n_pages():
-            _, deck = list(self.app.deck_list)[slot_index]
+    def create_carousel_page(self, deck_slot: int, deck: Deck) -> Adw.NavigationPage:
+        """Create a carousel page for a deck.
+        
+        Args:
+            deck_slot: Slot number of the deck in deck list
+            deck: Deck to display
             
-            # Get the navigation page and its grid
-            nav_page = self.carousel.get_nth_page(slot_index)
-            old_grid = nav_page.get_child()
-            
-            # Create new grid with current deck state
-            new_grid = self._create_deck_grid(deck)
-            
-            # Replace the old grid
-            nav_page.set_child(new_grid)
-
-    def _update_single_card_slot(self, deck_slot, card_index, card, limit_break):
-        """Update a single card slot in the carousel using in-place updates."""
-        if 0 <= deck_slot < self.carousel.get_n_pages():
-            nav_page = self.carousel.get_nth_page(deck_slot)
-            deck_grid = nav_page.get_child()
-            
-            # Find the specific card slot widget (at grid position)
-            row, col = divmod(card_index, 3)
-            card_slot = deck_grid.get_child_at(col, row)
-            
-            if card_slot and isinstance(card_slot, CardSlot):
-                # Update existing widget in-place instead of replacing it
-                if card_slot.set_card(card):
-                    self._update_card_slot_click_handler(card_slot, card_index, card)
-
-                card_slot.set_level(limit_break)
-
-    def _update_card_slot_click_handler(self, card_slot, slot_index, card):
-        if card is None:
-            card_slot.remove_controller(card_slot._click_controller)
-            card_slot._click_controller = None
-        else:
-            click_gesture = Gtk.GestureClick()
-            click_gesture.connect("pressed", self._on_card_slot_clicked, slot_index)
-            card_slot.add_controller(click_gesture)
-            card_slot._click_controller = click_gesture  # Store reference for later removal
-            
-    def create_carousel_page(self, slot: int, deck: Deck):
-        """Create a carousel page for a deck."""
+        Returns:
+            Navigation page containing the deck grid
+        """
         deck_grid = self._create_deck_grid(deck)
-        return Adw.NavigationPage.new_with_tag(deck_grid, f"Deck {slot + 1}", f"deck_carousel_{slot}")
+        return Adw.NavigationPage.new_with_tag(
+            deck_grid, 
+            f"Deck {deck_slot + 1}", 
+            f"deck_carousel_{deck_slot}"
+        )
 
-    def _create_deck_grid(self, deck: Deck):
-        """Create the grid widget for a deck."""
+    def _create_deck_grid(self, deck: Deck) -> Gtk.Grid:
+        """Create the grid widget for a deck.
+        
+        Args:
+            deck: Deck to create grid for
+            
+        Returns:
+            Grid widget containing card slots
+        """
         deck_grid = Gtk.Grid()
         deck_grid.set_row_spacing(24)
         deck_grid.set_column_spacing(24)
 
-        for index, card, limit_break in deck:
-            card_slot = self.create_card_slot(card, limit_break, index)
-            # TODO: update to use divmod like _update_single_card_slot
-            deck_grid.attach(card_slot, index % 3, index // 3, 1, 1)
+        for slot, card, limit_break in deck:
+            card_slot_widget = self._create_card_slot_widget(card, limit_break, slot)
+            row, col = divmod(slot, 3)
+            deck_grid.attach(card_slot_widget, col, row, 1, 1)
         
         return deck_grid
     
-    def create_card_slot(self, card: Card, level: int, slot_index: int):
-        """Create a card slot widget for the deck grid."""
-        active_deck = self.app.deck_list.active_deck
-        card_slot = CardSlot(card, level, 150, 200, deck=active_deck, slot_index=slot_index)
+    def _create_card_slot_widget(self, card: Card | None, limit_break: int, slot: int) -> CardSlot:
+        """Create a card slot widget for the deck grid.
         
-        # Add click handler for card removal and store reference
-        if card is not None:  # Only add click handler if there's a card
+        Args:
+            card: Card to display, or None for empty slot
+            limit_break: Current limit break level
+            slot: Slot position in deck
+            
+        Returns:
+            Configured CardSlot widget
+        """
+        active_deck = self.app.deck_list.active_deck
+        card_slot = CardSlot(card, limit_break, 150, 200, deck=active_deck, slot=slot)
+        
+        # Add click handler for card removal if slot contains a card
+        if card is not None:
             click_gesture = Gtk.GestureClick()
-            click_gesture.connect("pressed", self._on_card_slot_clicked, slot_index)
+            click_gesture.connect("pressed", self._on_card_slot_clicked, slot)
             card_slot.add_controller(click_gesture)
-            card_slot._click_controller = click_gesture  # Store reference
+            card_slot._click_controller = click_gesture  # Store reference for removal
         else:
             card_slot._click_controller = None  # Initialize as None for empty slots
         
         return card_slot
 
-    def _on_card_slot_clicked(self, gesture, n_press, x, y, slot_index):
-        """Handle clicking on a card in the deck to remove it."""
+    def _refresh_carousel_page(self, deck_slot: int) -> None:
+        """Refresh a specific carousel page to reflect current deck state.
+        
+        Args:
+            deck_slot: Slot number of deck to refresh
+        """
+        if 0 <= deck_slot < self.carousel.get_n_pages():
+            _, deck = list(self.app.deck_list)[deck_slot]
+            
+            # Get the navigation page and replace its grid
+            nav_page = self.carousel.get_nth_page(deck_slot)
+            new_grid = self._create_deck_grid(deck)
+            nav_page.set_child(new_grid)
+
+    def _update_single_card_slot(self, deck_slot: int, card_slot: int, card: Card | None, limit_break: int) -> None:
+        """Update a single card slot in the carousel using in-place updates.
+        
+        Args:
+            deck_slot: Slot number of deck in carousel
+            card_slot: Slot number of card in deck
+            card: New card to display, or None for empty
+            limit_break: New limit break level
+        """
+        if 0 <= deck_slot < self.carousel.get_n_pages():
+            nav_page = self.carousel.get_nth_page(deck_slot)
+            deck_grid = nav_page.get_child()
+            
+            # Find the specific card slot widget using grid position
+            row, col = divmod(card_slot, 3)
+            card_slot_widget = deck_grid.get_child_at(col, row)
+            
+            if card_slot_widget and isinstance(card_slot_widget, CardSlot):
+                # Update existing widget in-place
+                if card_slot_widget.set_card(card):
+                    self._update_card_slot_click_handler(card_slot_widget, card_slot, card)
+                card_slot_widget.set_limit_break(limit_break)
+
+    def _update_card_slot_click_handler(self, card_slot_widget: CardSlot, slot: int, card: Card | None) -> None:
+        """Update click handler for card slot based on whether it contains a card.
+        
+        Args:
+            card_slot_widget: CardSlot widget to update
+            slot: Slot position
+            card: Card in slot, or None if empty
+        """
+        # Remove existing click handler if present
+        if hasattr(card_slot_widget, '_click_controller') and card_slot_widget._click_controller:
+            card_slot_widget.remove_controller(card_slot_widget._click_controller)
+            card_slot_widget._click_controller = None
+        
+        # Add click handler only if slot contains a card
+        if card is not None:
+            click_gesture = Gtk.GestureClick()
+            click_gesture.connect("pressed", self._on_card_slot_clicked, slot)
+            card_slot_widget.add_controller(click_gesture)
+            card_slot_widget._click_controller = click_gesture
+
+    # Event handlers
+    def _on_window_width_changed(self, window: Gtk.Window, param) -> None:
+        """Handle window width changes for responsive spacing."""
+        self.update_carousel_spacing(self.carousel)
+
+    def _on_window_height_changed(self, window: Gtk.Window, param) -> None:
+        """Handle window height changes (currently unused)."""
+        pass
+
+    def _on_page_changed(self, carousel: Adw.Carousel, page_index: int) -> None:
+        """Handle carousel page changes to update active deck.
+        
+        Args:
+            carousel: Carousel that changed
+            page_index: New active page index
+        """
+        self.app.deck_list.active_slot = page_index
+
+    def _on_notify_position(self, carousel: Adw.Carousel, param) -> None:
+        """Handle carousel position changes for visual hints.
+        
+        Args:
+            carousel: Carousel with position change
+            param: Parameter spec (unused)
+        """
+        self.update_carousel_hints(carousel)
+
+    def _on_active_deck_changed(self, deck_list, **kwargs) -> None:
+        """Handle when the active deck changes.
+        
+        Args:
+            deck_list: DeckList that triggered the event
+            **kwargs: Event parameters
+        """
+        pass
+
+    def _on_card_added_to_active_deck(self, deck_list, **kwargs) -> None:
+        """Handle when a card is added to the active deck.
+        
+        Args:
+            deck_list: DeckList that triggered the event
+            **kwargs: Event parameters including 'card' and 'slot'
+        """
+        card = kwargs.get('card')
+        slot = kwargs.get('slot')
+        if card is not None and slot is not None:
+            current_deck_slot = self.app.deck_list.active_slot
+            self._update_single_card_slot(current_deck_slot, slot, card, 0)
+
+    def _on_card_removed_from_active_deck(self, deck_list, **kwargs) -> None:
+        """Handle when a card is removed from the active deck.
+        
+        Args:
+            deck_list: DeckList that triggered the event
+            **kwargs: Event parameters including 'slot'
+        """
+        slot = kwargs.get('slot')
+        if slot is not None:
+            current_deck_slot = self.app.deck_list.active_slot
+            self._update_single_card_slot(current_deck_slot, slot, None, 0)
+
+    def _on_limit_break_changed_in_active_deck(self, deck_list, **kwargs) -> None:
+        """Handle when a limit break level changes in the active deck.
+        
+        Args:
+            deck_list: DeckList that triggered the event
+            **kwargs: Event parameters including 'slot' and 'limit_break'
+        """
+        slot = kwargs.get('slot')
+        limit_break = kwargs.get('limit_break')
+        if slot is not None and limit_break is not None:
+            # Get current card at that slot
+            active_deck = self.app.deck_list.active_deck
+            card = active_deck.get_card_at_slot(slot) if active_deck else None
+            current_deck_slot = self.app.deck_list.active_slot
+            self._update_single_card_slot(current_deck_slot, slot, card, limit_break)
+
+    def _on_card_slot_clicked(self, gesture: Gtk.GestureClick, n_press: int, x: float, y: float, slot: int) -> None:
+        """Handle clicking on a card in the deck to remove it.
+        
+        Args:
+            gesture: Click gesture that triggered
+            n_press: Number of button presses
+            x: X coordinate of click
+            y: Y coordinate of click
+            slot: Slot position of clicked card
+        """
         active_deck = self.app.deck_list.active_deck
         if active_deck:
-            active_deck.remove_card_at_slot(slot_index)
+            active_deck.remove_card_at_slot(slot)
