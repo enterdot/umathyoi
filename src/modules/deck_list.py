@@ -37,7 +37,6 @@ class DeckList:
         self.card_removed_from_active_deck_at_slot: Event = Event()
         self.limit_break_set_for_active_deck_at_slot: Event = Event()
         self.active_deck_was_cleared: Event = Event()
-        self.active_deck_reached_capacity: Event = Event()
         self.active_deck_pushed_past_capacity: Event = Event()
 
         # Set up event forwarding for all decks
@@ -51,7 +50,6 @@ class DeckList:
             'card_removed_at_slot': self.card_removed_from_active_deck_at_slot,
             'limit_break_set_at_slot': self.limit_break_set_for_active_deck_at_slot,
             'deck_was_cleared': self.active_deck_was_cleared,
-            'deck_reached_capacity': self.active_deck_reached_capacity,
             'deck_pushed_past_capacity': self.active_deck_pushed_past_capacity,
         }
         
@@ -103,11 +101,7 @@ class DeckList:
                 self.slot_activated.trigger(self, index=self.active_slot, deck=self.active_deck)
                 Logger.debug(f"Activated deck in slot {self._active_slot}.", self, name=self.active_deck.name)
         else:
-            raise ValueError(f"Slot {index} is out of bounds.") 
-
-    @property
-    def slot_count(self):
-        return self._size
+            raise ValueError(f"Slot {index} is out of bounds.")
 
     def get_slot_at_offset(self, offset: int) -> int:
         offset_index = self._active_slot + offset
@@ -121,17 +115,17 @@ class DeckList:
     def get_deck_at_slot(self, index: int):
         return self._decks[index]
 
-    def find_deck_slot(self, target_deck: Deck) -> int | None:
+    def find_slot_by_deck(self, target_deck: Deck) -> int | None:
         """Find which slot number contains the given deck."""
         for slot, deck in self:
             if deck is target_deck:
                 return slot
         return None
 
-    def find_deck_by_slot(self, slot: int) -> Deck | None:
+    def find_deck_by_slot(self, target_slot: int) -> Deck | None:
         """Get deck at specific slot (convenience method)."""
-        if 0 <= slot < self._size:
-            return self._decks[slot]
+        if 0 <= target_slot < self._size:
+            return self._decks[target_slot]
         return None
 
     def __contains__(self, deck: Deck) -> bool:

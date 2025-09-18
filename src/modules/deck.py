@@ -42,7 +42,6 @@ class Deck:
         self.card_removed_at_slot: Event = Event()
         self.limit_break_set_at_slot: Event = Event()
         self.deck_was_cleared: Event = Event()
-        self.deck_reached_capacity: Event = Event()
         self.deck_pushed_past_capacity: Event = Event()
 
     @property

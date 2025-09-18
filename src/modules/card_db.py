@@ -28,7 +28,7 @@ class CardDatabase:
         self._load_ownership_data()
 
     @property
-    def card_count(self) -> int:
+    def count(self) -> int:
         return len(self.cards)
 
     def _load_cards_from_file(self, cards_file: str) -> None:
@@ -63,7 +63,7 @@ class CardDatabase:
                 Logger.debug("Card added to database.", self, id=card_data["id"], view_name=card_data["view_name"], type=card_data["type"], rarity=card_data["rarity"])
             except (KeyError, ValueError) as e:
                 Logger.warning(f"Skipping invalid card data for ID {card_data.get('id', 'unknown')}.", error=e)
-        Logger.info(f"Loaded data for {self.card_count} cards.", self)
+        Logger.info(f"Loaded data for {self.count} cards.", self)
 
     def _load_ownership_data(self) -> None:
         """Load card ownership data from persistent storage.

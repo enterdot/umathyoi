@@ -325,10 +325,10 @@ class CardSelection(Adw.Bin):
             card_stats: CardStats instance that changed
             **kwargs: Event parameters including 'card' and 'prev_card'
         """
-        # Update the large artwork display when card changes
+        # TODO: Update the large artwork display when card changes
         # This would be implemented when stats view is fully developed
         to_card_id = kwargs.get("card").id
-        from_card_id = kwargs.get("prev_car").id if kwargs.get("prev_car") else "none"
+        from_card_id = kwargs.get("prev_card").id if kwargs.get("prev_card") else "none"
         Logger.debug(f"Callback on info panel update.", self, to_card=to_card_id, from_card=from_card_id)
 
     # UI event handlers

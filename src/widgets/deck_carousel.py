@@ -148,7 +148,7 @@ class DeckCarousel(Adw.Bin):
 
         for slot, card, limit_break in deck:
             card_slot_widget = self._create_card_slot_widget(card, limit_break, deck, slot)
-            row, col = divmod(slot, 3) # TODO: magic number, replace with half of max deck size constant
+            row, col = divmod(slot, DeckConstants.DEFAULT_DECK_SIZE // 2)
             deck_grid.attach(card_slot_widget, col, row, 1, 1)
         
         return deck_grid

@@ -38,7 +38,7 @@ class Logger:
             message: Warning message to log
         """
         caller_name = caller.__class__.__name__ if caller else None
-        print(f"[WARNING] [{self._get_caller_name(caller)}] {message}", file=sys.stderr)
+        print(f"[WARNING] [{cls._get_caller_name(caller)}] {message}", file=sys.stderr)
     
     @classmethod
     def error(cls, message: str, caller: Any | None = None) -> None:
