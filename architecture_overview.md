@@ -41,13 +41,25 @@
 - Type hints everywhere
 
 **TODOs:**
-- Add deck efficency calculation and display (currently a placeholder). This should be done asynchronously because the calculation is not smart, it's brute-forced via continuous iterations until it converges.
-- Data persistence: serialize decks to save and load them
-- Stats display
+- Add deck efficiency calculation and display (currently a placeholder). This should be done asynchronously because the calculation is not smart, it's brute-forced via continuous iterations until it converges.
+- Data persistence: serialise decks to save and load them
+- Info panel in sidebar viewstaack to display stats of cards at different limit breaks
+- Preference dialogue to let user select level of precision for deck efficiency calculation as well as game scenario and level of training facility. Both are necessary for the efficiency calculation of decks
 - Add button to the header bar when the view is collapsed and only the carousel is visible, otherwise the user is not able to add cards anymore
-- Stats display: utilize CardStats class which holds information on the currently inspected card. It is used by the secondary view in the sidebar of the Deck Builder. It gets activated when clicking the info button on one of the action rows
+- Stats display: utilise CardStats class which holds information on the currently inspected card. It is used by the secondary view in the sidebar of the Deck Builder. It gets activated when clicking the info button on one of the action rows
 - Maybe add the info button also on the cards added to decks in the carousel
 - There needs to be a way to filter cards in the selection list sidebar because eventually there'll be hundreds of cards. This might be achieved via filter buttons but I would prefer a fuzzy search solution with a search box in a Revealer widget controlled by a search button.
+- **Low priority** `src/views/legacy_manager.py` implementation
+
+
+**Summary of Major Missing Features:**
+- Deck Efficiency Calculation - Core gameplay feature
+- Data Persistence - Save/load decks and card ownership
+- Card Stats Display - Detailed card information view
+- Search/Filter System - Essential for browsing hundreds of cards
+- Responsive Header Button - Critical for mobile/narrow screen usability
+- Legacy Manager - Entire secondary application feature (Low Priority)
+
 
 **Development Questions:**
 - Data serialization strategy needed, what options are there? Preferably built-in in Python library.
