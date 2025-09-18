@@ -27,6 +27,9 @@ def setup_logging(level: str = "DEBUG") -> None:
     root_logger.setLevel(getattr(logging, level.upper()))
     root_logger.addHandler(handler)
 
+    logging.getLogger('asyncio').setLevel(logging.WARNING)
+    logging.getLogger('aiohttp').setLevel(logging.INFO)
+
 
 def get_logger(name: str) -> logging.Logger:
     """Get a logger for the given name.
