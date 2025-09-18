@@ -2,10 +2,16 @@ import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Gio, Adw
+import logging
 
 from modules import CardDatabase, Deck, CardStats, DeckList
 from windows import MainWindow
-from utils import Logger
+from utils import setup_logging, get_logger
+
+# Set up logging before anything else
+setup_logging("DEBUG")
+logger = get_logger(__name__)
+
 
 class MainApplication(Adw.Application):
     """Main application class handling application-level logic and data."""
@@ -23,7 +29,7 @@ class MainApplication(Adw.Application):
         self.app_name = app_name
         self.app_version = app_version
 
-        Logger.info(f"Initializing {self.app_name} version {self.app_version}", self)
+        logger.info(f"Initializing {self.app_name} version {self.app_version}")
 
         self.connect('activate', self.on_activate)
         
@@ -69,7 +75,7 @@ class MainApplication(Adw.Application):
         # Remove one card to show partial deck
         deck1.remove_card_at_slot(2)
 
-        Logger.debug("Created first test deck.", self, deck=repr(deck1))
+        logger.debug(f"Created first test deck: {repr(deck1)}")
 
         # Test deck 2 - Speed focused
         deck2 = Deck("Speed Deck")
@@ -91,7 +97,7 @@ class MainApplication(Adw.Application):
         deck2.remove_card_at_slot(3)
         deck2.remove_card_at_slot(4)
 
-        Logger.debug("Created second test deck.", self, deck=repr(deck2))
+        logger.debug(f"Created second test deck: {repr(deck2)}")
 
         return [deck1, deck2]
     
@@ -135,7 +141,7 @@ class MainApplication(Adw.Application):
             Currently shows placeholder message. Should open preferences dialog
             when implemented.
         """
-        Logger.debug("Preferences dialog not yet implemented.", param=param)
+        logger.debug("Preferences dialog not yet implemented")
     
     def _on_about(self, action: Gio.SimpleAction, param) -> None:
         """Handle about action by showing about dialog.

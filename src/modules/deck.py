@@ -1,7 +1,10 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from typing import Iterator
 from .card import Card
 from .event import Event
-from utils import DeckConstants, Logger
+from utils import DeckConstants
 
 
 class Deck:
@@ -76,7 +79,7 @@ class Deck:
         removed_card = self._cards[slot]
         self._cards[slot] = None
         self._limit_breaks[slot] = 0  # Reset when removing
-        Logger.debug(f"Removed card at slot {slot}.", self, name=self.name)
+        logger.debug(f"Removed card at slot {slot} from deck '{self.name}'")
         self.card_removed_at_slot.trigger(self, card=removed_card, slot=slot)
         return removed_card
 
@@ -116,20 +119,20 @@ class Deck:
         Returns:
             Slot position where card was added, or None if deck is full
         """
-        Logger.debug(f"Adding card {card.id} at limit break {limit_break}.", self, name=self.name)
+        logger.debug(f"Adding card {card.id} at limit break {limit_break} to deck '{self.name}'")
         if card in self:
-            Logger.debug(f"Failed to add card {card.id}, already in deck.", self, name=self.name)
+            logger.debug(f"Failed to add card {card.id}, already in deck '{self.name}'")
             return None
 
         slot = self.find_first_empty_slot()
         if slot is not None:
             self._cards[slot] = card
             self.set_limit_break_at_slot(limit_break, slot)
-            Logger.debug(f"Added card {card.id} at slot {slot}.", self, name=self.name)
+            logger.debug(f"Added card {card.id} at slot {slot} to deck '{self.name}'")
             self.card_added_at_slot.trigger(self, card=card, slot=slot)
             return slot
         else:
-            Logger.debug(f"Could not add card {card.id}, deck is full.", self, name=self.name)
+            logger.debug(f"Could not add card {card.id}, deck '{self.name}' is full")
             self.deck_pushed_past_capacity.trigger(self, card=card)
             return None
 
@@ -203,10 +206,10 @@ class Deck:
             True if set successfully, False if slot is empty
         """
         if self._cards[slot] is None:
-            Logger.debug(f"Cannot set limit break on empty slot {slot}.", self, name=self.name)
+            logger.debug(f"Cannot set limit break on empty slot {slot} for deck '{self.name}'")
             return False
         self._limit_breaks[slot] = limit_break
-        Logger.debug(f"Set limit break {self._limit_breaks[slot]} at slot {slot}.", self, name=self.name)
+        logger.debug(f"Set limit break {self._limit_breaks[slot]} at slot {slot} for deck '{self.name}'")
         self.limit_break_set_at_slot.trigger(self, limit_break=limit_break, slot=slot)
         return True
 

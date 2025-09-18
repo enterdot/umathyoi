@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
@@ -6,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from modules import Card, CardStats
 from .card_artwork import CardArtwork
-from utils import auto_tag_from_instance, auto_title_from_instance, UIConstants, CardConstants, Logger
+from utils import auto_tag_from_instance, auto_title_from_instance, UIConstants, CardConstants
 
 if TYPE_CHECKING:
     from application import MainApplication
@@ -329,7 +332,7 @@ class CardSelection(Adw.Bin):
         # This would be implemented when stats view is fully developed
         to_card_id = kwargs.get("card").id
         from_card_id = kwargs.get("prev_card").id if kwargs.get("prev_card") else "none"
-        Logger.debug(f"Callback on info panel update.", self, to_card=to_card_id, from_card=from_card_id)
+        logger.debug(f"Callback on info panel updates from card {to_card_id} to card {from_card_id}")
 
     # UI event handlers
     def _on_card_row_activated(self, list_box: Gtk.ListBox, row: Adw.ActionRow) -> None:
@@ -341,10 +344,10 @@ class CardSelection(Adw.Bin):
         """
         active_deck = self.app.deck_list.active_deck
         if not active_deck:
-            Logger.error(f"No active deck.", self)
+            logger.error(f"No active deck")
             return
 
-        Logger.debug(f"Try adding card {row.card.id} to active deck.", self, title=row.get_title())
+        logger.debug(f"Try adding card {row.card.id} to active deck from row '{row.get_title()}'")
         active_deck.add_card(row.card)
 
     
@@ -401,5 +404,5 @@ class CardSelection(Adw.Bin):
         """
         card_stats = self.app.card_stats
         active_deck = self.app.deck_list.active_deck
-        Logger.debug(f"Try adding card {card_stats.card.id} at limit break {card_stats.limit_break} to active deck from info panel.", self, source=card_stats)
+        logger.debug(f"Try adding card {card_stats.card.id} at limit break {card_stats.limit_break} to active deck from info panel")
         active_deck.add_card(card_stats.card, card_stats.limit_break)

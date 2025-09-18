@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
@@ -7,7 +10,10 @@ from typing import TYPE_CHECKING
 from modules import Card, Deck
 from .card_slot import CardSlot
 from .placeholder import Placeholder
-from utils import auto_tag_from_instance, auto_title_from_instance, UIConstants, Logger
+from utils import (
+    auto_tag_from_instance,
+    auto_title_from_instance,
+    UIConstants, DeckConstants)
 
 if TYPE_CHECKING:
     from application import MainApplication
@@ -322,5 +328,5 @@ class DeckCarousel(Adw.Bin):
         """
         active_deck = self.app.deck_list.active_deck
         if active_deck:
-            Logger.debug(f"Try removing card at slot {slot} from active deck.", self, x_coord=x, y_coord=y)
+            logger.debug(f"Try removing card at slot {slot} from active deck")
             active_deck.remove_card_at_slot(slot)

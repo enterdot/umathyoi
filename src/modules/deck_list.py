@@ -1,7 +1,10 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from typing import Iterator
 from .deck import Deck
 from .event import Event
-from utils import DeckConstants, Logger
+from utils import DeckConstants
 
 class DeckList:
     def __init__(self, size: int = DeckConstants.DEFAULT_DECK_LIST_SIZE, decks: list[Deck | None] | None = None) -> None:
@@ -9,11 +12,11 @@ class DeckList:
             raise ValueError(f"Size {size} is not valid, it must be at least {DeckConstants.MIN_DECK_SIZE}.")
         self._size: int = size
 
-        Logger.info(f"Initializing deck list with {self._size} slots.", self)
+        logger.info(f"Initializing deck list with {self._size} slots")
 
         if decks is not None:
             if len(decks) > size:
-                Logger.warning(f"Size is {size} but {len(decks)} decks were given, discarding {len(decks) - size}", self)
+                logger.warning(f"Size is {size} but {len(decks)} decks were given, discarding {len(decks) - size}")
                 decks = decks[:size]
             self._decks = [deck if deck is not None else Deck() for deck in decks]
 
@@ -24,7 +27,7 @@ class DeckList:
         
         for slot, deck in enumerate(self._decks):
             if deck:
-                Logger.info(f"Slot {slot}: {repr(deck)}.", self)
+                logger.info(f"Slot {slot}: {repr(deck)}")
         
         self._active_slot: int = 0
 
@@ -74,7 +77,7 @@ class DeckList:
                         # Only forward if this deck is the active deck
                         if source_deck is self.active_deck:
                             target_event.trigger(self, **kwargs)
-                    handler.__name__ = f"{deck_event_name} (forward event by {self.__class__.__name__})"
+                    handler.__name__ = f"{deck_event_name} - forward event by {__name__}"
                     return handler
                 
                 deck_event.subscribe(create_handler(active_event))
@@ -99,9 +102,9 @@ class DeckList:
                 self.slot_deactivated.trigger(self, index=self.active_slot, deck=self.active_deck)
                 self._active_slot = index
                 self.slot_activated.trigger(self, index=self.active_slot, deck=self.active_deck)
-                Logger.debug(f"Activated deck in slot {self._active_slot}.", self, name=self.active_deck.name)
+                logger.debug(f"Activated deck '{self.active_deck.name}' in slot {self._active_slot}")
         else:
-            raise ValueError(f"Slot {index} is out of bounds.")
+            raise ValueError(f"Slot {index} is out of bounds")
 
     def get_slot_at_offset(self, offset: int) -> int:
         offset_index = self._active_slot + offset

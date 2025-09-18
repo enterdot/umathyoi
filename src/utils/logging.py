@@ -1,54 +1,40 @@
-"""Simple logging utility for development and debugging."""
+"""Standard Python logging setup for the application."""
 
+import logging
 import sys
 from typing import Any
 
 
-class Logger:
-    """Simple logger for development and debugging."""
+def setup_logging(level: str = "DEBUG") -> None:
+    """Set up application-wide logging configuration.
     
-    DEBUG = True
+    Args:
+        level: Logging level ("DEBUG", "INFO", "WARNING", "ERROR")
+        format_style: "simple" or "detailed" formatting
+    """
+    # Clear any existing handlers
+    root_logger = logging.getLogger()
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+
+    formatter = logging.Formatter('[%(levelname)s] [%(name)s] %(message)s')
     
-    @classmethod
-    def debug(cls, message: str, caller: Any | None = None, **kwargs: Any) -> None:
-        """Log debug message if debug mode is enabled.
+    # Console handler for all levels
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setFormatter(formatter)
+    
+    # Configure root logger
+    root_logger.setLevel(getattr(logging, level.upper()))
+    root_logger.addHandler(handler)
+
+
+def get_logger(name: str) -> logging.Logger:
+    """Get a logger for the given name.
+    
+    Args:
+        name: Logger name (typically __name__)
         
-        Args:
-            message: Debug message to log
-            **kwargs: Additional context variables to include
-        """
-        if cls.DEBUG:
-            context = f" ({', '.join(f'{k}={v}' for k, v in kwargs.items())})" if kwargs else ""
-            print(f"[DEBUG] [{cls._get_caller_name(caller)}] {message}{context}", file=sys.stderr)
-    
-    @classmethod
-    def info(cls, message: str, caller: Any | None = None) -> None:
-        """Log info message.
-        
-        Args:
-            message: Info message to log
-        """
-        print(f"[INFO] [{cls._get_caller_name(caller)}] {message}")
-    
-    @classmethod
-    def warning(cls, message: str, caller: Any | None = None) -> None:
-        """Log warning message.
-        
-        Args:
-            message: Warning message to log
-        """
-        caller_name = caller.__class__.__name__ if caller else None
-        print(f"[WARNING] [{cls._get_caller_name(caller)}] {message}", file=sys.stderr)
-    
-    @classmethod
-    def error(cls, message: str, caller: Any | None = None) -> None:
-        """Log error message.
-        
-        Args:
-            message: Error message to log
-        """
-        print(f"[ERROR] [{self._get_caller_name(caller)}] {message}", file=sys.stderr)
-    
-    @classmethod
-    def _get_caller_name(cls, caller: Any | None) -> str:
-        return caller.__class__.__name__ if caller else str(None)
+    Returns:
+        Configured logger instance
+    """
+    return logging.getLogger(name)

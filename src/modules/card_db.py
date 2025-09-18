@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import gi
 gi.require_version('Gdk', '4.0')
 from gi.repository import GdkPixbuf
@@ -8,7 +11,7 @@ from typing import Optional, Iterator
 from pathlib import Path
 
 from .card import Rarity, CardType, Card
-from utils import CardConstants, NetworkConstants, Logger
+from utils import CardConstants, NetworkConstants
 
 
 class CardDatabase:
@@ -44,7 +47,7 @@ class CardDatabase:
         try:
             with open(cards_file, 'r', encoding='utf-8') as f:
                 cards_data = json.load(f)
-                Logger.debug("Card data parsed from JSON file", self, file=f.name, count=len(cards_data))
+                logger.debug(f"Data for {len(cards_data)} cards parsed from JSON file {f.name}")
         except FileNotFoundError:
             raise FileNotFoundError(f"Cards file {cards_file} not found.")
         except json.JSONDecodeError as e:
@@ -60,10 +63,10 @@ class CardDatabase:
                     type=CardType(card_data["type"]),
                     limit_breaks={int(k): v for k, v in card_data["limit_breaks"].items()}
                 )
-                Logger.debug("Card added to database.", self, id=card_data["id"], view_name=card_data["view_name"], type=card_data["type"], rarity=card_data["rarity"])
+                logger.debug(f"Card {card_data['id']} added to database")
             except (KeyError, ValueError) as e:
-                Logger.warning(f"Skipping invalid card data for ID {card_data.get('id', 'unknown')}.", error=e)
-        Logger.info(f"Loaded data for {self.count} cards.", self)
+                logger.warning(f"Skipping invalid data for card {card_data.get('id', 'unknown')}: {e}")
+        logger.info(f"Loaded data for {self.count} cards")
 
     def _load_ownership_data(self) -> None:
         """Load card ownership data from persistent storage.
@@ -202,7 +205,7 @@ class CardDatabase:
             return cached_pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
         url = NetworkConstants.IMAGE_BASE_URL.format(card_id=card_id)
-        Logger.debug(f"Loading image for card {card_id}.", self, width=width, height=height)
+        logger.debug(f"Loading image for card {card_id} ({width} by {height})")
 
         try:
             timeout = aiohttp.ClientTimeout(total=NetworkConstants.IMAGE_TIMEOUT_SECONDS)
@@ -213,14 +216,14 @@ class CardDatabase:
                         pixbuf = self._create_pixbuf_from_data(image_data)
                         if pixbuf:
                             self.image_cache[cache_key] = pixbuf
-                            Logger.debug(f"Loaded and cached image for card {card_id}.", self)
+                            logger.debug(f"Loaded and cached image for card {card_id}")
                             return pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
                     else:
-                        Logger.warning(f"HTTP {response.status} when loading artwork for card {card_id}")
+                        logger.warning(f"HTTP {response.status} when loading artwork for card {card_id}")
         except aiohttp.ClientError as e:
-            Logger.warning(f"Network error loading artwork for card {card_id}: {e}.")
+            logger.warning(f"Network error loading artwork for card {card_id}: {e}")
         except Exception as e:
-            Logger.error(f"Unexpected error loading artwork for card {card_id}: {e}.")
+            logger.error(f"Unexpected error loading artwork for card {card_id}: {e}")
 
         return None  # Caller handles fallback
 
@@ -239,7 +242,7 @@ class CardDatabase:
             loader.close()
             return loader.get_pixbuf()
         except Exception as e:
-            Logger.error(f"Could not create pixbuf from image data: {e}")
+            logger.error(f"Could not create buffer from image data: {e}")
             return None
 
     def save_ownership_data(self, file_path: str | None = None) -> bool:
@@ -257,9 +260,9 @@ class CardDatabase:
         # TODO: Implement actual persistence
         # Should save self.owned_copies to JSON file
         if file_path:
-            Logger.debug(f"Would save ownership data to: {file_path}.")
+            logger.debug(f"Would save ownership data to: {file_path}")
         else:
-            Logger.debug("Would save ownership data to default location.")
+            logger.debug("Would save ownership data to default location")
         return True
 
     def __iter__(self) -> Iterator[Card]:

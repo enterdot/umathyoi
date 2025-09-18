@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk
@@ -6,7 +9,7 @@ from typing import TYPE_CHECKING
 from modules import Card
 from modules import Deck
 from .card_artwork import CardArtwork
-from utils import auto_title_from_instance, UIConstants, CardConstants, Logger
+from utils import auto_title_from_instance, UIConstants, CardConstants
 
 if TYPE_CHECKING:
     from application import MainApplication
@@ -102,7 +105,7 @@ class CardSlot(Gtk.Box):
         """Handle limit break change from UI - update deck."""
         new_limit_break = int(scale.get_value())
         if self._deck is not None and self._slot is not None:
-            Logger.debug(f"Try setting limit break {new_limit_break} at slot {self._slot} for reference deck.", self)
+            logger.debug(f"Try setting limit break {new_limit_break} at slot {self._slot} for reference deck")
             self._deck.set_limit_break_at_slot(new_limit_break, self._slot)
     
     def set_card(self, card: Card | None) -> bool:

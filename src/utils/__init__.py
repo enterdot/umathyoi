@@ -5,7 +5,7 @@ from .case_convert import (
     auto_title_from_instance
 )
 from .constants import CardConstants, DeckConstants, UIConstants, NetworkConstants
-from .logging import Logger
+from .logging import setup_logging, get_logger
 
 __all__ = [
     'pascal_case_to_kebab_case',
@@ -16,5 +16,6 @@ __all__ = [
     'DeckConstants',
     'UIConstants',
     'NetworkConstants',
-    'Logger'
+    'setup_logging',
+    'get_logger',
 ]
