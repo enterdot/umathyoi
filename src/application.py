@@ -1,16 +1,17 @@
+import logging
+from utils import setup_logging, get_logger
+setup_logging("DEBUG")
+logger = get_logger(__name__)
+
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Gio, Adw
-import logging
 
 from modules import CardDatabase, Deck, CardStats, DeckList
 from windows import MainWindow
-from utils import setup_logging, get_logger
+from utils import auto_title_from_instance
 
-# Set up logging before anything else
-setup_logging("DEBUG")
-logger = get_logger(__name__)
 
 
 class MainApplication(Adw.Application):
@@ -29,15 +30,20 @@ class MainApplication(Adw.Application):
         self.app_name = app_name
         self.app_version = app_version
 
-        logger.info(f"Initializing {self.app_name} version {self.app_version}")
+        logger.info(f"Starting {self.app_name} version {self.app_version}")
 
         self.connect('activate', self.on_activate)
         
         self._init_data()
         self._setup_actions()
+        logger.info(f"Main application setup completed")
+
+        logger.debug(f"{auto_title_from_instance(self)} initialized")
     
     def _init_data(self) -> None:
         """Initialize application data (card database and decks)."""
+        
+        logger.info("Loading card database and initializing decks")
         self.card_db = CardDatabase()
         self.card_stats = CardStats()
         

@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 from typing import Iterator
 from .deck import Deck
 from .event import Event
-from utils import DeckConstants
+from utils import DeckConstants, auto_title_from_instance
 
 class DeckList:
     def __init__(self, size: int = DeckConstants.DEFAULT_DECK_LIST_SIZE, decks: list[Deck | None] | None = None) -> None:
@@ -44,6 +44,8 @@ class DeckList:
 
         # Set up event forwarding for all decks
         self._setup_deck_event_forwarding()
+        
+        logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     def _setup_deck_event_forwarding(self):
         """Subscribe to all deck events and forward active deck events."""

@@ -34,6 +34,8 @@ class DeckCarousel(Adw.Bin):
         self.window: MainWindow = window
         self.setup_ui()
         self.connect_signals()
+
+        logger.debug(f"{auto_title_from_instance(self)} initialized")
         
     def setup_ui(self) -> None:
         """Set up the carousel UI components."""

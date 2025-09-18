@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
@@ -25,9 +28,13 @@ class DeckBuilderView(Adw.Bin):
         super().__init__()
         self.app: MainApplication = window.app
         self.window: MainWindow = window
+
+        logger.debug(f"Setting up {auto_title_from_instance(self)} with navigation split view")
         self.setup_ui()
         self.setup_responsive_ui()
         self.connect_signals()
+        
+        logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     def setup_ui(self) -> None:
         """Set up the main UI with navigation split view."""
@@ -61,6 +68,8 @@ class DeckBuilderView(Adw.Bin):
         """Set up responsive behavior for different screen sizes."""
         split_view = self.get_child()
         self.window.width_breakpoint.add_setter(split_view, "collapsed", True)
+        logger.debug(f"{auto_title_from_instance(self)} responsive UI configured")
+
 
     def connect_signals(self) -> None:
         """Connect any additional signals (currently none needed)."""

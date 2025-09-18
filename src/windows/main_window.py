@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
@@ -6,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from views import DeckBuilderView
 from views import LegacyManagerView
-from utils import UIConstants
+from utils import UIConstants, auto_title_from_instance
 
 if TYPE_CHECKING:
     from application import MainApplication
@@ -35,7 +38,11 @@ class MainWindow(Adw.ApplicationWindow):
 
         self._load_css()
         self._setup_ui()
+
+        logger.info(f"Presenting {auto_title_from_instance(self)} ({UIConstants.DEFAULT_WINDOW_WIDTH} by {UIConstants.DEFAULT_WINDOW_HEIGHT})")
         self.present()
+
+        logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     def _setup_breakpoints(self, width: int | None, height: int | None) -> None:
         """Set up responsive breakpoints for different screen sizes.

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
@@ -5,6 +8,7 @@ from gi.repository import Gtk, Adw
 from typing import TYPE_CHECKING
 
 from widgets import Placeholder
+from utils import auto_title_from_instance, auto_tag_from_instance
 
 if TYPE_CHECKING:
     from application import MainApplication
@@ -23,9 +27,13 @@ class LegacyManagerView(Adw.Bin):
         super().__init__()
         self.app: MainApplication = window.app
         self.window: MainWindow = window
+
+        logger.debug(f"Setting up {auto_title_from_instance(self)} placeholder")
         self.setup_ui()
         self.setup_responsive_ui()
         self.connect_signals()
+        
+        logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     def setup_ui(self) -> None:
         """Set up placeholder UI."""

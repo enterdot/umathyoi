@@ -11,7 +11,7 @@ from typing import Optional, Iterator
 from pathlib import Path
 
 from .card import Rarity, CardType, Card
-from utils import CardConstants, NetworkConstants
+from utils import CardConstants, NetworkConstants, auto_title_from_instance
 
 
 class CardDatabase:
@@ -29,6 +29,8 @@ class CardDatabase:
         
         self._load_cards_from_file(cards_file)
         self._load_ownership_data()
+        
+        logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     @property
     def count(self) -> int:
@@ -47,7 +49,7 @@ class CardDatabase:
         try:
             with open(cards_file, 'r', encoding='utf-8') as f:
                 cards_data = json.load(f)
-                logger.debug(f"Data for {len(cards_data)} cards parsed from JSON file {f.name}")
+                logger.info(f"Data for {len(cards_data)} cards parsed from JSON file {f.name}")
         except FileNotFoundError:
             raise FileNotFoundError(f"Cards file {cards_file} not found.")
         except json.JSONDecodeError as e:
@@ -210,9 +212,11 @@ class CardDatabase:
         try:
             timeout = aiohttp.ClientTimeout(total=NetworkConstants.IMAGE_TIMEOUT_SECONDS)
             async with aiohttp.ClientSession(timeout=timeout) as session:
+                logger.debug(f"Requesting image from {url}")
                 async with session.get(url) as response:
                     if response.status == 200:
                         image_data = await response.read()
+                        logger.debug(f"Image response: {response.status} ({len(image_data)} bytes)")
                         pixbuf = self._create_pixbuf_from_data(image_data)
                         if pixbuf:
                             self.image_cache[cache_key] = pixbuf

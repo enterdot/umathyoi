@@ -32,6 +32,8 @@ class CardSelection(Adw.Bin):
 
         self.setup_ui()
         self.connect_signals()
+        
+        logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     @property
     def list_box(self) -> Gtk.ListBox:
@@ -116,7 +118,6 @@ class CardSelection(Adw.Bin):
         click_gesture.connect("pressed", self._on_card_list_view_clicked, list_box)
         list_box.add_controller(click_gesture)
         
-        # Populate with all cards
         self._populate_card_list(list_box)
         
         # Set margins
@@ -139,7 +140,7 @@ class CardSelection(Adw.Bin):
         Args:
             list_box: List box to populate
         """
-        #cards = self.app.card_db.get_all_cards()
+        logger.debug(f"Populating card selection list with {self.app.card_db.count} cards")
         for card in sorted(self.app.card_db, key=lambda c: c.view_name):
             row = self._create_card_action_row(card)
             list_box.append(row)

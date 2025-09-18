@@ -28,7 +28,7 @@ class Deck:
         self._cards: list[Card | None] = [None] * size
         if cards is not None:
             if len(cards) > size:
-                print(f"Deck size is {size} but {len(cards)} cards were given, discarding {len(cards) - size}")
+                logger.warning(f"Deck size is {size} but {len(cards)} cards were given, discarding {len(cards) - size}")
                 self._cards = cards[:size]
             else:
                 self._cards = cards + [None] * (size - len(cards))
@@ -36,7 +36,7 @@ class Deck:
         self._limit_breaks: list[int] = [0] * size
         if limit_breaks is not None:
             if len(limit_breaks) > size:
-                print(f"Deck size is {size} but {len(limit_breaks)} limit breaks were given, discarding {len(limit_breaks) - size}")
+                logger.warning(f"Deck size is {size} but {len(limit_breaks)} limit breaks were given, discarding {len(limit_breaks) - size}")
                 self._limit_breaks = limit_breaks[:size]
             else:
                 self._limit_breaks = limit_breaks + [0] * (size - len(limit_breaks))

@@ -1,6 +1,9 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from .card import Card
 from .event import Event
-from utils import CardConstants
+from utils import CardConstants, auto_title_from_instance
 
 
 class CardStats:
@@ -18,6 +21,8 @@ class CardStats:
 
         self.card_changed: Event = Event()
         self.limit_break_changed: Event = Event()
+        
+        logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     @property
     def card(self) -> Card | None:
