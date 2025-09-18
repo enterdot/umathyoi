@@ -19,7 +19,7 @@ class Deck:
         self.name: str = name
 
         if size < DeckConstants.MIN_DECK_SIZE:
-            raise ValueError(f"Size {size} is not valid, it must be at least {DeckConstants.MIN_DECK_SIZE}")
+            raise ValueError(f"Size {size} is not valid, it must be at least {DeckConstants.MIN_DECK_SIZE}.")
         self._size: int = size
 
         self._cards: list[Card | None] = [None] * size
@@ -61,7 +61,7 @@ class Deck:
         return all(card is None for card in self._cards)
 
     @property
-    def card_count(self) -> int:
+    def count(self) -> int:
         """Number of cards currently in the deck."""
         return sum(1 for card in self._cards if card is not None)
 
@@ -226,11 +226,5 @@ class Deck:
         for slot, (card, limit_break) in enumerate(zip(self._cards, self._limit_breaks)):
             yield (slot, card, limit_break)
 
-    def __str__(self) -> str:
-        """String representation of deck."""
-        return f"Deck '{self.name}': {self.card_count}/{self._size} cards"
-
     def __repr__(self) -> str:
-        """Detailed representation of deck."""
-        cards_repr = [f"Slot {slot}: {card.view_name if card else 'Empty'}" for slot, card in enumerate(self._cards)]
-        return f"Deck(name='{self.name}', cards=[{', '.join(cards_repr)}])"
+        return f"{self.__class__.__name__}(name='{self.name}', count={self.count}/{self._size}, cards={[card.id for card in self._cards if card]})"

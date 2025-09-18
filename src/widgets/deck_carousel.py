@@ -40,9 +40,8 @@ class DeckCarousel(Adw.Bin):
         self.carousel.set_allow_mouse_drag(True)
         self.carousel.set_allow_scroll_wheel(True)
         self.carousel.set_allow_long_swipes(True)
-        self.carousel.set_reveal_duration(200)
-        self.carousel.minimum_spacing = 30
-        self.carousel.set_spacing(self.carousel.minimum_spacing)
+        self.carousel.set_reveal_duration(UIConstants.CAROUSEL_REVEAL_DURATION)
+        self.carousel.set_spacing(UIConstants.CAROUSEL_MIN_SPACING)
         self.carousel.set_vexpand(True)
         self.carousel.set_valign(Gtk.Align.CENTER)
             
@@ -148,25 +147,26 @@ class DeckCarousel(Adw.Bin):
         deck_grid.set_column_spacing(UIConstants.DECK_GRID_SPACING)
 
         for slot, card, limit_break in deck:
-            card_slot_widget = self._create_card_slot_widget(card, limit_break, slot)
-            row, col = divmod(slot, 3)
+            card_slot_widget = self._create_card_slot_widget(card, limit_break, deck, slot)
+            row, col = divmod(slot, 3) # TODO: magic number, replace with half of max deck size constant
             deck_grid.attach(card_slot_widget, col, row, 1, 1)
         
         return deck_grid
+        
     
-    def _create_card_slot_widget(self, card: Card | None, limit_break: int, slot: int) -> CardSlot:
+    def _create_card_slot_widget(self, card: Card | None, limit_break: int, deck: Deck, slot: int) -> CardSlot:
         """Create a card slot widget for the deck grid.
         
         Args:
             card: Card to display, or None for empty slot
             limit_break: Current limit break level
+            deck: Deck the slot is bound to
             slot: Slot position in deck
             
         Returns:
             Configured CardSlot widget
         """
-        active_deck = self.app.deck_list.active_deck
-        card_slot = CardSlot(self.window, card, limit_break, UIConstants.CARD_SLOT_WIDTH, UIConstants.CARD_SLOT_HEIGHT, deck=active_deck, slot=slot)
+        card_slot = CardSlot(self.window, card, limit_break, UIConstants.CARD_SLOT_WIDTH, UIConstants.CARD_SLOT_HEIGHT, deck=deck, slot=slot)
         
         # Add click handler for card removal if slot contains a card
         if card is not None:
@@ -280,10 +280,9 @@ class DeckCarousel(Adw.Bin):
             **kwargs: Event parameters including 'card' and 'slot'
         """
         card = kwargs.get('card')
-        slot = kwargs.get('slot')
-        if card is not None and slot is not None:
-            current_deck_slot = self.app.deck_list.active_slot
-            self._update_single_card_slot(current_deck_slot, slot, card, 0)
+        card_slot = kwargs.get('slot')
+        if card is not None and card_slot is not None:
+            self._update_single_card_slot(self.app.deck_list.active_slot, card_slot, card, 0)
 
     def _on_card_removed_from_active_deck(self, deck_list, **kwargs) -> None:
         """Handle when a card is removed from the active deck.
@@ -292,10 +291,9 @@ class DeckCarousel(Adw.Bin):
             deck_list: DeckList that triggered the event
             **kwargs: Event parameters including 'slot'
         """
-        slot = kwargs.get('slot')
-        if slot is not None:
-            current_deck_slot = self.app.deck_list.active_slot
-            self._update_single_card_slot(current_deck_slot, slot, None, 0)
+        card_slot = kwargs.get('slot')
+        if card_slot is not None:
+            self._update_single_card_slot(self.app.deck_list.active_slot, card_slot, None, 0)
 
     def _on_limit_break_changed_in_active_deck(self, deck_list, **kwargs) -> None:
         """Handle when a limit break level changes in the active deck.
@@ -304,14 +302,13 @@ class DeckCarousel(Adw.Bin):
             deck_list: DeckList that triggered the event
             **kwargs: Event parameters including 'slot' and 'limit_break'
         """
-        slot = kwargs.get('slot')
+        card_slot = kwargs.get('slot')
         limit_break = kwargs.get('limit_break')
-        if slot is not None and limit_break is not None:
+        if card_slot is not None and limit_break is not None:
             # Get current card at that slot
             active_deck = self.app.deck_list.active_deck
-            card = active_deck.get_card_at_slot(slot) if active_deck else None
-            current_deck_slot = self.app.deck_list.active_slot
-            self._update_single_card_slot(current_deck_slot, slot, card, limit_break)
+            card = active_deck.get_card_at_slot(card_slot) if active_deck else None
+            self._update_single_card_slot(self.app.deck_list.active_slot, card_slot, card, limit_break)
 
     def _on_card_slot_clicked(self, gesture: Gtk.GestureClick, n_press: int, x: float, y: float, slot: int) -> None:
         """Handle clicking on a card in the deck to remove it.

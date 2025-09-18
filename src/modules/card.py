@@ -41,4 +41,4 @@ class Card:
             yield limit_break
 
     def __repr__(self) -> str:
-        return f"Card(id={self.id}, name='{self.name}', rarity={self.rarity}, type={self.type})"
+        return f"{self.__class__.__name__}(id={self.id}, name='{self.name}', rarity={self.rarity}, type={self.type})"

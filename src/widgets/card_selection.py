@@ -329,7 +329,7 @@ class CardSelection(Adw.Bin):
         # This would be implemented when stats view is fully developed
         to_card_id = kwargs.get("card").id
         from_card_id = kwargs.get("prev_car").id if kwargs.get("prev_car") else "none"
-        Logger.debug(f"Card stats changed", caller=card_stats, to_card=to_card_id, from_card=from_card_id)
+        Logger.debug(f"Card stats changed.", caller=card_stats, to_card=to_card_id, from_card=from_card_id)
 
     # UI event handlers
     def _on_card_row_activated(self, list_box: Gtk.ListBox, row: Adw.ActionRow) -> None:
@@ -352,9 +352,7 @@ class CardSelection(Adw.Bin):
         elif active_deck.remove_card(row.card) is not None:
             self._show_row(row)
         else:
-            raise RuntimeError(
-                f"Could not add or remove {row.card} to {active_deck} even though it's not full"
-            )
+            raise RuntimeError(f"Could not add or remove {row.card} to {active_deck} even though it's not full.")
     
     def _on_card_list_view_clicked(self, gesture: Gtk.GestureClick, n_press: int, x: float, y: float, list_box: Gtk.ListBox) -> None:
         """Handle clicking on the card list view.
@@ -412,6 +410,6 @@ class CardSelection(Adw.Bin):
         
         if card_stats.card and active_deck and not active_deck.is_full:
             if active_deck.add_card(card_stats.card, card_stats.limit_break) is not None:
-                Logger.debug(f"Added card {card_stats.card.id} at limit break {card_stats.limit_break} to active deck", name=active_deck.name)
+                Logger.debug(f"Added card at set limit break from info_button to active deck.", card=repr(card_stats.card), limit_break=card_stats.limit_break, deck=repr(active_deck))
             else:
-                Logger.debug(f"Could not add card {card_stats.card.id}, already in active deck", name=active_deck.name)
+                Logger.debug(f"Could not add card, already in active deck.", card=repr(card_stats.card), limit_break=card_stats.limit_break, deck=repr(active_deck))

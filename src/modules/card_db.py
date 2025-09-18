@@ -46,7 +46,7 @@ class CardDatabase:
                 cards_data = json.load(f)
                 Logger.debug("Card data parsed from JSON file", file=f, count=len(cards_data))
         except FileNotFoundError:
-            raise FileNotFoundError(f"Cards file not found: {cards_file}")
+            raise FileNotFoundError(f"Cards file {cards_file} not found.")
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON in cards file: {e}")
 
@@ -60,10 +60,10 @@ class CardDatabase:
                     type=CardType(card_data["type"]),
                     limit_breaks={int(k): v for k, v in card_data["limit_breaks"].items()}
                 )
-                Logger.debug("Card added to database", id=card_data["id"], view_name=card_data["view_name"], type=card_data["type"], rarity=card_data["rarity"])
+                Logger.debug("Card added to database.", id=card_data["id"], view_name=card_data["view_name"], type=card_data["type"], rarity=card_data["rarity"])
             except (KeyError, ValueError) as e:
-                Logger.warning(f"Skipping invalid card data for ID {card_data.get('id', 'unknown')}: {e}")
-        Logger.info(f"Loaded data for {self.card_count} cards")
+                Logger.warning(f"Skipping invalid card data for ID {card_data.get('id', 'unknown')}.", error=e)
+        Logger.info(f"Loaded data for {self.card_count} cards.")
 
     def _load_ownership_data(self) -> None:
         """Load card ownership data from persistent storage.
@@ -256,9 +256,9 @@ class CardDatabase:
         # TODO: Implement actual persistence
         # Should save self.owned_copies to JSON file
         if file_path:
-            Logger.debug(f"Would save ownership data to: {file_path}")
+            Logger.debug(f"Would save ownership data to: {file_path}.")
         else:
-            Logger.debug("Would save ownership data to default location")
+            Logger.debug("Would save ownership data to default location.")
         return True
 
     def __iter__(self) -> Iterator[Card]:

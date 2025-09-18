@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from modules import Card
 from modules import Deck
 from .card_artwork import CardArtwork
-from utils import auto_title_from_instance, UIConstants, CardConstants
+from utils import auto_title_from_instance, UIConstants, CardConstants, Logger
 
 if TYPE_CHECKING:
     from application import MainApplication
@@ -87,7 +87,7 @@ class CardSlot(Gtk.Box):
         self.limit_break_scale.set_digits(0)
         self.limit_break_scale.set_hexpand(True)
         
-        # Add limit break marks (0-4)
+        # Add limit break marks
         for i in range(CardConstants.MAX_LIMIT_BREAKS + 1):
             self.limit_break_scale.add_mark(i, Gtk.PositionType.BOTTOM, str(i))
         
@@ -96,32 +96,16 @@ class CardSlot(Gtk.Box):
     
     def connect_signals(self) -> None:
         """Connect widget signals."""
-        self.limit_break_scale.connect("value-changed", self._on_limit_break_changed)
-        
-        # Subscribe to deck events if we have a deck reference
-        if self._deck is not None:
-            self._deck.limit_break_set_at_slot.subscribe(self._on_deck_limit_break_changed)
+        self.limit_break_scale.connect("value-changed", self._on_scale_limit_break_changed)
     
-    def _on_limit_break_changed(self, scale: Gtk.Scale) -> None:
+    def _on_scale_limit_break_changed(self, scale: Gtk.Scale) -> None:
         """Handle limit break change from UI - update deck."""
         new_limit_break = int(scale.get_value())
         if self._deck is not None and self._slot is not None:
             # Update the deck - this will trigger the event
             self._deck.set_limit_break_at_slot(new_limit_break, self._slot)
+            Logger.debug(f"{self.__class__.__name__} set limit break {new_limit_break} at slot {self._slot} for reference deck.", deck=repr(self._deck))
         # Don't update self._limit_break here - let the event callback handle it
-    
-    def _on_deck_limit_break_changed(self, deck: Deck, **kwargs) -> None:
-        """Handle limit break change from deck - update UI."""
-        slot = kwargs.get('slot')
-        limit_break = kwargs.get('limit_break')
-        
-        # Only update if this event is for our slot
-        if slot == self._slot and limit_break is not None:
-            self._limit_break = limit_break
-            # Update UI without triggering the signal to avoid infinite loops
-            self.limit_break_scale.handler_block_by_func(self._on_limit_break_changed)
-            self.limit_break_adjustment.set_value(limit_break)
-            self.limit_break_scale.handler_unblock_by_func(self._on_limit_break_changed)
     
     def set_card(self, card: Card | None) -> bool:
         """Set the card for this slot (in-place update).
@@ -150,9 +134,9 @@ class CardSlot(Gtk.Box):
         if self._limit_break != limit_break:
             self._limit_break = limit_break
             # Block signal to prevent triggering deck update
-            self.limit_break_scale.handler_block_by_func(self._on_limit_break_changed)
+            self.limit_break_scale.handler_block_by_func(self._on_scale_limit_break_changed)
             self.limit_break_adjustment.set_value(limit_break)
-            self.limit_break_scale.handler_unblock_by_func(self._on_limit_break_changed)
+            self.limit_break_scale.handler_unblock_by_func(self._on_scale_limit_break_changed)
             return True
         return False
     

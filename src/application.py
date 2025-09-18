@@ -69,7 +69,7 @@ class MainApplication(Adw.Application):
         # Remove one card to show partial deck
         deck1.remove_card_at_slot(2)
 
-        Logger.debug("Created test deck 1", name=deck1.name, card_count=deck1.card_count, cards=[c.id for _, c, _ in deck1 if c])
+        Logger.debug("Created first test deck.", deck=repr(deck1))
 
         # Test deck 2 - Speed focused
         deck2 = Deck("Speed Deck")
@@ -91,7 +91,7 @@ class MainApplication(Adw.Application):
         deck2.remove_card_at_slot(3)
         deck2.remove_card_at_slot(4)
 
-        Logger.debug("Created test deck 2", name=deck2.name, card_count=deck2.card_count, cards=[c.id for _, c, _ in deck1 if c])
+        Logger.debug("Created second test deck.", deck=repr(deck2))
 
         return [deck1, deck2]
     
@@ -135,7 +135,7 @@ class MainApplication(Adw.Application):
             Currently shows placeholder message. Should open preferences dialog
             when implemented.
         """
-        Logger.debug("Preferences dialog not yet implemented")
+        Logger.debug("Preferences dialog not yet implemented.", param=param)
     
     def _on_about(self, action: Gio.SimpleAction, param) -> None:
         """Handle about action by showing about dialog.

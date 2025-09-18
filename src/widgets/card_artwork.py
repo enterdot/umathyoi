@@ -85,7 +85,6 @@ class CardArtwork(Gtk.Box):
         if pixbuf:
             texture = Gdk.Texture.new_for_pixbuf(pixbuf)
             self.artwork.set_paintable(texture)
-            #self.artwork.add_css_class("frame")
             self.artwork.add_css_class("card")
             
             self._clear_children()

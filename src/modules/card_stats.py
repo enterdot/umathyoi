@@ -49,7 +49,7 @@ class CardStats:
             limit_break: Limit break level
         """
         if not (CardConstants.MIN_LIMIT_BREAKS <= limit_break <= CardConstants.MAX_LIMIT_BREAKS):
-            raise ValueError(f"Limit break must be {CardConstants.MIN_LIMIT_BREAKS}-{CardConstants.MAX_LIMIT_BREAKS}, got {limit_break}")
+            raise ValueError(f"Limit break must be {CardConstants.MIN_LIMIT_BREAKS}-{CardConstants.MAX_LIMIT_BREAKS}, got {limit_break}.")
         
         if limit_break != self._limit_break:
             prev_limit_break = self._limit_break

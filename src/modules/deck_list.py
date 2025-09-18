@@ -6,7 +6,7 @@ from utils import DeckConstants, Logger
 class DeckList:
     def __init__(self, size: int = DeckConstants.DEFAULT_DECK_LIST_SIZE, decks: list[Deck | None] | None = None) -> None:
         if size < DeckConstants.MIN_DECK_SIZE:
-            raise ValueError(f"Size {size} is not valid, it must be at least {DeckConstants.MIN_DECK_SIZE}")
+            raise ValueError(f"Size {size} is not valid, it must be at least {DeckConstants.MIN_DECK_SIZE}.")
         self._size: int = size
 
         if decks is not None:
@@ -19,7 +19,12 @@ class DeckList:
                 self._decks.extend([Deck() for _ in range(size - len(self._decks))])
         else:
             self._decks = [Deck() for _ in range(size)]
-            
+        
+        for slot, deck in enumerate(self._decks):
+            if deck:
+                Logger.debug(f"{deck.__class__.__name__} in slot {slot} added.", deck=repr(deck))
+        Logger.debug(f"{self.__class__.__name__} initialized with {self._size} decks.")
+        
         self._active_slot: int = 0
 
         # Existing deck list events
@@ -76,6 +81,11 @@ class DeckList:
                 deck_event.subscribe(create_handler(active_event))
 
     @property
+    def size(self) -> int:
+        """Maximum number of decks this deck list can hold."""
+        return self._size
+
+    @property
     def active_deck(self) -> Deck | None:
         return self._decks[self._active_slot]
 
@@ -90,9 +100,9 @@ class DeckList:
                 self.slot_deactivated.trigger(self, index=self.active_slot, deck=self.active_deck)
                 self._active_slot = index
                 self.slot_activated.trigger(self, index=self.active_slot, deck=self.active_deck)
-                Logger.debug(f"Activated deck in slot {self._active_slot}", name=self.active_deck.name)
+                Logger.debug(f"Activated deck in slot {self._active_slot}.", name=self.active_deck.name)
         else:
-            raise ValueError(f"Slot {index} is out of bounds") 
+            raise ValueError(f"Slot {index} is out of bounds.") 
 
     @property
     def slot_count(self):
@@ -130,8 +140,5 @@ class DeckList:
         for index in range(self._size):
             yield (index, self._decks[index])
 
-    def __repr__(self):
-        return f"DeckList(size={self._size}, decks={self._decks})"
-    
-    def __str__(self):
-        return f"{self._decks}"
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(size={self._size}, decks={repr(self._decks)})"
