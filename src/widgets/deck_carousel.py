@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from modules import Card, Deck
 from .card_slot import CardSlot
 from .placeholder import Placeholder
-from utils import auto_tag_from_instance, auto_title_from_instance, UIConstants
+from utils import auto_tag_from_instance, auto_title_from_instance, UIConstants, Logger
 
 if TYPE_CHECKING:
     from application import MainApplication
@@ -92,7 +92,7 @@ class DeckCarousel(Adw.Bin):
             if not hasattr(carousel, 'target_spacing'):
                 carousel.target_spacing = float(carousel.get_spacing())
             carousel.target_spacing += (nav_page_width - self.last_nav_page_width) / 2
-            carousel.set_spacing(round(max(carousel.minimum_spacing, carousel.target_spacing)))
+            carousel.set_spacing(round(max(UIConstants.CAROUSEL_MIN_SPACING, carousel.target_spacing)))
         
         self.last_nav_page_width = float(nav_page_width)
     
@@ -322,4 +322,5 @@ class DeckCarousel(Adw.Bin):
         """
         active_deck = self.app.deck_list.active_deck
         if active_deck:
+            Logger.debug(f"Try removing card at slot {slot} from active deck.", self, x_coord=x, y_coord=y)
             active_deck.remove_card_at_slot(slot)

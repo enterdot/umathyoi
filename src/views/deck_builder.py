@@ -49,6 +49,8 @@ class DeckBuilderView(Adw.Bin):
         content_page.set_tag(f"{auto_tag_from_instance(content_child)}-nav-page")
         content_page.set_title(f"{auto_tag_from_instance(content_child)} Navigation Page")
 
+        sidebar_child.refresh_all_action_rows()
+
         split_view.set_sidebar(sidebar_page)
         split_view.set_content(content_page)
         split_view.set_show_content(True)  # show content by default when collapsed

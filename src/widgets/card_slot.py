@@ -102,10 +102,8 @@ class CardSlot(Gtk.Box):
         """Handle limit break change from UI - update deck."""
         new_limit_break = int(scale.get_value())
         if self._deck is not None and self._slot is not None:
-            # Update the deck - this will trigger the event
+            Logger.debug(f"Try setting limit break {new_limit_break} at slot {self._slot} for reference deck.", self)
             self._deck.set_limit_break_at_slot(new_limit_break, self._slot)
-            Logger.debug(f"{self.__class__.__name__} set limit break {new_limit_break} at slot {self._slot} for reference deck.", deck=repr(self._deck))
-        # Don't update self._limit_break here - let the event callback handle it
     
     def set_card(self, card: Card | None) -> bool:
         """Set the card for this slot (in-place update).

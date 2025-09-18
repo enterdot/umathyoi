@@ -23,7 +23,7 @@ class MainApplication(Adw.Application):
         self.app_name = app_name
         self.app_version = app_version
 
-        Logger.info(f"Initializing {self.app_name} version {self.app_version}")
+        Logger.info(f"Initializing {self.app_name} version {self.app_version}", self)
 
         self.connect('activate', self.on_activate)
         
@@ -69,7 +69,7 @@ class MainApplication(Adw.Application):
         # Remove one card to show partial deck
         deck1.remove_card_at_slot(2)
 
-        Logger.debug("Created first test deck.", deck=repr(deck1))
+        Logger.debug("Created first test deck.", self, deck=repr(deck1))
 
         # Test deck 2 - Speed focused
         deck2 = Deck("Speed Deck")
@@ -91,7 +91,7 @@ class MainApplication(Adw.Application):
         deck2.remove_card_at_slot(3)
         deck2.remove_card_at_slot(4)
 
-        Logger.debug("Created second test deck.", deck=repr(deck2))
+        Logger.debug("Created second test deck.", self, deck=repr(deck2))
 
         return [deck1, deck2]
     

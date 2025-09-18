@@ -44,7 +44,7 @@ class CardDatabase:
         try:
             with open(cards_file, 'r', encoding='utf-8') as f:
                 cards_data = json.load(f)
-                Logger.debug("Card data parsed from JSON file", file=f, count=len(cards_data))
+                Logger.debug("Card data parsed from JSON file", self, file=f.name, count=len(cards_data))
         except FileNotFoundError:
             raise FileNotFoundError(f"Cards file {cards_file} not found.")
         except json.JSONDecodeError as e:
@@ -60,10 +60,10 @@ class CardDatabase:
                     type=CardType(card_data["type"]),
                     limit_breaks={int(k): v for k, v in card_data["limit_breaks"].items()}
                 )
-                Logger.debug("Card added to database.", id=card_data["id"], view_name=card_data["view_name"], type=card_data["type"], rarity=card_data["rarity"])
+                Logger.debug("Card added to database.", self, id=card_data["id"], view_name=card_data["view_name"], type=card_data["type"], rarity=card_data["rarity"])
             except (KeyError, ValueError) as e:
                 Logger.warning(f"Skipping invalid card data for ID {card_data.get('id', 'unknown')}.", error=e)
-        Logger.info(f"Loaded data for {self.card_count} cards.")
+        Logger.info(f"Loaded data for {self.card_count} cards.", self)
 
     def _load_ownership_data(self) -> None:
         """Load card ownership data from persistent storage.
@@ -201,8 +201,8 @@ class CardDatabase:
             cached_pixbuf = self.image_cache[cache_key]
             return cached_pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
-        # Download image from remote server
         url = NetworkConstants.IMAGE_BASE_URL.format(card_id=card_id)
+        Logger.debug(f"Loading image for card {card_id}.", self, width=width, height=height)
 
         try:
             timeout = aiohttp.ClientTimeout(total=NetworkConstants.IMAGE_TIMEOUT_SECONDS)
@@ -213,13 +213,14 @@ class CardDatabase:
                         pixbuf = self._create_pixbuf_from_data(image_data)
                         if pixbuf:
                             self.image_cache[cache_key] = pixbuf
+                            Logger.debug(f"Loaded and cached image for card {card_id}.", self)
                             return pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
                     else:
-                        Logger.error(f"HTTP {response.status} when loading artwork for card {card_id}")
+                        Logger.warning(f"HTTP {response.status} when loading artwork for card {card_id}")
         except aiohttp.ClientError as e:
-            Logger.error(f"Could not load artwork for card {card_id}: {e}")
+            Logger.warning(f"Network error loading artwork for card {card_id}: {e}.")
         except Exception as e:
-            Logger.error(f"Could not load artwork for card {card_id}: {e}")
+            Logger.error(f"Unexpected error loading artwork for card {card_id}: {e}.")
 
         return None  # Caller handles fallback
 

@@ -9,9 +9,11 @@ class DeckList:
             raise ValueError(f"Size {size} is not valid, it must be at least {DeckConstants.MIN_DECK_SIZE}.")
         self._size: int = size
 
+        Logger.info(f"Initializing deck list with {self._size} slots.", self)
+
         if decks is not None:
             if len(decks) > size:
-                print(f"DeckList size is {size} but {len(decks)} decks were given, discarding {len(decks) - size}")
+                Logger.warning(f"Size is {size} but {len(decks)} decks were given, discarding {len(decks) - size}", self)
                 decks = decks[:size]
             self._decks = [deck if deck is not None else Deck() for deck in decks]
 
@@ -22,8 +24,7 @@ class DeckList:
         
         for slot, deck in enumerate(self._decks):
             if deck:
-                Logger.debug(f"{deck.__class__.__name__} in slot {slot} added.", deck=repr(deck))
-        Logger.debug(f"{self.__class__.__name__} initialized with {self._size} decks.")
+                Logger.info(f"Slot {slot}: {repr(deck)}.", self)
         
         self._active_slot: int = 0
 
@@ -100,7 +101,7 @@ class DeckList:
                 self.slot_deactivated.trigger(self, index=self.active_slot, deck=self.active_deck)
                 self._active_slot = index
                 self.slot_activated.trigger(self, index=self.active_slot, deck=self.active_deck)
-                Logger.debug(f"Activated deck in slot {self._active_slot}.", name=self.active_deck.name)
+                Logger.debug(f"Activated deck in slot {self._active_slot}.", self, name=self.active_deck.name)
         else:
             raise ValueError(f"Slot {index} is out of bounds.") 
 
