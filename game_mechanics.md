@@ -63,7 +63,7 @@ Wit facility:
 
 Another mechanic that should be considered is the Fan club. The trainee gains fans as she participates in races with the placing determining the amount gained. The Fan count is relevant for this application because some cards provide exotic effects like "Increased training effectiveness per N fans".
 
-Here's an example of how a stat gain would be calculated. Note that I'm calculating total Power gain from the Power facility in this example, `power_bonus` would be `speed_bonus` for the Speed facility. The current mood can provide -20%, -10%, 0%, 10% or 20% bonus.
+Here's an example of how a stat gain would be calculated. Note that I'm calculating total Power gain from the Power facility in this example, `power_bonus` applies because the Power facility provides Power but a card with `power_bonus` landing on the Speed facility would still apply this bonus because the Speed facility also provides some amount of Power. The current mood can provide -20%, -10%, 0%, 10% or 20% bonus.
 ```
 base_stat_gain = (base_facility_gain + power_bonus[card0] + ...)
 friendship_multiplier = (((100% + friendship_bonus[card0]) * (100% + friendship_bonus[card1]) * ...)) / 100%
