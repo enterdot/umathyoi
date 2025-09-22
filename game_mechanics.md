@@ -63,4 +63,19 @@ Wit facility:
 
 Another mechanic that should be considered is the Fan club. The trainee gains fans as she participates in races with the placing determining the amount gained. The Fan count is relevant for this application because some cards provide exotic effects like "Increased training effectiveness per N fans".
 
+Here's an example of how a stat gain would be calculated. Note that I'm calculating total Power gain from the Power facility in this example, `power_bonus` would be `speed_bonus` for the Speed facility. The current mood can provide -20%, -10%, 0%, 10% or 20% bonus.
+```
+base_stat_gain = (base_facility_gain + power_bonus[card0] + ...)
+friendship_multiplier = (((100% + friendship_bonus[card0]) * (100% + friendship_bonus[card1]) * ...)) / 100%
+mood_multiplier = (100% + (current_mood_bonus * (100% + mood_effect[card0] + mood_effect[1] + ...))) / 100%
+training_effectiveness_multiplier = (100% + training_effectiveness[card0] + training_effectiveness[card1] + ...) / 100%
+support_multiplier = (100% + 5% * number_of_support_cards_on_facility ) / 100%
+trainee_multiplier = (100% + trainee_power_growth) / 100%
+
+final_power_gain = base_stat_gain * friendship_multiplier * mood_multiplier * training_effectiveness_multiplier * support_multiplier * trainee_multiplier
+```
+
+`final_power_gain` is then rounded down to an integer. Note that the `friendship_multiplier` value of a card is only taken into account if the type of the card matches the type of facility, in this case I'm assuming `card0` and `card1` are Power cards.
+Finally, it's possible that future cards could have more conditional effects that might break the rules, for example there might be a card that triggers a friendship training for facilities NOT of its type. I'm just speculating but I want to clarify that our lambda dictionary should be able to accommodate a variety of exotic effects.
+
 There are many more mechanics but this should suffice to create a context for the implementation of all application features.
