@@ -67,7 +67,7 @@ Here's an example of how a stat gain would be calculated. Note that I'm calculat
 ```
 base_stat_gain = (base_facility_gain + power_bonus[card0] + ...)
 friendship_multiplier = (((100% + friendship_bonus[card0]) * (100% + friendship_bonus[card1]) * ...)) / 100%
-mood_multiplier = (100% + (current_mood_bonus * (100% + mood_effect[card0] + mood_effect[1] + ...))) / 100%
+mood_multiplier = (100% + (current_mood_bonus * (100% + mood_effect[card0] + mood_effect[card1] + ...))) / 100%
 training_effectiveness_multiplier = (100% + training_effectiveness[card0] + training_effectiveness[card1] + ...) / 100%
 support_multiplier = (100% + 5% * number_of_support_cards_on_facility ) / 100%
 trainee_multiplier = (100% + trainee_power_growth) / 100%
