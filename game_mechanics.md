@@ -28,6 +28,39 @@ Each career has a limited amount of turns and many of them will be spent on rest
 
 On top of all this each career is set in a Scenario which the player can choose. Each scenario changes the stat gain for each training facility and the cap for each stat. It also adds extra mechanics which are simply too complicated to even take in consideration and it would be unnecessary anyway. Currently, the game only has one scenario, with its second coming soon, they are quite different but ultimately what is of interest for this application is how the scenario effects the level of the training facilities. The current and only scenario is called "URA Finals" and its mechanics is simply this: every 4 times a facility is used it goes up a level, so it starts at level 1 and after 4 uses it goes to level 2, to reach level 5 you would need 16 uses. The level of the facilities influences the stat gain significantly.
 
+For reference, the "URA Finals" scenario has the following stat gain values:
+
+Speed facility:
+    Level 1: +10 Speed, +5 Power, +2 Skill Points
+    Level 2: +11 Speed, +6 Power, +2 Skill Points
+    Level 3: +11 Speed, +7 Power, +3 Skill Points
+    Level 4: +12 Speed, +7 Power, +3 Skill Points
+    Level 5: +13 Speed, +8 Power, +4 Skill Points
+Stamina facility:
+    Level 1: +9 Stamina, +4 Guts, +2 Skill Points
+    Level 2: +10 Stamina, +4 Guts, +2 Skill Points
+    Level 3: +11 Stamina, +5 Guts, +3 Skill Points
+    Level 4: +11 Stamina, +5 Guts, +3 Skill Points
+    Level 5: +12 Stamina, +6 Guts, +4 Skill Points
+Power facility:
+    Level 1: +5 Stamina, +8 Power, +2 Skill Points
+    Level 2: +5 Stamina, +9 Power, +2 Skill Points
+    Level 3: +6 Stamina, +9 Power, +3 Skill Points
+    Level 4: +6 Stamina, +10 Power, +3 Skill Points
+    Level 5: +7 Stamina, +11 Power, +4 Skill Points
+Guts facility:
+    Level 1: +4 Speed, +4 Power, +8 Guts, +2 Skill Points
+    Level 2: +4 Speed, +4 Power, +9 Guts, +2 Skill Points
+    Level 3: +5 Speed, +5 Power, +9 Guts, +3 Skill Points
+    Level 4: +5 Speed, +5 Power, +10 Guts, +3 Skill Points
+    Level 5: +6 Speed, +6 Power, +11 Guts, +4 Skill Points
+Wit facility:
+    Level 1: +2 Speed, +9 Wit, +4 Skill Points
+    Level 2: +3 Speed, +9 Wit, +4 Skill Points
+    Level 3: +3 Speed, +10 Wit, +5 Skill Points
+    Level 4: +4 Speed, +11 Wit, +6 Skill Points
+    Level 5: +4 Speed, +12 Wit, +7 Skill Points
+
 Another mechanic that should be considered is the Fan club. The trainee gains fans as she participates in races with the placing determining the amount gained. The Fan count is relevant for this application because some cards provide exotic effects like "Increased training effectiveness per N fans".
 
 There are many more mechanics but this should suffice to create a context for the implementation of all application features.
