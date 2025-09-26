@@ -1,0 +1,42 @@
+{
+  "ura_finals": {
+    "name": "URA Finals",
+    "facilities": {
+      "speed": {
+        "1": {"speed": 10, "power": 5, "skill_points": 2},
+        "2": {"speed": 11, "power": 6, "skill_points": 2},
+        "3": {"speed": 11, "power": 7, "skill_points": 3},
+        "4": {"speed": 12, "power": 7, "skill_points": 3},
+        "5": {"speed": 13, "power": 8, "skill_points": 4}
+      },
+      "stamina": {
+        "1": {"stamina": 9, "guts": 4, "skill_points": 2},
+        "2": {"stamina": 10, "guts": 4, "skill_points": 2},
+        "3": {"stamina": 11, "guts": 5, "skill_points": 3},
+        "4": {"stamina": 11, "guts": 5, "skill_points": 3},
+        "5": {"stamina": 12, "guts": 6, "skill_points": 4}
+      },
+      "power": {
+        "1": {"stamina": 5, "power": 8, "skill_points": 2},
+        "2": {"stamina": 5, "power": 9, "skill_points": 2},
+        "3": {"stamina": 6, "power": 9, "skill_points": 3},
+        "4": {"stamina": 6, "power": 10, "skill_points": 3},
+        "5": {"stamina": 7, "power": 11, "skill_points": 4}
+      },
+      "guts": {
+        "1": {"speed": 4, "power": 4, "guts": 8, "skill_points": 2},
+        "2": {"speed": 4, "power": 4, "guts": 9, "skill_points": 2},
+        "3": {"speed": 5, "power": 5, "guts": 9, "skill_points": 3},
+        "4": {"speed": 5, "power": 5, "guts": 10, "skill_points": 3},
+        "5": {"speed": 6, "power": 6, "guts": 11, "skill_points": 4}
+      },
+      "wit": {
+        "1": {"speed": 2, "wit": 9, "skill_points": 4},
+        "2": {"speed": 3, "wit": 9, "skill_points": 4},
+        "3": {"speed": 3, "wit": 10, "skill_points": 5},
+        "4": {"speed": 4, "wit": 11, "skill_points": 6},
+        "5": {"speed": 4, "wit": 12, "skill_points": 7}
+      }
+    }
+  }
+}
