@@ -6,7 +6,7 @@ from .event import Event
 from utils import CardConstants, auto_title_from_instance
 
 
-class CardStats:
+class CardInspector:
     """Tracks currently inspected card and limit break level for info display."""
     
     def __init__(self, card: Card | None = None, limit_break: int = 0) -> None:

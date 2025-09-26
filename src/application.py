@@ -8,7 +8,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Gio, Adw
 
-from modules import CardDatabase, Deck, CardStats, DeckList
+from modules import CardDatabase, Deck, CardInspector, DeckList
 from windows import MainWindow
 from utils import auto_title_from_instance
 
@@ -45,7 +45,7 @@ class MainApplication(Adw.Application):
         
         logger.info("Loading card database and initializing decks")
         self.card_db = CardDatabase()
-        self.card_stats = CardStats()
+        self.card_inspector = CardInspector()
         
         # Initialize deck list with test data
         # TODO: Replace with session persistence when implemented

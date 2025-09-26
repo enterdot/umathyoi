@@ -7,7 +7,7 @@ gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
 from typing import TYPE_CHECKING
 
-from modules import Card, CardStats
+from modules import Card, CardInspector
 from .card_artwork import CardArtwork
 from utils import auto_tag_from_instance, auto_title_from_instance, UIConstants, CardConstants
 
@@ -70,8 +70,8 @@ class CardSelection(Adw.Bin):
         self.app.deck_list.card_added_to_active_deck_at_slot.subscribe(self._on_active_deck_card_added)
         self.app.deck_list.card_removed_from_active_deck_at_slot.subscribe(self._on_active_deck_card_removed)
 
-        # Card stats events
-        self.app.card_stats.card_changed.subscribe(self._on_card_stats_changed)
+        # Card inspector events
+        self.app.card_inspector.card_changed.subscribe(self._on_card_inspector_changed)
 
     def refresh_all_action_rows(self) -> None:
         """Refresh visibility of all action rows based on current active deck state."""
@@ -243,7 +243,7 @@ class CardSelection(Adw.Bin):
         limit_break_selector.set_halign(Gtk.Align.CENTER)
         
         # Limit break slider
-        current_value = self.app.card_stats.limit_break
+        current_value = self.app.card_inspector.limit_break
         slider_adjustment = Gtk.Adjustment(
             value=current_value, 
             lower=CardConstants.MIN_LIMIT_BREAKS, 
@@ -322,11 +322,11 @@ class CardSelection(Adw.Bin):
         self.refresh_all_action_rows()
         self.list_box.set_visible(True)
 
-    def _on_card_stats_changed(self, card_stats: CardStats, **kwargs) -> None:
+    def _on_card_inspector_changed(self, card_inspector: CardInspector, **kwargs) -> None:
         """Handle when card stats selection changes.
         
         Args:
-            card_stats: CardStats instance that changed
+            card_inspector: CardInspector instance that changed
             **kwargs: Event parameters including 'card' and 'prev_card'
         """
         # TODO: Update the large artwork display when card changes
@@ -373,7 +373,7 @@ class CardSelection(Adw.Bin):
             info_button: Info button that was clicked
             card: Card to show info for
         """
-        self.app.card_stats.card = card
+        self.app.card_inspector.card = card
         view_stack = info_button.get_ancestor(Adw.ViewStack)
         if view_stack:
             view_stack.set_visible_child_name("stats_info_view")
@@ -395,7 +395,7 @@ class CardSelection(Adw.Bin):
             slider: Scale widget that changed
         """
         limit_break = int(slider.get_value())
-        self.app.card_stats.limit_break = limit_break
+        self.app.card_inspector.limit_break = limit_break
     
     def _on_stats_info_view_add_button_clicked(self, button: Gtk.Button) -> None:
         """Handle clicking the add button in stats info view.
@@ -403,7 +403,7 @@ class CardSelection(Adw.Bin):
         Args:
             button: Add button that was clicked
         """
-        card_stats = self.app.card_stats
+        card_inspector = self.app.card_inspector
         active_deck = self.app.deck_list.active_deck
-        logger.debug(f"Try adding card {card_stats.card.id} at limit break {card_stats.limit_break} to active deck from info panel")
-        active_deck.add_card(card_stats.card, card_stats.limit_break)
+        logger.debug(f"Try adding card {card_inspector.card.id} at limit break {card_inspector.limit_break} to active deck from info panel")
+        active_deck.add_card(card_inspector.card, card_inspector.limit_break)
