@@ -1,0 +1,183 @@
+{
+  "metadata": {
+    "source": "Gametora",
+    "scraped_at": "2025-09-27T11:09:37.814732",
+    "endpoint_pattern": "https://gametora.com/_next/data/pgqKwGpVRDewvjE3UX6O2/umamusume/characters/{character_id}.json?id={character_id}",
+    "record_count": 2,
+    "data_format": "raw_gametora",
+    "character_ids_requested": [
+      "109501-believe",
+      "103501-winning-ticket"
+    ],
+    "success_rate": "2/2"
+  },
+  "data": [
+    {
+      "url_name": "109501-believe",
+      "card_id": 109501,
+      "char_id": 1095,
+      "rarity": 3,
+      "costume": 109501,
+      "skills_unique": [
+        100951
+      ],
+      "skills_innate": [
+        202372,
+        203932,
+        200022
+      ],
+      "skills_evo": [
+        {
+          "old": 202371,
+          "new": 109501111
+        },
+        {
+          "old": 203931,
+          "new": 109501211
+        }
+      ],
+      "skills_awakening": [
+        201322,
+        202371,
+        201902,
+        203931
+      ],
+      "stat_bonus": [
+        0,
+        0,
+        10,
+        10,
+        10
+      ],
+      "talent_group": 109501,
+      "base_stats": [
+        103,
+        64,
+        99,
+        92,
+        92
+      ],
+      "aptitude": [
+        "A",
+        "G",
+        "A",
+        "D",
+        "G",
+        "G",
+        "D",
+        "A",
+        "D",
+        "G"
+      ],
+      "four_star_stats": [
+        115,
+        71,
+        111,
+        103,
+        100
+      ],
+      "five_star_stats": [
+        126,
+        78,
+        122,
+        113,
+        111
+      ],
+      "name": "Believe",
+      "release": ""
+    },
+    {
+      "url_name": "103501-winning-ticket",
+      "card_id": 103501,
+      "char_id": 1035,
+      "rarity": 1,
+      "costume": 103501,
+      "skills_unique": [
+        10351,
+        100351
+      ],
+      "skills_innate": [
+        200152,
+        200732,
+        201402
+      ],
+      "skills_evo": [
+        {
+          "old": 201401,
+          "new": 103501111
+        },
+        {
+          "old": 200591,
+          "new": 103501211
+        }
+      ],
+      "skills_awakening": [
+        200592,
+        201401,
+        201392,
+        200591
+      ],
+      "stat_bonus": [
+        0,
+        10,
+        20,
+        0,
+        0
+      ],
+      "talent_group": 103501,
+      "base_stats": [
+        87,
+        68,
+        91,
+        74,
+        80
+      ],
+      "aptitude": [
+        "A",
+        "G",
+        "G",
+        "F",
+        "A",
+        "B",
+        "G",
+        "B",
+        "A",
+        "G"
+      ],
+      "two_star_stats": [
+        93,
+        72,
+        97,
+        78,
+        85
+      ],
+      "three_star_stats": [
+        98,
+        76,
+        102,
+        83,
+        91
+      ],
+      "four_star_stats": [
+        109,
+        85,
+        114,
+        92,
+        100
+      ],
+      "five_star_stats": [
+        120,
+        93,
+        125,
+        101,
+        111
+      ],
+      "name": "Winning Ticket",
+      "title": "[Get to Winning!]",
+      "release": "2025-06-26",
+      "skills_event": [
+        200492
+      ]
+    }
+  ]
+}
