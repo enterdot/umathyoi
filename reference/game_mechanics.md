@@ -22,11 +22,50 @@ Using a training facility costs Energy and provides stats relative to that train
 
 Resting recovers Energy, Recreation improves mood, Infirmary cures negative statuses, running a race provides random stats and many Skill points.
 
-The way the support cards come into play is that every turn, each of the 6 cards is randomly placed on one of the training facilities or none at all. The stat gain from using a training facility is improved by which and how many cards landed on it. Notably, if a card of type Speed lands on the Speed training facility, the amount of Speed and Power gained is strongly improved. The exact amount of stats gained however can only be calculated when taking into account the numerous stats the each card has. Also, each character has a bonus to the growth rate of 1 or more stats, for example a character with 20% Stamina bonus will gain 20% more Stamina whenever it's gained via training (so from the Stamina training facility and the Power training facility). The final value of the calculation is rounded down.
+The way the support cards come into play is that every turn, each of the 6 cards is randomly placed on one of the training facilities or none at all. The stat gain from using a training facility is improved by which and how many cards landed on it. Notably, if a card of type Speed lands on the Speed training facility, the amount of Speed and Power gained is strongly improved. The exact amount of stats gained however can only be calculated when taking into account the numerous effects the each card has.
+
+Cards can go from level 1 to level 50 if they are of SSR rarity, to level 45 if of SR rarity and to level 40 if they are of R rarity. The Limit Break values (LB for short) mentioned in the codebase and in chats refers to the possibility of upgrading the level of the card, in this way:
+
+- R rarity card:
+  - LB0 -> max_level = 20
+  - LB1 -> max_level = 25
+  - LB2 -> max_level = 30
+  - LB3 -> max_level = 35
+  - LB4 -> max_level = 40
+
+- SR rarity card:
+  - LB0 -> max_level = 25
+  - LB1 -> max_level = 30
+  - LB2 -> max_level = 35
+  - LB3 -> max_level = 40
+  - LB4 -> max_level = 45
+
+- SSR rarity card:
+  - LB0 -> max_level = 30
+  - LB1 -> max_level = 35
+  - LB2 -> max_level = 40
+  - LB3 -> max_level = 45
+  - LB4 -> max_level = 50
+  
+LB4 is something referred to as MLB (short for Maximum Limit Break). The limit break is the most important value for players, rather than level, because leveling a card is trivial and as such the limit break is the actual indicator of the maximum level currently achievable by the card, and the level of the card determines its effectiveness.
+
+Card effects are identified in the scraped Gametora JSON by type (a number): they can be normal effects or unique effects. All cards (R, SR and SSR) can have normal effects, only SSR cards can have one or more unique effects. The effects currently in the game are:
+- Normal effect types: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 25, 26, 27, 28, 30, 31, 32]
+- Unique effect types: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 19, 27, 28, 30, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122]
+
+Normal effects and Unique effects can look similar. For example the card Vodka Power SSR (30005-vodka in src/data/cards.json) has the following effects (among others):
+- unique effect of type 1: Increases the effectiveness of Friendship Training (10%)
+- unique effect of type 19: Increases the frequency at which the character participates in their preferred training type (20)
+- normal effect of type 1: Increases the effectiveness of Friendship Training (35% at max level 50)
+- normal effect of type 19: Increases the frequency at which the character participates in their preferred training type (65 at max level 50)
+
+When calculating the total effect of the type 1 effects, the two values are multiplied: 
+
+Also, each character has a bonus to the growth rate of 1 or more stats, for example a character with 20% Stamina bonus will gain 20% more Stamina whenever it's gained via training (so from the Stamina training facility and the Power training facility). The final value of the calculation is rounded down.
 
 Each career has a limited amount of turns and many of them will be spent on resting and racing. Resting is particularly important because as Energy gets low the risk of failure from using any of training facility increases. Failing a training in any non-Wit training can lead to injury which when requires wasting turns in Recreation and Infirmary which can ruin a career. Each training facility also has a level, from 1 to 5, higher level facilities provide higher gains.
 
-On top of all this each career is set in a Scenario which the player can choose. Each scenario changes the stat gain for each training facility and the cap for each stat. It also adds extra mechanics which are simply too complicated to even take in consideration and it would be unnecessary anyway. Currently, the game only has one scenario, with its second coming soon, they are quite different but ultimately what is of interest for this application is how the scenario effects the level of the training facilities. The current and only scenario is called "URA Finals" and its mechanics is simply this: every 4 times a facility is used it goes up a level, so it starts at level 1 and after 4 uses it goes to level 2, to reach level 5 you would need 16 uses. The level of the facilities influences the stat gain significantly.
+On top of all this each career is set in a Scenario which the player can choose. Each scenario changes the stat gain for each training facility and the cap for each stat. It also adds extra mechanics which are simply too complicated to even take in consideration and it would be unnecessary anyway. Currently, the game only has one scenario, with its second coming soon, they are quite different but ultimately what is of interest for this application is how the scenario affect the level of the training facilities. The current and only scenario is called "URA Finals" and its mechanics is simply this: every 4 times a facility is used it goes up a level, so it starts at level 1 and after 4 uses it goes to level 2, to reach level 5 you would need 16 uses. The level of the facilities influences the stat gain significantly.
 
 For reference, the "URA Finals" scenario has the following stat gain values:
 
