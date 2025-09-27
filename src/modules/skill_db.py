@@ -1,7 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from typing import Iterator, Optional
+from typing import Iterator
 from .skill import Skill
 from utils import auto_title_from_instance
 
@@ -29,7 +29,7 @@ class SkillDatabase:
         # Placeholder: empty skills data
         self.skills = {}
     
-    def get_skill_by_id(self, skill_id: int) -> Optional[Skill]:
+    def get_skill_by_id(self, skill_id: int) -> Skill | None:
         """Get skill by ID.
         
         Args:

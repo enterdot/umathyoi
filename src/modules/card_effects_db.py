@@ -1,7 +1,6 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from typing import Optional
 from .card import Card
 from .card_training_effects import CardTrainingEffects
 from utils import auto_title_from_instance

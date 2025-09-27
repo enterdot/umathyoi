@@ -1,7 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from typing import Iterator, Optional
+from typing import Iterator
 from .character import Character
 from .stat_type import StatType
 from utils import auto_title_from_instance
@@ -30,7 +30,7 @@ class CharacterDatabase:
         # Placeholder: empty characters data
         self.characters = {}
     
-    def get_character_by_id(self, character_id: int) -> Optional[Character]:
+    def get_character_by_id(self, character_id: int) -> Character | None:
         """Get character by ID.
         
         Args:

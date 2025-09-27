@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 from .stat_type import StatType
 
 
@@ -11,7 +10,7 @@ class Character:
     name: str
     description: str = ""
     stat_growth: list[tuple[StatType, int]] | None = None
-    unique_skill: Optional[int] = None
+    unique_skill: int | None = None
     skills: list[int] | None = None
     
     # Future expansion fields from Gametora JSON:
