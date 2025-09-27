@@ -1,4 +1,4 @@
-from .card import Card, Rarity, CardType
+from .card import Card, Rarity, CardType, CardEffect, CardUniqueEffect
 from .card_db import CardDatabase
 from .deck import Deck
 from .card_inspector import CardInspector
@@ -15,6 +15,8 @@ __all__ = [
     'Card',
     'Rarity',
     'CardType',
+    'CardEffect',
+    'CardUniqueEffect',
     'CardDatabase',
     'Deck',
     'CardInspector',

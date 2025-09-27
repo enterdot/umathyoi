@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class CardSlot(Gtk.Box):
     """Widget representing a single card slot in a deck with artwork and limit break selector."""
     
-    def __init__(self, window: 'MainWindow', card: Card | None = None, limit_break: int = CardConstants.MIN_LIMIT_BREAKS, width: int = UIConstants.CARD_SLOT_WIDTH, height: int = UIConstants.CARD_SLOT_HEIGHT, deck: Deck | None = None, slot: int | None = None):
+    def __init__(self, window: 'MainWindow', card: Card | None = None, limit_break: int = CardConstants.MIN_LIMIT_BREAK, width: int = UIConstants.CARD_SLOT_WIDTH, height: int = UIConstants.CARD_SLOT_HEIGHT, deck: Deck | None = None, slot: int | None = None):
         """Initialize card slot widget.
         
         Args:
@@ -79,7 +79,7 @@ class CardSlot(Gtk.Box):
         self.limit_break_box.set_visible(True)
         
         self.limit_break_adjustment = Gtk.Adjustment(
-            value=self._limit_break, lower=CardConstants.MIN_LIMIT_BREAKS, upper=CardConstants.MAX_LIMIT_BREAKS, step_increment=1, page_increment=1
+            value=self._limit_break, lower=CardConstants.MIN_LIMIT_BREAK, upper=CardConstants.MAX_LIMIT_BREAK, step_increment=1, page_increment=1
         )
         self.limit_break_scale = Gtk.Scale(
             orientation=Gtk.Orientation.HORIZONTAL, 
@@ -91,7 +91,7 @@ class CardSlot(Gtk.Box):
         self.limit_break_scale.set_hexpand(True)
         
         # Add limit break marks
-        for i in range(CardConstants.MAX_LIMIT_BREAKS + 1):
+        for i in range(CardConstants.MAX_LIMIT_BREAK + 1):
             self.limit_break_scale.add_mark(i, Gtk.PositionType.BOTTOM, str(i))
         
         self.limit_break_box.append(self.limit_break_scale)
@@ -144,4 +144,4 @@ class CardSlot(Gtk.Box):
     def clear(self) -> None:
         """Clear the slot (remove card and reset limit break level)."""
         self.set_card(None)
-        self.set_limit_break(CardConstants.MIN_LIMIT_BREAKS)
+        self.set_limit_break(CardConstants.MIN_LIMIT_BREAK)

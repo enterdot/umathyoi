@@ -103,133 +103,52 @@ class CardDatabase:
         cards_data = file_data['data']
         metadata = file_data.get('metadata', {})
 
-        logger.info(f"Loading Gametora data: {metadata.get('record_count', len(cards_data))} cards")
+        logger.info(f"Loading data: {metadata.get('record_count', len(cards_data))} cards")
         if 'scraped_at' in metadata:
                 logger.info(f"Data scraped at: {metadata['scraped_at']}")
 
-        self._load_gametora_cards(cards_data)
+        self._load_cards(cards_data)
 
         logger.info(f"Loaded data for {self.count} cards")
 
-    def _load_original_cards(self, cards_data: list) -> None:
-        """Load cards from the original format."""
+    def _load_cards(self, cards_data: list) -> None:
+        """Load cards, keep compact arrays for effects."""
         for card_data in cards_data:
             try:
-                self.cards[card_data["id"]] = Card(
-                    id=card_data["id"],
-                    name=card_data["name"],
-                    view_name=card_data["view_name"],
-                    rarity=Rarity(card_data["rarity"]),
-                    type=CardType(card_data["type"]),
-                    limit_breaks={int(k): v for k, v in card_data["limit_breaks"].items()}
-                )
-                logger.debug(f"Card {card_data['id']} added to database")
-            except (KeyError, ValueError) as e:
-                logger.warning(f"Skipping invalid data for card {card_data.get('id', 'unknown')}: {e}")
-
-    def _load_gametora_cards(self, cards_data: list) -> None:
-        """Load cards from the Gametora format with raw effects arrays."""
-        for card_data in cards_data:
-            try:
-                # Map Gametora field names to our Card model
-                card_id = card_data["support_id"]
-                name = card_data["url_name"]  # Use URL-friendly name as internal name
-                view_name = card_data["char_name"]  # Display name
-                rarity = Rarity(card_data["rarity"])
-                card_type = self._map_gametora_card_type(card_data["type"])
-                
-                # Convert raw effects to limit breaks format for the Card model
-                # This is a simplified conversion - CardTrainingEffects will handle the full parsing
-                limit_breaks = self._convert_effects_to_limit_breaks(card_data.get("effects", []))
-                
+                card_id=card_data["support_id"]
                 self.cards[card_id] = Card(
                     id=card_id,
-                    name=name,
-                    view_name=view_name,
-                    rarity=rarity,
-                    type=card_type,
-                    limit_breaks=limit_breaks
+                    name=card_data["url_name"],
+                    view_name=card_data["char_name"],
+                    rarity=Rarity(card_data["rarity"]),
+                    type=self._map_name_to_card_type(card_data["type"]),
+                    effects=card_data.get("effects", []),
+                    unique_effects=card_data.get("unique", {}).get("effects", []),
+                    unique_effects_unlock_level=card_data.get("unique", {}).get("level", 0)
                 )
-                logger.debug(f"Card {card_id} ({view_name}) added to database")
+                logger.debug(f"Card {card_id} added to database")
                 
             except (KeyError, ValueError) as e:
                 logger.warning(f"Skipping invalid data for card {card_data.get('support_id', 'unknown')}: {e}")
 
-    def _map_gametora_card_type(self, gametora_type: str) -> CardType:
-        """Map Gametora type strings to CardType enum.
+    def _map_name_to_card_type(self, name: str) -> CardType:
+        """Map type name to CardType enum.
         
         Args:
-            gametora_type: Type string from Gametora ('speed', 'stamina', etc.)
+            name: Type name
             
         Returns:
             Corresponding CardType enum value
         """
         type_mapping = {
-            'speed': CardType.SPEED,
-            'stamina': CardType.STAMINA,
-            'power': CardType.POWER,
-            'guts': CardType.GUTS,
-            'intelligence': CardType.WIT,
-            'friend': CardType.PAL
+            'speed': CardType.speed,
+            'stamina': CardType.stamina,
+            'power': CardType.power,
+            'guts': CardType.guts,
+            'intelligence': CardType.wit,
+            'friend': CardType.pal
         }
-        
-        return type_mapping.get(gametora_type, CardType.PAL)  # Default to PAL for unknown types
-
-    def _convert_effects_to_limit_breaks(self, effects: list) -> dict[int, dict[str, int]]:
-        """
-        Convert Gametora effects arrays to simplified limit breaks format.
-        
-        This is a basic conversion for the Card model. The full parsing logic
-        will be handled by CardTrainingEffects class later.
-        
-        Args:
-            effects: List of effects arrays from Gametora
-            
-        Returns:
-            Simplified limit breaks dictionary for Card model
-        """
-        # Simple effect type mapping for basic Card model compatibility
-        basic_effect_mapping = {
-            1: 'friendship_bonus',
-            2: 'mood_effect', 
-            5: 'speed_bonus',
-            6: 'stamina_bonus',
-            7: 'power_bonus',
-            8: 'guts_bonus',
-            9: 'wit_bonus',
-            14: 'training_effectiveness',
-            17: 'starting_stats_bonus',
-            18: 'race_bonus',
-            19: 'fan_bonus'
-        }
-        
-        limit_breaks = {}
-        
-        # Initialize all limit break levels
-        for lb_level in range(5):  # 0-4 limit breaks
-            limit_breaks[lb_level] = {}
-        
-        # Process effects arrays
-        for effect_array in effects:
-            if len(effect_array) < 2:
-                continue
-                
-            effect_type_id = effect_array[0]
-            effect_name = basic_effect_mapping.get(effect_type_id)
-            
-            if not effect_name:
-                continue  # Skip unknown effects for now
-            
-            # Extract values for each limit break level
-            for lb_level in range(5):
-                value_index = lb_level + 1  # Skip effect_type_id at index 0
-                
-                if value_index < len(effect_array):
-                    value = effect_array[value_index]
-                    if value != -1:  # -1 means no effect
-                        limit_breaks[lb_level][effect_name] = value
-        
-        return limit_breaks
+        return type_mapping.get(name, CardType.pal)  # Default to PAL for unknown types #TODO: raise RuntimeException instead
 
     def _load_ownership_data(self) -> None:
         """Load card ownership data from persistent storage.
