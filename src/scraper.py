@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+
 """
 Gametora Data Scraper - Raw Data Approach
 
@@ -14,19 +15,22 @@ Usage:
     python tools/scrape_gametora.py --all
 """
 
+import logging
+from utils import setup_logging, get_logger
+setup_logging("DEBUG")
+logger = get_logger(__name__)
+
 import json
 import asyncio
 import aiohttp
 import argparse
-import logging
+
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any
 from dataclasses import dataclass
 from datetime import datetime
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+from utils import ApplicationConstants
 
 @dataclass
 class GametoraEndpoint:
@@ -36,31 +40,30 @@ class GametoraEndpoint:
     output_file: str
     description: str
 
-# Known Gametora endpoints
 GAMETORA_ENDPOINTS = {
     'cards': GametoraEndpoint(
         name='support_cards',
         url='https://gametora.com/data/umamusume/support-cards.9da37405.json',
-        output_file='src/cards.json',
+        output_file=ApplicationConstants.CARDS_JSON,
         description='Support cards with stats, effects, and skills'
     ),
     'skills': GametoraEndpoint(
         name='skills',
         url='https://gametora.com/data/umamusume/skills.742ab78e.json',
-        output_file='src/skills.json',
+        output_file=ApplicationConstants.SKILLS_JSON,
         description='Skills that can be learned by characters and granted by cards'
     ),
     # Characters will be handled separately due to individual endpoint pattern
 }
 
 class GametoraScraperBase:
-    """Base class for Gametora data scrapers with minimal transformation approach"""
+    """Base class for Gametora data scrapers with minimal cleanup"""
     
     def __init__(self, endpoint: GametoraEndpoint):
         self.endpoint = endpoint
-        self.session: Optional[aiohttp.ClientSession] = None
+        self.session: aiohttp.ClientSession | None = None
     
-    async def fetch_data(self) -> Optional[List[Dict[str, Any]]]:
+    async def fetch_data(self) -> list[dict[str, Any]] | None:
         """Fetch raw data from Gametora endpoint"""
         try:
             logger.info(f"Fetching {self.endpoint.description} from {self.endpoint.url}")
@@ -85,7 +88,7 @@ class GametoraScraperBase:
             logger.error(f"Unexpected error fetching {self.endpoint.name}: {e}")
             return None
     
-    def clean_data(self, raw_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def clean_data(self, raw_data: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         Minimal cleanup of raw data - override in subclasses for specific needs.
         
@@ -113,11 +116,11 @@ class GametoraScraperBase:
         
         return cleaned_data
     
-    def _is_valid_record(self, record: Dict[str, Any]) -> bool:
+    def _is_valid_record(self, record: dict[str, Any]) -> bool:
         """Check if record has minimum required fields - override in subclasses"""
         return True  # Base implementation accepts all records
     
-    def _clean_record(self, record: Dict[str, Any]) -> Dict[str, Any]:
+    def _clean_record(self, record: dict[str, Any]) -> dict[str, Any]:
         """Minimal cleanup of individual record - override in subclasses"""
         # Base implementation: just ensure consistent null handling
         cleaned = {}
@@ -126,7 +129,7 @@ class GametoraScraperBase:
             cleaned[key] = None if value is None else value
         return cleaned
     
-    def save_data(self, cleaned_data: List[Dict[str, Any]]) -> bool:
+    def save_data(self, cleaned_data: list[dict[str, Any]]) -> bool:
         """Save cleaned data to JSON file with metadata"""
         try:
             output_path = Path(self.endpoint.output_file)
@@ -138,8 +141,7 @@ class GametoraScraperBase:
                     'source': 'Gametora',
                     'scraped_at': datetime.now().isoformat(),
                     'endpoint': self.endpoint.url,
-                    'record_count': len(cleaned_data),
-                    'data_format': 'raw_gametora'  # Indicates minimal transformation
+                    'record_count': len(cleaned_data)
                 },
                 'data': cleaned_data
             }
@@ -184,12 +186,12 @@ class CardsScraper(GametoraScraperBase):
         'name_jp', 'name_ko', 'name_tw'
     }
     
-    def _is_valid_record(self, record: Dict[str, Any]) -> bool:
+    def _is_valid_record(self, record: dict[str, Any]) -> bool:
         """Validate card record has essential fields"""
         required_fields = ['support_id', 'char_name', 'rarity', 'type']
         return all(field in record for field in required_fields)
     
-    def _clean_record(self, record: Dict[str, Any]) -> Dict[str, Any]:
+    def _clean_record(self, record: dict[str, Any]) -> dict[str, Any]:
         """Clean card record for EN/Global version"""
         cleaned = super()._clean_record(record)
         
@@ -228,11 +230,11 @@ class SkillsScraper(GametoraScraperBase):
         'name_ko', 'name_tw', 'loc'
     }
     
-    def _is_valid_record(self, record: Dict[str, Any]) -> bool:
+    def _is_valid_record(self, record: dict[str, Any]) -> bool:
         """Validate skill record has essential fields"""
         return 'id' in record or 'skill_id' in record
     
-    def clean_data(self, raw_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def clean_data(self, raw_data: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         Override clean_data to handle gene_version flattening.
         
@@ -262,7 +264,7 @@ class SkillsScraper(GametoraScraperBase):
         
         return cleaned_data
     
-    def _clean_record(self, record: Dict[str, Any]) -> Dict[str, Any]:
+    def _clean_record(self, record: dict[str, Any]) -> dict[str, Any]:
         """Clean skill record for EN/Global version"""
         cleaned = super()._clean_record(record)
         
@@ -283,7 +285,7 @@ class SkillsScraper(GametoraScraperBase):
         
         return cleaned
     
-    def _clean_gene_version_skill(self, gene_skill: Dict[str, Any], parent_id: Any) -> Optional[Dict[str, Any]]:
+    def _clean_gene_version_skill(self, gene_skill: dict[str, Any], parent_id: Any) -> dict[str, Any] | None:
         """
         Clean gene_version skill and prepare it as a separate entry.
         
@@ -294,6 +296,9 @@ class SkillsScraper(GametoraScraperBase):
         Returns:
             Cleaned gene skill with parent_skills field, or None if invalid
         """
+        
+        # TODO: Review this method
+        
         if not isinstance(gene_skill, dict):
             return None
         
@@ -338,19 +343,19 @@ class CharactersScraper:
         'release', 'release_ko', 'release_zh_tw', 'obtained', 'skills_event'
     }
     
-    def __init__(self, character_ids: List[str], base_url_template: str):
+    def __init__(self, character_ids: list[str], base_url_template: str):
         """
         Initialize characters scraper.
         
         Args:
-            character_ids: List of character ID strings (e.g., ["101102-grass-wonder"])
+            character_ids: list of character ID strings (e.g., ["101102-grass-wonder"])
             base_url_template: URL template with {character_id} placeholder
         """
         self.character_ids = character_ids
         self.base_url_template = base_url_template
-        self.output_file = 'src/characters.json'
+        self.output_file = ApplicationConstants.CHARACTERS_JSON
     
-    async def fetch_character(self, character_id: str) -> Optional[Dict[str, Any]]:
+    async def fetch_character(self, character_id: str) -> dict[str, Any] | None:
         """Fetch data for a single character"""
         url = self.base_url_template.format(character_id=character_id)
         
@@ -368,7 +373,7 @@ class CharactersScraper:
             logger.warning(f"Error fetching character {character_id}: {e}")
             return None
     
-    def _clean_character_record(self, record: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def _clean_character_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
         """Clean character record for EN/Global version"""
         try:
             # Extract only itemData, discard everything else
@@ -411,7 +416,7 @@ class CharactersScraper:
             logger.warning(f"Error cleaning character record: {e}")
             return None
     
-    async def fetch_all_characters(self) -> List[Dict[str, Any]]:
+    async def fetch_all_characters(self) -> list[dict[str, Any]]:
         """Fetch all characters concurrently"""
         logger.info(f"Fetching {len(self.character_ids)} individual character files")
         
@@ -434,7 +439,7 @@ class CharactersScraper:
         logger.info(f"Successfully processed {len(characters)}/{len(self.character_ids)} characters")
         return characters
     
-    def save_characters(self, characters: List[Dict[str, Any]]) -> bool:
+    def save_characters(self, characters: list[dict[str, Any]]) -> bool:
         """Save character data to JSON file"""
         try:
             output_path = Path(self.output_file)
@@ -476,8 +481,8 @@ class CharactersScraper:
         return self.save_characters(characters)
 
 
-class GametoraScrapingOrchestrator:
-    """Main orchestrator for running scrapers with raw data approach"""
+class GametoraScrapeManager:
+    """Main manager for running scrapers with raw data approach"""
     
     def __init__(self):
         self.scrapers = {
@@ -485,15 +490,14 @@ class GametoraScrapingOrchestrator:
             'skills': SkillsScraper(GAMETORA_ENDPOINTS['skills']),
         }
         
-        # Character scraper will be created on-demand with provided IDs
         self.character_scraper = None
     
-    def set_character_ids(self, character_ids: List[str], url_template: str):
+    def set_character_ids(self, character_ids: list[str], url_template: str):
         """Set up character scraper with provided IDs"""
         self.character_scraper = CharactersScraper(character_ids, url_template)
         self.scrapers['characters'] = self.character_scraper
     
-    async def run_scrapers(self, selected_scrapers: List[str]) -> Dict[str, bool]:
+    async def run_scrapers(self, selected_scrapers: list[str]) -> dict[str, bool]:
         """Run selected scrapers and return results"""
         results = {}
         
@@ -522,7 +526,7 @@ class GametoraScrapingOrchestrator:
         
         return results
     
-    def print_summary(self, results: Dict[str, bool]):
+    def print_summary(self, results: dict[str, bool]):
         """Print a summary of scraping results"""
         print("\n" + "="*60)
         print("SCRAPING SUMMARY (Raw Data Approach)")
@@ -546,7 +550,7 @@ class GametoraScrapingOrchestrator:
                     endpoint = GAMETORA_ENDPOINTS[name]
                     print(f"  - {endpoint.output_file}")
                 elif name == 'characters':
-                    print(f"  - src/characters.json")
+                    print(f"  - {ApplicationConstants.CHARACTERS_JSON}")
         
         print("\nNote: Data stored with minimal transformation.")
         print("Use view classes in the app to access typed, clean interfaces.")
@@ -555,7 +559,7 @@ class GametoraScrapingOrchestrator:
 async def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
-        description='Scrape Gametora data with minimal transformation (raw data approach)'
+        description='Scrape Gametora data with minimal cleanup'
     )
     
     # Individual scraper options
@@ -565,7 +569,7 @@ async def main():
     
     # Character-specific options
     parser.add_argument('--characters-file', help='File containing character IDs (one per line)')
-    parser.add_argument('--characters-ids', help='Comma-separated character IDs')
+    parser.add_argument('--characters-ids', help='Comma-separated character IDs (e.g. "30025-special-week,10007-vodka")')
     parser.add_argument('--characters-url-template', 
                        default='https://gametora.com/_next/data/pgqKwGpVRDewvjE3UX6O2/umamusume/characters/{character_id}.json?id={character_id}',
                        help='URL template for character endpoints')
@@ -589,11 +593,10 @@ async def main():
             print(f"     → Output: {endpoint.output_file}")
         print("  ✓ characters: Individual endpoints (pattern-based)")
         print(f"     → Pattern: {args.characters_url_template}")
-        print(f"     → Output: src/characters.json")
+        print(f"     → Output: {ApplicationConstants.CHARACTERS_JSON}")
         return
     
-    # Set up orchestrator
-    orchestrator = GametoraScrapingOrchestrator()
+    manager = GametoraScrapeManager()
     
     # Handle character IDs setup
     character_ids = []
@@ -610,7 +613,7 @@ async def main():
         logger.info(f"Using {len(character_ids)} character IDs from command line")
     
     if character_ids:
-        orchestrator.set_character_ids(character_ids, args.characters_url_template)
+        manager.set_character_ids(character_ids, args.characters_url_template)
     
     # Determine which scrapers to run
     selected_scrapers = []
@@ -640,12 +643,12 @@ async def main():
                 endpoint = GAMETORA_ENDPOINTS[name]
                 print(f"  - {name}: {endpoint.url} → {endpoint.output_file}")
             elif name == 'characters':
-                print(f"  - characters: {len(character_ids)} individual endpoints → src/characters.json")
+                print(f"  - characters: {len(character_ids)} individual endpoints → {ApplicationConstants.CHARACTERS_JSON}")
         return
     
     # Run the scrapers
-    results = await orchestrator.run_scrapers(selected_scrapers)
-    orchestrator.print_summary(results)
+    results = await manager.run_scrapers(selected_scrapers)
+    manager.print_summary(results)
     
     # Exit with error code if any scrapers failed
     if not all(results.values()):
