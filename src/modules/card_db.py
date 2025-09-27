@@ -7,17 +7,20 @@ from gi.repository import GdkPixbuf
 
 import json
 import aiohttp
-from typing import Optional, Iterator
+import asyncio
+from typing import Iterator
 from pathlib import Path
+import hashlib
+from platformdirs import user_cache_dir
 
 from .card import Rarity, CardType, Card
-from utils import CardConstants, NetworkConstants, auto_title_from_instance
+from utils import ApplicationConstants, CardConstants, NetworkConstants, auto_title_from_instance
 
 
 class CardDatabase:
     """Database for managing card data, images, and ownership information."""
     
-    def __init__(self, cards_file: str = 'cards.json') -> None:
+    def __init__(self, cards_file: str = ApplicationConstants.CARDS_JSON) -> None:
         """Initialize card database.
         
         Args:
@@ -27,10 +30,52 @@ class CardDatabase:
         self.image_cache: dict[int, GdkPixbuf.Pixbuf] = {}
         self.owned_copies: dict[int, int] = {}
         
-        self._load_cards_from_file(cards_file)
+        # Shared HTTP session and semaphore for connection limiting
+        self._session: aiohttp.ClientSession | None = None
+        self._connection_semaphore = asyncio.Semaphore(NetworkConstants.MAX_CONCURRENT_CONNECTIONS)
+        # Setup disk cache directory
+        self._cache_dir = Path(user_cache_dir(ApplicationConstants.CACHE_NAME)) / ApplicationConstants.CARD_ARTWORK_CACHE_NAME
+        self._cache_dir.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Card artwork cache directory: {self._cache_dir}")
+        try:
+            self._load_cards_from_file(cards_file)
+        except Exception as e:
+            logger.error(f"Could not load cards from {cards_file}: {e}")
+            import sys
+            sys.exit(1)
         self._load_ownership_data()
         
         logger.debug(f"{auto_title_from_instance(self)} initialized")
+
+    async def __aenter__(self):
+        """Async context manager entry."""
+        await self._ensure_session()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        await self._close_session()
+
+    async def _ensure_session(self) -> None:
+        """Ensure HTTP session is created."""
+        if self._session is None or self._session.closed:
+            timeout = aiohttp.ClientTimeout(total=NetworkConstants.IMAGE_TIMEOUT_SECONDS)
+            connector = aiohttp.TCPConnector(
+                limit=20,  # Total connection pool size
+                limit_per_host=10,  # Max connections per host
+                ttl_dns_cache=300,  # DNS cache TTL
+                use_dns_cache=True,
+            )
+            self._session = aiohttp.ClientSession(
+                timeout=timeout,
+                connector=connector
+            )
+
+    async def _close_session(self) -> None:
+        """Close HTTP session."""
+        if self._session and not self._session.closed:
+            await self._session.close()
+            self._session = None
 
     @property
     def count(self) -> int:
@@ -48,13 +93,26 @@ class CardDatabase:
         """
         try:
             with open(cards_file, 'r', encoding='utf-8') as f:
-                cards_data = json.load(f)
-                logger.info(f"Data for {len(cards_data)} cards parsed from JSON file {f.name}")
+                file_data = json.load(f)
+                logger.info(f"Loaded card data from {f.name}")
         except FileNotFoundError:
             raise FileNotFoundError(f"Cards file {cards_file} not found.")
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON in cards file: {e}")
 
+        cards_data = file_data['data']
+        metadata = file_data.get('metadata', {})
+
+        logger.info(f"Loading Gametora data: {metadata.get('record_count', len(cards_data))} cards")
+        if 'scraped_at' in metadata:
+                logger.info(f"Data scraped at: {metadata['scraped_at']}")
+
+        self._load_gametora_cards(cards_data)
+
+        logger.info(f"Loaded data for {self.count} cards")
+
+    def _load_original_cards(self, cards_data: list) -> None:
+        """Load cards from the original format."""
         for card_data in cards_data:
             try:
                 self.cards[card_data["id"]] = Card(
@@ -68,7 +126,110 @@ class CardDatabase:
                 logger.debug(f"Card {card_data['id']} added to database")
             except (KeyError, ValueError) as e:
                 logger.warning(f"Skipping invalid data for card {card_data.get('id', 'unknown')}: {e}")
-        logger.info(f"Loaded data for {self.count} cards")
+
+    def _load_gametora_cards(self, cards_data: list) -> None:
+        """Load cards from the Gametora format with raw effects arrays."""
+        for card_data in cards_data:
+            try:
+                # Map Gametora field names to our Card model
+                card_id = card_data["support_id"]
+                name = card_data["url_name"]  # Use URL-friendly name as internal name
+                view_name = card_data["char_name"]  # Display name
+                rarity = Rarity(card_data["rarity"])
+                card_type = self._map_gametora_card_type(card_data["type"])
+                
+                # Convert raw effects to limit breaks format for the Card model
+                # This is a simplified conversion - CardTrainingEffects will handle the full parsing
+                limit_breaks = self._convert_effects_to_limit_breaks(card_data.get("effects", []))
+                
+                self.cards[card_id] = Card(
+                    id=card_id,
+                    name=name,
+                    view_name=view_name,
+                    rarity=rarity,
+                    type=card_type,
+                    limit_breaks=limit_breaks
+                )
+                logger.debug(f"Card {card_id} ({view_name}) added to database")
+                
+            except (KeyError, ValueError) as e:
+                logger.warning(f"Skipping invalid data for card {card_data.get('support_id', 'unknown')}: {e}")
+
+    def _map_gametora_card_type(self, gametora_type: str) -> CardType:
+        """Map Gametora type strings to CardType enum.
+        
+        Args:
+            gametora_type: Type string from Gametora ('speed', 'stamina', etc.)
+            
+        Returns:
+            Corresponding CardType enum value
+        """
+        type_mapping = {
+            'speed': CardType.SPEED,
+            'stamina': CardType.STAMINA,
+            'power': CardType.POWER,
+            'guts': CardType.GUTS,
+            'intelligence': CardType.WIT,
+            'friend': CardType.PAL
+        }
+        
+        return type_mapping.get(gametora_type, CardType.PAL)  # Default to PAL for unknown types
+
+    def _convert_effects_to_limit_breaks(self, effects: list) -> dict[int, dict[str, int]]:
+        """
+        Convert Gametora effects arrays to simplified limit breaks format.
+        
+        This is a basic conversion for the Card model. The full parsing logic
+        will be handled by CardTrainingEffects class later.
+        
+        Args:
+            effects: List of effects arrays from Gametora
+            
+        Returns:
+            Simplified limit breaks dictionary for Card model
+        """
+        # Simple effect type mapping for basic Card model compatibility
+        basic_effect_mapping = {
+            1: 'friendship_bonus',
+            2: 'mood_effect', 
+            5: 'speed_bonus',
+            6: 'stamina_bonus',
+            7: 'power_bonus',
+            8: 'guts_bonus',
+            9: 'wit_bonus',
+            14: 'training_effectiveness',
+            17: 'starting_stats_bonus',
+            18: 'race_bonus',
+            19: 'fan_bonus'
+        }
+        
+        limit_breaks = {}
+        
+        # Initialize all limit break levels
+        for lb_level in range(5):  # 0-4 limit breaks
+            limit_breaks[lb_level] = {}
+        
+        # Process effects arrays
+        for effect_array in effects:
+            if len(effect_array) < 2:
+                continue
+                
+            effect_type_id = effect_array[0]
+            effect_name = basic_effect_mapping.get(effect_type_id)
+            
+            if not effect_name:
+                continue  # Skip unknown effects for now
+            
+            # Extract values for each limit break level
+            for lb_level in range(5):
+                value_index = lb_level + 1  # Skip effect_type_id at index 0
+                
+                if value_index < len(effect_array):
+                    value = effect_array[value_index]
+                    if value != -1:  # -1 means no effect
+                        limit_breaks[lb_level][effect_name] = value
+        
+        return limit_breaks
 
     def _load_ownership_data(self) -> None:
         """Load card ownership data from persistent storage.
@@ -190,7 +351,7 @@ class CardDatabase:
         return max(0, owned - 1)
 
     async def load_card_image(self, card_id: int, width: int, height: int) -> GdkPixbuf.Pixbuf | None:
-        """Load and cache card artwork from remote server.
+        """Load and cache card artwork from remote server or disk cache.
         
         Args:
             card_id: Card identifier
@@ -200,36 +361,27 @@ class CardDatabase:
         Returns:
             Scaled pixbuf, or None if loading failed
         """
-        # Check cache first
+        # Check memory cache first
         cache_key = card_id
         if cache_key in self.image_cache:
             cached_pixbuf = self.image_cache[cache_key]
             return cached_pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
-        url = NetworkConstants.IMAGE_BASE_URL.format(card_id=card_id)
-        logger.debug(f"Loading image for card {card_id} ({width} by {height})")
+        # Check disk cache
+        disk_pixbuf = await self._load_from_disk_cache(card_id)
+        if disk_pixbuf:
+            self.image_cache[cache_key] = disk_pixbuf
+            logger.debug(f"Loaded card {card_id} from disk cache")
+            return disk_pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
-        try:
-            timeout = aiohttp.ClientTimeout(total=NetworkConstants.IMAGE_TIMEOUT_SECONDS)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
-                logger.debug(f"Requesting image from {url}")
-                async with session.get(url) as response:
-                    if response.status == 200:
-                        image_data = await response.read()
-                        logger.debug(f"Image response: {response.status} ({len(image_data)} bytes)")
-                        pixbuf = self._create_pixbuf_from_data(image_data)
-                        if pixbuf:
-                            self.image_cache[cache_key] = pixbuf
-                            logger.debug(f"Loaded and cached image for card {card_id}")
-                            return pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
-                    else:
-                        logger.warning(f"HTTP {response.status} when loading artwork for card {card_id}")
-        except aiohttp.ClientError as e:
-            logger.warning(f"Network error loading artwork for card {card_id}: {e}")
-        except Exception as e:
-            logger.error(f"Unexpected error loading artwork for card {card_id}: {e}")
+        # Download from internet as fallback
+        downloaded_pixbuf = await self._download_and_cache_image(card_id)
+        if downloaded_pixbuf:
+            self.image_cache[cache_key] = downloaded_pixbuf
+            return downloaded_pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
-        return None  # Caller handles fallback
+        logger.error(f"Could not load image data for card {card_id}")
+        return None
 
     def _create_pixbuf_from_data(self, image_data: bytes) -> GdkPixbuf.Pixbuf | None:
         """Create GdkPixbuf from image data bytes.
@@ -269,6 +421,44 @@ class CardDatabase:
             logger.debug("Would save ownership data to default location")
         return True
 
+    def get_cache_info(self) -> dict:
+        """Get information about the disk cache.
+        
+        Returns:
+            Dictionary with cache statistics
+        """
+        try:
+            cache_files = list(self._cache_dir.glob("*.png"))
+            total_size = sum(f.stat().st_size for f in cache_files)
+            
+            return {
+                "cache_dir": str(self._cache_dir),
+                "cached_cards": len(cache_files),
+                "total_size_mb": round(total_size / (1024 * 1024), 2),
+                "total_cards": self.count
+            }
+        except Exception as e:
+            logger.error(f"Error getting cache info: {e}")
+            return {"error": str(e)}
+
+    def clear_cache(self) -> bool:
+        """Clear the disk cache.
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            import shutil
+            if self._cache_dir.exists():
+                shutil.rmtree(self._cache_dir)
+                self._cache_dir.mkdir(parents=True, exist_ok=True)
+                logger.info("Disk cache cleared")
+                return True
+        except Exception as e:
+            logger.error(f"Error clearing cache: {e}")
+            return False
+
+
     def __iter__(self) -> Iterator[Card]:
         """Iterate over all cards in database.
         
@@ -276,3 +466,94 @@ class CardDatabase:
             Card instances in the database
         """
         yield from self.cards.values()
+
+    def _get_cache_file_path(self, card_id: int) -> Path:
+        """Get the disk cache file path for a card.
+        
+        Args:
+            card_id: Card identifier
+            
+        Returns:
+            Path to cached image file
+        """
+        return self._cache_dir / f"{card_id}.png"
+
+    async def _load_from_disk_cache(self, card_id: int) -> GdkPixbuf.Pixbuf | None:
+        """Load card image from disk cache.
+        
+        Args:
+            card_id: Card identifier
+            
+        Returns:
+            Pixbuf from cache, or None if not cached
+        """
+        cache_file = self._get_cache_file_path(card_id)
+        
+        if not cache_file.exists():
+            return None
+        
+        try:
+            # Load image data from disk
+            image_data = cache_file.read_bytes()
+            return self._create_pixbuf_from_data(image_data)
+        except Exception as e:
+            logger.warning(f"Failed to load cached image for card {card_id}: {e}")
+            # Remove corrupted cache file
+            try:
+                cache_file.unlink()
+            except:
+                pass
+            return None
+
+    async def _download_and_cache_image(self, card_id: int) -> GdkPixbuf.Pixbuf | None:
+        """Download card image and save to disk cache.
+        
+        Args:
+            card_id: Card identifier
+            
+        Returns:
+            Downloaded pixbuf, or None if download failed
+        """
+        # Ensure session exists
+        await self._ensure_session()
+        
+        # Use semaphore to limit concurrent connections
+        async with self._connection_semaphore:
+            url = NetworkConstants.IMAGE_BASE_URL.format(card_id=card_id)
+            logger.debug(f"Downloading image for card {card_id}")
+
+            try:
+                async with self._session.get(url) as response:
+                    if response.status == 200:
+                        image_data = await response.read()
+                        logger.debug(f"Downloaded image for card {card_id}: {len(image_data)} bytes")
+                        
+                        # Save to disk cache
+                        cache_file = self._get_cache_file_path(card_id)
+                        try:
+                            cache_file.write_bytes(image_data)
+                            logger.debug(f"Cached image for card {card_id} to {cache_file}")
+                        except Exception as e:
+                            logger.warning(f"Failed to save image cache for card {card_id}: {e}")
+                        
+                        # Create pixbuf
+                        return self._create_pixbuf_from_data(image_data)
+                    else:
+                        logger.warning(f"HTTP {response.status} when downloading artwork for card {card_id}")
+            except aiohttp.ClientError as e:
+                logger.warning(f"Network error downloading artwork for card {card_id}: {e}")
+            except Exception as e:
+                logger.error(f"Unexpected error downloading artwork for card {card_id}: {e}")
+
+        return None
+
+    def __del__(self):
+        """Cleanup when database is destroyed."""
+        if self._session and not self._session.closed:
+            # Can't await in __del__, so we schedule the cleanup
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    loop.create_task(self._close_session())
+            except:
+                pass  # Ignore errors during cleanup

@@ -16,6 +16,29 @@ if TYPE_CHECKING:
 class CardArtwork(Gtk.Box):
     """A widget that displays card artwork with async loading and placeholder."""
     
+    # Class-level shared event loop and thread
+    _shared_loop = None
+    _shared_thread = None
+    _loop_lock = threading.Lock()
+    
+    @classmethod
+    def _ensure_shared_loop(cls):
+        """Ensure the shared event loop is running."""
+        with cls._loop_lock:
+            if cls._shared_loop is None or cls._shared_loop.is_closed():
+                cls._shared_loop = asyncio.new_event_loop()
+                cls._shared_thread = threading.Thread(
+                    target=cls._run_shared_loop,
+                    daemon=True
+                )
+                cls._shared_thread.start()
+    
+    @classmethod
+    def _run_shared_loop(cls):
+        """Run the shared event loop in its own thread."""
+        asyncio.set_event_loop(cls._shared_loop)
+        cls._shared_loop.run_forever()
+    
     def __init__(self, window: 'MainWindow', card: Card = None, width: int = 45, height: int = 60):
         """Initialize card artwork widget.
         
@@ -33,6 +56,7 @@ class CardArtwork(Gtk.Box):
         self.width = width
         self.height = height
         self.set_size_request(width, height)
+        self._ensure_shared_loop()
         
         # Create widgets
         self.artwork = Gtk.Picture()
@@ -110,7 +134,7 @@ class CardArtwork(Gtk.Box):
             self.show_empty_frame()
     
     def load_card_artwork(self):
-        """Load card artwork asynchronously."""
+        """Load card artwork asynchronously using shared event loop."""
         if not self.card:
             self.show_empty_frame()
             return
@@ -118,26 +142,31 @@ class CardArtwork(Gtk.Box):
         # Show loading spinner while loading
         self.show_loading()
         
-        def load_artwork():
-            async def _load():
+        async def _load():
+            """Async function to load the image."""
+            try:
                 pixbuf = await self.app.card_db.load_card_image(
                     self.card.id, self.width, self.height
                 )
                 
-                def update_idle():
+                # Schedule UI update on main thread
+                def update_ui():
                     self.show_artwork(pixbuf)
+                    return False  # Don't repeat
+                
+                GLib.idle_add(update_ui)
+                
+            except Exception as e:
+                # Handle any errors during loading
+                def show_error():
+                    self.show_empty_frame()
                     return False
                 
-                GLib.idle_add(update_idle)
-            
-            def run_async():
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                loop.run_until_complete(_load())
-                loop.close()
-            
-            thread = threading.Thread(target=run_async)
-            thread.daemon = True
-            thread.start()
+                GLib.idle_add(show_error)
         
-        load_artwork()
+        # Schedule the coroutine on the shared event loop
+        if self._shared_loop and not self._shared_loop.is_closed():
+            asyncio.run_coroutine_threadsafe(_load(), self._shared_loop)
+        else:
+            # Fallback: show empty frame if loop is not available
+            self.show_empty_frame()
