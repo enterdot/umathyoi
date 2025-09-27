@@ -1,0 +1,469 @@
+{
+    "char_id": 1001,
+    "char_name": "Special Week",
+    "effects": [
+      [
+        1,
+        10,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        25,
+        -1,
+        -1,
+        -1,
+        35
+      ],
+      [
+        2,
+        -1,
+        -1,
+        -1,
+        10,
+        -1,
+        20,
+        20,
+        -1,
+        -1,
+        30,
+        -1
+      ],
+      [
+        3,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        1,
+        -1,
+        -1,
+        -1
+      ],
+      [
+        14,
+        -1,
+        -1,
+        1,
+        -1,
+        -1,
+        5,
+        5,
+        -1,
+        -1,
+        10,
+        -1
+      ],
+      [
+        15,
+        -1,
+        -1,
+        -1,
+        1,
+        -1,
+        1,
+        1,
+        -1,
+        -1,
+        5,
+        -1
+      ],
+      [
+        16,
+        -1,
+        -1,
+        -1,
+        1,
+        -1,
+        5,
+        5,
+        -1,
+        -1,
+        10,
+        -1
+      ],
+      [
+        19,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        15,
+        30
+      ]
+    ],
+    "event_skills": [
+      201621,
+      201352,
+      201351,
+      200762
+    ],
+    "hints": {
+      "hint_others": [
+        {
+          "hint_type": 1,
+          "hint_value": 6
+        },
+        {
+          "hint_type": 3,
+          "hint_value": 2
+        }
+      ],
+      "hint_skills": [
+        200162,
+        200232,
+        200512,
+        200612,
+        200732,
+        201352,
+        201542
+      ]
+    },
+    "rarity": 3,
+    "support_id": 30025,
+    "type": "speed",
+    "unique": {
+      "effects": [
+        {
+          "type": 8,
+          "value": 5
+        },
+        {
+          "type": 15,
+          "value": 5
+        }
+      ],
+      "level": 40
+    },
+    "url_name": "30025-special-week",
+    "release": "2025-06-26"
+}
+
+
+Level 1, Limit Break 0:
+Friendship Bonus 10%
+
+Level 3, Limit Break 0:
+Friendship Bonus 11%
+
+Level 5, Limit Break 0:
+Friendship Bonus 12%
+
+Level 7, Limit Break 0:
+Friendship Bonus 13%
+
+Level 9, Limit Break 0:
+Friendship Bonus 14%
+
+Level 10, Limit Break 0:
+Friendship Bonus 14%
+Initial Friendship Gauge 1
+
+Level 11, Limit Break 0:
+Friendship Bonus 15%
+Initial Friendship Gauge 1
+
+Level 13, Limit Break 0:
+Friendship Bonus 16%
+Initial Friendship Gauge 2
+
+Level 15, Limit Break 0:
+Friendship Bonus 17%
+Initial Friendship Gauge 2
+Mood Effect 10%
+Race Bonus 1%
+Fan Bonus 1%
+
+Level 16, Limit Break 0:
+Friendship Bonus 17%
+Initial Friendship Gauge 2
+Mood Effect 11%
+Race Bonus 1%
+Fan Bonus 1%
+
+Level 17, Limit Break 0:
+Friendship Bonus 18%
+Initial Friendship Gauge 2
+Mood Effect 12%
+Race Bonus 1%
+Fan Bonus 1%
+
+Level 17, Limit Break 0:
+Friendship Bonus 18%
+Initial Friendship Gauge 2
+Mood Effect 12%
+Race Bonus 1%
+Fan Bonus 1%
+
+Level 18, Limit Break 0:
+Friendship Bonus 18%
+Initial Friendship Gauge 3
+Mood Effect 13%
+Race Bonus 1%
+Fan Bonus 2%
+
+Level 19, Limit Break 0:
+Friendship Bonus 19%
+Initial Friendship Gauge 3
+Mood Effect 14%
+Race Bonus 1%
+Fan Bonus 2%
+
+Level 20, Limit Break 0:
+Friendship Bonus 19%
+Initial Friendship Gauge 3
+Mood Effect 15%
+Race Bonus 1%
+Fan Bonus 3%
+
+Level 21, Limit Break 0:
+Friendship Bonus 20%
+Initial Friendship Gauge 3
+Mood Effect 16%
+Race Bonus 1%
+Fan Bonus 3%
+
+Level 22, Limit Break 0:
+Friendship Bonus 20%
+Initial Friendship Gauge 4
+Mood Effect 17%
+Race Bonus 1%
+Fan Bonus 3%
+
+Level 23, Limit Break 0:
+Friendship Bonus 21%
+Initial Friendship Gauge 4
+Mood Effect 18%
+Race Bonus 1%
+Fan Bonus 4%
+
+Level 24, Limit Break 0:
+Friendship Bonus 21%
+Initial Friendship Gauge 4
+Mood Effect 19%
+Race Bonus 1%
+Fan Bonus 4%
+
+Level 25, Limit Break 0:
+Friendship Bonus 22%
+Initial Friendship Gauge 5
+Mood Effect 20%
+Race Bonus 1%
+Fan Bonus 5%
+
+Level 26, Limit Break 0:
+Friendship Bonus 22%
+Initial Friendship Gauge 5
+Mood Effect 20%
+Race Bonus 1%
+Fan Bonus 5%
+
+Level 27, Limit Break 0:
+Friendship Bonus 23%
+Initial Friendship Gauge 5
+Mood Effect 20%
+Race Bonus 1%
+Fan Bonus 5%
+
+Level 28, Limit Break 0:
+Friendship Bonus 23%
+Initial Friendship Gauge 5
+Mood Effect 20%
+Race Bonus 1%
+Fan Bonus 5%
+
+Level 29, Limit Break 0:
+Friendship Bonus 24%
+Initial Friendship Gauge 5
+Mood Effect 20%
+Race Bonus 1%
+Fan Bonus 5%
+
+Level 30, Limit Break 0:
+Friendship Bonus 25%
+Initial Friendship Gauge 5
+Mood Effect 20%
+Race Bonus 1%
+Fan Bonus 5%
+
+Level 31, Limit Break 1:
+Friendship Bonus 25%
+Initial Friendship Gauge 5
+Mood Effect 20%
+Race Bonus 1%
+Fan Bonus 5%
+
+Level 32, Limit Break 1:
+Friendship Bonus 26%
+Initial Friendship Gauge 5
+Mood Effect 21%
+Race Bonus 1%
+Fan Bonus 5%
+
+Level 33, Limit Break 1:
+Friendship Bonus 26%
+Initial Friendship Gauge 6
+Mood Effect 22%
+Race Bonus 1%
+Fan Bonus 6%
+
+Level 34, Limit Break 1:
+Friendship Bonus 27%
+Initial Friendship Gauge 6
+Mood Effect 22%
+Race Bonus 2%
+Fan Bonus 6%
+
+Level 35, Limit Break 1:
+Friendship Bonus 27%
+Initial Friendship Gauge 6
+Mood Effect 23%
+Race Bonus 2%
+Fan Bonus 6%
+Speed Bonus 1
+
+Level 36, Limit Break 2:
+Friendship Bonus 28%
+Initial Friendship Gauge 7
+Mood Effect 24%
+Race Bonus 2%
+Fan Bonus 7%
+Speed Bonus 1
+
+Level 37, Limit Break 2:
+Friendship Bonus 28%
+Initial Friendship Gauge 7
+Mood Effect 24%
+Race Bonus 2%
+Fan Bonus 7%
+Speed Bonus 1
+
+Level 38, Limit Break 2:
+Friendship Bonus 29%
+Initial Friendship Gauge 7
+Mood Effect 25%
+Race Bonus 3%
+Fan Bonus 7%
+Speed Bonus 1
+
+Level 39, Limit Break 2:
+Friendship Bonus 29%
+Initial Friendship Gauge 8
+Mood Effect 26%
+Race Bonus 3%
+Fan Bonus 8%
+Speed Bonus 1
+
+Level 40, Limit Break 2:
+Unique Effect unlocked
+Friendship Bonus 30%
+Initial Friendship Gauge 8
+Mood Effect 26%
+Race Bonus 3%
+Fan Bonus 8%
+Speed Bonus 1
+
+Level 41, Limit Break 3:
+Unique Effect unlocked
+Friendship Bonus 30%
+Initial Friendship Gauge 8
+Mood Effect 27%
+Race Bonus 3%
+Fan Bonus 8%
+Speed Bonus 1
+
+Level 42, Limit Break 3:
+Unique Effect unlocked
+Friendship Bonus 31%
+Initial Friendship Gauge 9
+Mood Effect 28%
+Race Bonus 4%
+Fan Bonus 9%
+Speed Bonus 1
+
+Level 43, Limit Break 3:
+Unique Effect unlocked
+Friendship Bonus 31%
+Initial Friendship Gauge 9
+Mood Effect 28%
+Race Bonus 4%
+Fan Bonus 9%
+Speed Bonus 1
+
+Level 44, Limit Break 3:
+Unique Effect unlocked
+Friendship Bonus 32%
+Initial Friendship Gauge 9
+Mood Effect 29%
+Race Bonus 4%
+Fan Bonus 9%
+Speed Bonus 1
+
+Level 45, Limit Break 3:
+Unique Effect unlocked
+Friendship Bonus 32%
+Initial Friendship Gauge 10
+Mood Effect 30%
+Race Bonus 5%
+Fan Bonus 10%
+Speed Bonus 1
+Specialty Priority 15
+
+Level 46, Limit Break 4:
+Unique Effect unlocked
+Friendship Bonus 33%
+Initial Friendship Gauge 10
+Mood Effect 30%
+Race Bonus 5%
+Fan Bonus 10%
+Speed Bonus 1
+Specialty Priority 18
+
+Level 47, Limit Break 4:
+Unique Effect unlocked
+Friendship Bonus 33%
+Initial Friendship Gauge 10
+Mood Effect 30%
+Race Bonus 5%
+Fan Bonus 10%
+Speed Bonus 1
+Specialty Priority 21
+
+Level 48, Limit Break 4:
+Unique Effect unlocked
+Friendship Bonus 34%
+Initial Friendship Gauge 10
+Mood Effect 30%
+Race Bonus 5%
+Fan Bonus 10%
+Speed Bonus 1
+Specialty Priority 24
+
+Level 49, Limit Break 4:
+Unique Effect unlocked
+Friendship Bonus 34%
+Initial Friendship Gauge 10
+Mood Effect 30%
+Race Bonus 5%
+Fan Bonus 10%
+Speed Bonus 1
+Specialty Priority 27
+
+Level 50, Limit Break 4:
+Unique Effect unlocked
+Friendship Bonus 35%
+Initial Friendship Gauge 10
+Mood Effect 30%
+Race Bonus 5%
+Fan Bonus 10%
+Speed Bonus 1
+Specialty Priority 30

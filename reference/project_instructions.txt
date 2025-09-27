@@ -1,0 +1,15 @@
+In addition to all code, 3 markdown files are provided for additional information on the project in the reference directory:
+- architecture_overview.md
+- application_description.md
+- game_mechanics.md
+
+When you think an update requires writing a lot of code or when the changes span many different files, give me the option to choose between you writing the code or you giving me detailed instructions on how to do the update myself.
+
+Always add type hints whenever possible. If the hints are obvious and would require a `if TYPE_CHECKING:` check, propose a removal.
+
+Try and use modern Python features whenever possible. For example, prefer:
+- `Type | None` rather than `Optional[type]`
+- `var: list[Type]` rather than `from typing import List; var: List[Type]`
+- `var: dict[Type]` rather than `from typing import Dict; var: Dict[Type]`
+
+Try and match the style of the codebase and as a general rule: the less code the better.
