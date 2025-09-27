@@ -5,8 +5,7 @@ from .card_inspector import CardInspector
 from .event import Event
 from .deck_list import DeckList
 from .stat_type import StatType
-from .card_training_effects import CardTrainingEffects
-from .card_effects_db import CardEffectsDatabase
+from .training_effect import TrainingEffect
 from .skill import Skill
 from .skill_db import SkillDatabase
 from .character import Character
@@ -22,8 +21,7 @@ __all__ = [
     'Event',
     'DeckList',
     'StatType',
-    'CardTrainingEffects',
-    'CardEffectsDatabase',
+    'TrainingEffect',
     'Skill',
     'SkillDatabase',
     'Character',
