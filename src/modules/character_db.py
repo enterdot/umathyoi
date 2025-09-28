@@ -3,9 +3,10 @@ logger = logging.getLogger(__name__)
 
 from typing import Iterator
 from .character import Character
-from .stat_type import StatType
+from .character import StatType
 from utils import auto_title_from_instance
 
+#TODO: This class was written before the code was refactored/rewritten, needs a review
 
 class CharacterDatabase:
     """Database for managing characters loaded from Gametora website."""
