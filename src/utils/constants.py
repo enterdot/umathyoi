@@ -13,8 +13,17 @@ class ApplicationConstants:
     SCENARIOS_JSON = "data/scenarios.json"
     
 
+class GameplayConstants:
+    """Constants related to general gameplay"""
+    MIN_FACILITY_LEVEL = 1
+    MAX_FACILITY_LEVEL = 5
+
+class CharacterConstants:
+    """Constants related to characters."""
+    MAX_TOTAL_STAT_GROWTH = 30 # 30%
+    
 class CardConstants:
-    """Constants related to cards and game mechanics."""
+    """Constants related to cards."""
     MAX_LIMIT_BREAK = 4
     MIN_LIMIT_BREAK = 0
     LEVELS_PER_LIMIT_BREAK = 5
@@ -27,7 +36,6 @@ class CardConstants:
     SSR_MAX_LEVEL = SSR_MAX_LEVEL_AT_MIN_LIMIT_BREAK + LEVELS_PER_LIMIT_BREAK * MAX_LIMIT_BREAK
     MILESTONE_LEVELS = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
     DEFAULT_OWNED_COPIES = 3  # TODO: For testing
-
 
 class DeckConstants:
     """Constants related to deck management."""

@@ -32,15 +32,15 @@ class TrainingResult:
     # TODO: methods that add/multiply all cards "distilled" effects accordingly
     
     # TODO: interface to query for the actual stat gains
-    def get_stat_gain_by_type(stat_type: StatType) -> int:
+    def get_stat_gain_by_type(self, stat_type: StatType) -> int:
         # always 0 or positive
         pass
     
-    def get_skill_points_gain() -> int:
+    def get_skill_points_gain(self) -> int:
         # always 0 or positive
         pass
 
-    def get_energy_gain() -> int:
+    def get_energy_gain(self) -> int:
         # can be negative
         pass
 

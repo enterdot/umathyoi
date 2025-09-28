@@ -82,15 +82,8 @@ class CardDatabase:
         return len(self.cards)
 
     def _load_cards_from_file(self, cards_file: str) -> None:
-        """Load card data from JSON file.
-        
-        Args:
-            cards_file: Path to JSON file containing card definitions
-            
-        Raises:
-            FileNotFoundError: If cards file doesn't exist
-            ValueError: If cards file contains invalid data
-        """
+        """Load card data from JSON file."""
+
         try:
             with open(cards_file, 'r', encoding='utf-8') as f:
                 file_data = json.load(f)

@@ -21,12 +21,12 @@ class StatGrowth:
     _wit: int
         
     def __post_init__(self) -> None:
-        self._assert_total_limit()
+        self._assert_total_stat_growth()
     
-    def _assert_total_limit(self) -> None:
+    def _assert_total_stat_growth(self) -> None:
         total = sum(self._speed, self._stamina, self._power, self._guts, self._wit)
         if total > 30: # TODO: add constant
-            raise RuntimeError(f"A trainee total stat growth bonus cannot be more than 30%")
+            raise RuntimeError(f"Total stat growth bonus is {total}%, exceeds 30% limit")
 
     def set_stat_growth(self, stat_type: StatType, value: int) -> None:
         match stat_type:
@@ -40,7 +40,7 @@ class StatGrowth:
                 self._guts = value
             case StatType.wit:
                 self._wit = value
-        self._assert_total_limit()
+        self._assert_total_stat_growth()
     
     def get_stat_growth(self, stat_type: StatType) -> None:
         match stat_type:
