@@ -18,5 +18,6 @@ Try and match the style of the codebase:
 - always use spaces for indentations, never tabs
 - don't use magic numbers, annotate with a '# TODO: add as constant' for WIP implementations
 - use my existing Logger and Event solutions when those functionalities are needed
+- prefer relative imports (`from .foo import bar`) for intra-package imports
 
 Finally, as a general rule: the less code the better.
