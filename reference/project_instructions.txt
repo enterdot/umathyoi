@@ -19,5 +19,8 @@ Try and match the style of the codebase:
 - don't use magic numbers, annotate with a '# TODO: add as constant' for WIP implementations
 - use my existing Logger and Event solutions when those functionalities are needed
 - prefer relative imports (`from .foo import bar`) for intra-package imports
+- prefer to fail early for programmers errors with `raise RuntimeError()`
+- prefer to recover only from bad user input or failed local/online resource loading/saving
+- keep methods heredocs short, type hints already provide information on parameters and return values
 
 Finally, as a general rule: the less code the better.
