@@ -5,6 +5,7 @@ from enum import Enum
 from dataclasses import dataclass
 from typing import Iterator
 from functools import lru_cache
+from .scenario import FacilityType
 
 from utils import CardConstants
 
@@ -74,31 +75,31 @@ class CardUniqueEffect(Enum):
     race_stat_gain_increase = 15
     skill_hint_frequency = 18
     specialty_priority = 19
-    failure_protection =27
+    failure_protection = 27
     energy_cost_reduction = 28
     skill_points_bonus = 30
-    effect_bonus_if_min_bond = 101                                          # value=min_bond, value_1=effect_id, value_2=amount [30189-kitasan-black]
-    training_effectiveness_if_min_bond_and_not_preferred_facility = 102     # value=min_bond, value_1=amount [30083-sakura-bakushin-o]
-    training_effectiveness_if_min_card_types = 103                          # value=min_card_types, value_1=amount [30250-buena-vista]
-    training_effectiveness_for_fans = 104                                   # value=fans, value_1=max_amount [30086-narita-top-road]
+    effect_bonus_if_min_bond = 101
+    training_effectiveness_if_min_bond_and_not_preferred_facility = 102
+    training_effectiveness_if_min_card_types = 103
+    training_effectiveness_for_fans = 104
     stat_up_per_card_based_on_type = 105                                    # value=type_amount_per_stat_type, value_1=all_amount_per_non_stat_type [30090-symboli-rudolf]
-    effect_bonus_per_friendship_trainings = 106                             # value=max_times, value_1=unique_id, value_2=amount [30112-twin-turbo]
-    effect_bonus_on_less_energy = 107                                       # value=effect_id, value_1=max_low_energy, value_2=min_low_energy, value_3=max_amount, value_4=min_amount  [30094-bamboo-memory]
+    effect_bonus_per_friendship_trainings = 106
+    effect_bonus_on_less_energy = 107
     effect_bonus_on_more_max_energy = 108                                   # TODO: unclear, ignore and print warning when used - value=effect_id, value_1=, value_2=, value_3=, value_4= [30095-seeking-the-pearl] 
-    effect_bonus_per_combined_bond = 109                                    # value=effect_id, value_1=max_bonus [30208-nishino-flower]
-    effect_bonus_per_card_on_facility = 110                                 # value=effect_id, value_1=amount [30102-el-condor-pasa]
-    effect_bonus_per_facility_level = 111                                   # value=effect_id, value_1=amount [30107-maruzensky]
-    chance_for_no_failure = 112                                             # value=chance [30108-nakayama-festa]
-    effect_bonus_if_friendship_training = 113                               # value=effect_id, value_1=amount [30256-tamamo-cross]
-    effect_bonus_on_more_energy = 114                                       # value=effect_id, value_1=min_value, value_2=max_value [30115-mejiro-palmer]
-    all_cards_gain_effect_bonus = 115                                       # value=effect_id, value_1=amount [30146-oguri-cap]
-    effect_bonus_per_skill_type = 116                                       # value=skill_type, value_1=effect_id, value_2=amount, value_3=max_skills [30134-mejiro-ramonu]
+    effect_bonus_per_combined_bond = 109
+    effect_bonus_per_card_on_facility = 110
+    effect_bonus_per_facility_level = 111
+    chance_for_no_failure = 112
+    effect_bonus_if_friendship_training = 113
+    effect_bonus_on_more_energy = 114
+    all_cards_gain_effect_bonus = 115
+    effect_bonus_per_skill_type = 116
     effect_bonus_per_combined_facility_level = 117                          # value=effect_id, value_1=max_combined_level, value_2=max_amount [30148-daiwa-scarlet]
-    extra_appearance_if_min_bond = 118                                      # value=extra_appearances, value_1=min_bond [30160-mei-satake]
-    cards_appear_more_if_min_bond = 119                                     # TODO: unclear, ignore and print warning when used - value=, value_1=, value_2=min_bond [30188-ryoka-tsurugi]
+    extra_appearance_if_min_bond = 118
+    cards_appear_more_if_min_bond = 119
     stat_or_skill_points_bonus_per_card_based_on_type = 120                 # value=skill_point_bonus_per_non_stat_type, value_1=min_bond, value_2=stat_bonus_per_stat_type, value_3=max_stat_bonus [30187-orfevre]
-    all_cards_gain_bond_bonus_per_training = 121                            # value=amount, value_1=amount_if_card_is_on_facility [30207-yayoi-akikawa]
-    cards_gain_effect_bonus_next_turn_after_trained_with = 122              # value=effect_id, value_1=amount [30257-tucker-bryne]
+    all_cards_gain_bond_bonus_per_training = 121
+    cards_gain_effect_bonus_next_turn_after_trained_with = 122
 
 @dataclass
 class Card:
@@ -126,22 +127,15 @@ class Card:
         else:
             raise RuntimeError(f"Invalid state for {self}, {rarity=}")
 
-    @lru_cache(maxsize=256)  # Cache up to 256 (effect_type, level) combinations
+    @property
+    def preferred_facility(self) -> FacilityType:
+        if self.type == CardType.pal:
+            return None
+        return FacilityType(self.type.value())
+
+    @lru_cache(maxsize=256)
     def _interpolate_effect_value(self, effect_type: CardEffect, level: int) -> int:
-        """
-        Calculate effect value at specific level using interpolation between milestones.
-        
-        Args:
-            effect_type: effect type
-            level: card level
-            
-        Returns:
-            Effect value at the specified level
-            
-        Note:
-            Uses LRU cache for performance since the same levels are queried repeatedly.
-            The cache key is (effect_type, level) so each effect type is cached separately.
-        """
+        """Calculate effect value at specific level using interpolation between milestones"""
 
         if not self.min_level <= level <= self.max_level:
             logger.warning(f"{level=} is out of range for card {self.id}")
@@ -252,21 +246,8 @@ class Card:
         """Get effect value at maximum level for maximum limit break."""
         return self.get_effect_at_limit_break(CardConstants.MAX_LIMIT_BREAK)
 
-
-    def get_all_effects_at_level(self, level: int) -> dict[str, int]:
-        """
-        Get all effects for this card at the specified level.
-        
-        Args:
-            level: level
-            
-        Returns:
-            Dictionary mapping effect names to values
-            
-        Note:
-            This method benefits heavily from LRU caching since it calls
-            _interpolate_effect_value multiple times for the same level.
-        """
+    def get_all_effects_at_level(self, level: int) -> dict[CardEffect, int]:
+        """Get all effects for this card at the specified level."""
         effects = {}
         
         # Get all effect types present on this card
@@ -278,29 +259,39 @@ class Card:
         # Calculate value for each present effect type
         for effect_type_id in present_effect_ids:
             try:
-                effect_name = CardEffect(effect_type_id).name
+                effect_type = CardEffect(effect_type_id)
                 value = self._interpolate_effect_value(CardEffect(effect_type_id), level)
                 if value > 0:  # Only include non-zero effects
-                    effects[effect_name] = value
+                    effects[effect_type] = value
             except ValueError:
                 continue
         
         return effects
 
     def get_all_effects_at_limit_break(self, limit_break: int) -> dict[str, int]:
-        """
-        Get all effects for this card at the specified limit break.
-        
-        Args:
-            limit_break: limit break
-            
-        Returns:
-            Dictionary mapping effect names to values
-        """
+        """Get all effects for this card at the specified limit break."""
         level = self.get_level_at_limit_break(limit_break)
         return self.get_all_effects_at_level(level)
 
-    # TODO: add methods to get unique effects
+    def get_all_unique_effects(self) -> dict[CardUniqueEffect, list[int]] | None:
+        if self.rarity == CardRarity.SSR:
+            unique_effects = {}
+            for unique_effects_row in self.unique_effects:
+                if len(unique_effects_row) > 0:
+                    unique_effect_id = unique_effects_row[0]
+                    try:
+                        unique_effect_type = CardUniqueEffect(unique_effect_id)
+                        unique_effect_values = unique_effects_row[1:]
+                        unique_effects[unique_effect_type] = unique_effect_values
+                    except ValueError:
+                        logger.warning(f"Card {self.id} has not implemented unique effect id {unique_effect_id}")
+
+            return unique_effects
+        else
+            return None
+
+    def is_preferred_facility(self, facility_type: FacilityType) -> bool:
+        return facility_type == self.preferred_facility
 
     def __hash__(self) -> int:
         """Make Card hashable for LRU cache support."""
