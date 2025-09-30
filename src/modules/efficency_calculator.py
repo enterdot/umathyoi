@@ -4,26 +4,35 @@ from .skill import Skill, SkillType
 from .mood import Mood
 from .card import Card, CardType, CardEffect, CardUniqueEffect
 from .scenario import Scenario, Facility, FacilityType
-from .character import StatType, StatGrowth
+from .character import GenericCharacter, StatType
 
-@dataclass
-class TurnConfiguration:
-    fan_count: int
-    mood: Mood
+@dataclass(frozen=True)
+class Turn:
     scenario: Scenario
-    cards: list[Card]
-    card_levels: dict[int, int] # card_id -> card_level
-    bond_gauges: dict[int, int] # card_id -> bond_gauge
-    skills: list[Skill]
+    facility_levels: dict[FacilityType, int]
     energy: int
     max_energy: int
-    facility_levels: dict[FacilityType, int]
-    facility_cards: dict[FacilityType, list[Card]]
-    stat_growth: StatGrowth
-    
+    fan_count: int
+    mood: Mood
+    character: GenericCharacter
+    cards: list[Card]
+    card_levels: dict[Card, int]
+    card_bonds: dict[Card, int]
+    skills: list[Skill]
+
+    def __post_init__(self) -> None:
+        #TODO: distribute cards among facilities with random module
+        self.card_facilities: dict[Card, FacilityType]
+
+        self.training_effects: dict[FacilityType, list[TrainingEffect]]
+        for card in self.cards:
+            training_effect = TrainingEffect(card, self)
+            self.training_effects[training_effect.facility_type].append(training_effect)
+
+
     @property
     def combined_bond_gauge(self) -> int:
-        return sum(bond_gauges.values())
+        return sum(card_bonds.values())
 
     @property
     def combined_facility_levels(self) -> int:
@@ -38,21 +47,18 @@ class TurnConfiguration:
             # Count across all facilities
             if card_type is None:
                 # Count all cards
-                return sum(len(cards) for cards in self.facility_cards.values())
+                return len(self.cards)
             else:
                 # Count specific card type across all facilities
-                return sum(
-                    len([c for c in self.facility_cards[facility] if c.type == card_type])
-                    for facility in FacilityType
-                )
+                return sum(1 for card in self.cards if card.type == card_type)
         else:
             # Count on specific facility
             if card_type is None:
                 # Count all cards on this facility
-                return len(self.facility_cards[facility_type])
+                return sum(1 for facility in card_facilities.values() if facility == facility_type)
             else:
                 # Count specific card type on this facility
-                return len([c for c in self.facility_cards[facility_type] if c.type == card_type])
+                return sum(1 for card, facility in card_facilities.items() if facility == facility_type and card.type == card_type)
 
     def get_skill_count(self, skill_type: SkillType | None = None) -> int:
         if skill_type is None:
@@ -64,12 +70,16 @@ class TurnConfiguration:
 class TrainingEffect:
     """The effect on training a card provides based on turn state"""
     card: Card
-    facility_type: FacilityType # facility the card was assigned to
-    turn_config: TurnConfiguration
+    turn: Turn
 
     def __post_init__(self):
-        """Pre-build effect handlers once"""
+        """Pre-build effect handlers and calculate combined normal and unique effects"""
         self._unique_effect_handlers = self._make_unique_effect_handlers()
+        self.combined_effects = _calculate_combined_effects()
+    
+    @property
+    def facility_type(self) -> FacilityType:
+        return self.turn.card_facilities[self.card]
 
     def _make_unique_effect_handlers(self):
         """Creates a dictionary of effect handlers as closures. Each closure captures self and can access instance state."""
@@ -82,7 +92,7 @@ class TrainingEffect:
                 lambda vals: [
                     (
                         CardEffect(vals[1]),
-                        vals[2] * (self.turn_config.bond_gauges[self.card.id] >= vals[0])
+                        vals[2] * (self.turn.card_bonds[self.card] >= vals[0])
                     )
                 ],
 
@@ -93,7 +103,7 @@ class TrainingEffect:
                 lambda vals: [
                     (
                         CardEffect(vals[0]),
-                        20 + self.turn_config.combined_bond_gauge // vals[1]
+                        20 + self.turn.combined_bond_gauge // vals[1]
                     )
                 ],
             
@@ -104,7 +114,7 @@ class TrainingEffect:
                 lambda vals: [
                     (
                         CardEffect(vals[0]),
-                        self.turn_config.facility_levels[self.facility_type] * vals[1]
+                        self.turn.facility_levels[self.facility_type] * vals[1]
                     )
                 ],
             
@@ -126,7 +136,7 @@ class TrainingEffect:
                 lambda vals: [
                     (
                         CardEffect(vals[0]),
-                        min(self.turn_config.energy // vals[1], vals[2])
+                        min(self.turn.energy // vals[1], vals[2])
                     )
                 ],
             
@@ -137,7 +147,7 @@ class TrainingEffect:
                 lambda vals: [
                     (
                         CardEffect(vals[0]),
-                        min(vals[3], vals[4] + (self.turn_config.max_energy - max(self.turn_config.energy, vals[2])) // vals[1]) * (self.turn_config.energy <= 100)
+                        min(vals[3], vals[4] + (self.turn.max_energy - max(self.turn.energy, vals[2])) // vals[1]) * (self.turn.energy <= 100)
                     )
                 ],
 
@@ -183,10 +193,7 @@ class TrainingEffect:
             # value = effect_id, value_1 = bonus_amount
             # sample card: 30257-tucker-bryne
             # Requires turn-by-turn tracking - too complex for simulator
-                lambda vals: (
-                    logger.warning(f"Card {self.card.id} has next-turn effect {CardUniqueEffect(122).name} which is not supported in simulator"),
-                    []
-                )[1],
+                lambda vals: [],
 
             CardUniqueEffect.training_effectiveness_if_min_card_types:
             # unique_effect_id = 103
@@ -196,7 +203,7 @@ class TrainingEffect:
                 lambda vals: [
                     (
                         CardEffect.training_effectiveness,
-                        vals[1] * (self.turn_config.card_types_in_deck >= vals[0])
+                        vals[1] * (self.turn.card_types_in_deck >= vals[0])
                     )
                 ],
 
@@ -207,7 +214,7 @@ class TrainingEffect:
                 lambda vals: [
                     (
                         CardEffect.training_effectiveness,
-                        min(vals[1], self.turn_config.fan_count // vals[0])
+                        min(vals[1], self.turn.fan_count // vals[0])
                     )
                 ],
 
@@ -218,7 +225,7 @@ class TrainingEffect:
                 lambda vals: [
                     (
                         CardEffect.training_effectiveness,
-                        vals[1] * (self.turn_config.bond_gauges[self.card.id] >= vals[0] and not self.card.is_preferred_facility(self.facility_type))
+                        vals[1] * (self.turn.card_bonds[self.card] >= vals[0] and not self.card.is_preferred_facility(self.facility_type))
                     )
                 ],
 
@@ -230,7 +237,7 @@ class TrainingEffect:
                 lambda vals: [
                     (
                         CardEffect(vals[1]),
-                        vals[2] * vals[0] * (self.turn_config.bond_gauges[self.card.id] >= CardConstants.FRIENDSHIP_BOND_THRESHOLD)
+                        vals[2] * vals[0] * (self.turn.card_bonds[self.card] >= CardConstants.FRIENDSHIP_BOND_THRESHOLD)
                     )
                 ],
 
@@ -241,7 +248,7 @@ class TrainingEffect:
                 lambda vals: [
                     (
                         CardEffect(vals[0]),
-                        (self.turn_config.get_card_count(facility_type=self.facility_type) - 1) * vals[1]
+                        (self.turn.get_card_count(facility_type=self.facility_type) - 1) * vals[1]
                     )
                 ],
 
@@ -266,7 +273,7 @@ class TrainingEffect:
                 lambda vals: [
                     (
                         CardEffect(vals[1]),
-                        min(self.turn_config.get_skill_count(SkillType(vals[0])), vals[3]) * vals[2]
+                        min(self.turn.get_skill_count(SkillType(vals[0])), vals[3]) * vals[2]
                     )
                 ],
 
@@ -285,57 +292,56 @@ class TrainingEffect:
                 lambda vals: [
                     (
                         CardEffect(vals[0]),
-                        vals[2] * self.turn_config.combined_facility_levels // vals[1]
+                        vals[2] * self.turn.combined_facility_levels // vals[1]
                     )
                 ],
 
             CardUniqueEffect.stat_or_skill_points_bonus_per_card_based_on_type:
             # unique_effect_id = 120
             # value = skill_point_bonus_per_pal, value_1 = min_bond, value_2 = stat_bonus_per_stat_type, value_3 = max_cards_per_stat
-            # When bond >= min_bond: +stat_bonus per stat-type card (capped per stat), +skill_points per Pal
             # sample card: 30187-orfevre
                 lambda vals: [
                     # Speed bonus (effect 3)
                     (
                         CardEffect(3), 
-                        min(self.turn_config.get_card_count(card_type=CardType.SPEED), vals[3]) 
+                        min(self.turn.get_card_count(card_type=CardType.SPEED), vals[3]) 
                         * vals[2] 
-                        * (self.turn_config.bond_gauges[self.card.id] >= vals[1])
+                        * (self.turn.card_bonds[self.card] >= vals[1])
                     ),
                     # Stamina bonus (effect 4)
                     (
                         CardEffect(4), 
-                        min(self.turn_config.get_card_count(card_type=CardType.STAMINA), vals[3]) 
+                        min(self.turn.get_card_count(card_type=CardType.STAMINA), vals[3]) 
                         * vals[2] 
-                        * (self.turn_config.bond_gauges[self.card.id] >= vals[1])
+                        * (self.turn.card_bonds[self.card] >= vals[1])
                     ),
                     # Power bonus (effect 5)
                     (
                         CardEffect(5), 
-                        min(self.turn_config.get_card_count(card_type=CardType.POWER), vals[3]) 
+                        min(self.turn.get_card_count(card_type=CardType.POWER), vals[3]) 
                         * vals[2] 
-                        * (self.turn_config.bond_gauges[self.card.id] >= vals[1])
+                        * (self.turn.card_bonds[self.card] >= vals[1])
                     ),
                     # Guts bonus (effect 6)
                     (
                         CardEffect(6), 
-                        min(self.turn_config.get_card_count(card_type=CardType.GUTS), vals[3]) 
+                        min(self.turn.get_card_count(card_type=CardType.GUTS), vals[3]) 
                         * vals[2] 
-                        * (self.turn_config.bond_gauges[self.card.id] >= vals[1])
+                        * (self.turn.card_bonds[self.card] >= vals[1])
                     ),
                     # Wit bonus (effect 7)
                     (
                         CardEffect(7), 
-                        min(self.turn_config.get_card_count(card_type=CardType.WIT), vals[3]) 
+                        min(self.turn.get_card_count(card_type=CardType.WIT), vals[3]) 
                         * vals[2] 
-                        * (self.turn_config.bond_gauges[self.card.id] >= vals[1])
+                        * (self.turn.card_bonds[self.card] >= vals[1])
                     ),
                     # Skill points (effect 30) - no cap on Pal cards
                     (
                         CardEffect(30), 
-                        self.turn_config.get_card_count(card_type=CardType.PAL) 
+                        self.turn.get_card_count(card_type=CardType.PAL) 
                         * vals[0] 
-                        * (self.turn_config.bond_gauges[self.card.id] >= vals[1])
+                        * (self.turn.card_bonds[self.card] >= vals[1])
                     )
                 ],
 
@@ -343,12 +349,11 @@ class TrainingEffect:
             # See: https://umamusu.wiki/Game:List_of_Support_Cards
         }
 
-    @property
-    def effects(self) -> dict[CardEffect, int]:
+    def _calculate_combined_effects(self) -> dict[CardEffect, int]:
         """Flatten unique effects into normal effects"""
-        effects = self.card.get_all_effects_at_level(self.turn_config.card_levels[self.card.id])
+        effects = self.card.get_all_effects_at_level(self.turn.card_levels[self.card])
 
-        if self.turn_config.card_levels[self.card.id] < self.card.unique_effects_unlock_level:
+        if self.turn.card_levels[self.card] < self.card.unique_effects_unlock_level:
             # Card unique effects are not unlocked
             return effects
         
@@ -368,48 +373,27 @@ class TrainingEffect:
                     for effect_type, effect_value in results:
                         flattened_effects[effect_type] = flattened_effects.get(effect_type, 0) + effect_value
         
-        # TODO: Merge effects and flattened_effects with appropriate logic
+        # Merge effects and flattened_effects
+        combined_effects = effects.copy()
+        
+        for effect_type, unique_value in flattened_effects.items():
+            if effect_type == CardEffect.friendship_effectiveness:
+                # Special multiplication rule for friendship
+                normal_value = combined_effects.get(effect_type, 0)
+                combined = ((100 + normal_value) * (100 + unique_value) / 100) - 100
+                combined_effects[effect_type] = int(combined)
+            else:
+                # Additive rule for all other effects
+                combined_effects[effect_type] = combined_effects.get(effect_type, 0) + unique_value
+        
+        return combined_effects
                 
 
-@dataclass
-class TrainingResult:
-    facility_type: FacilityType
-    training_effects: list[TrainingEffect]
-    turn_config: TurnConfiguration
-    
-    # TODO: methods that combine the effects of all cards
-    
-    # TODO: interface to query for the actual stat gains
-    def get_stat_gain_by_type(self, stat_type: StatType) -> int:
-        # always 0 or positive
-        pass
-    
-    def get_skill_points_gain(self) -> int:
-        # always 0 or positive
-        pass
+class EfficencyCalculator:
+    # Initiate with attributes required to make the 10000 Turn instances
+    # Let modules and widgets update turn parameters via properties to trigger recalculations and events
+    # Define events so the UI knows what the efficency_calculator is done and update itself accordingly
+    # For every turn created you can then do:
+    # effects_on_speed_facility = self.turns[456].training_effects[FacilityType.speed]
+    pass
 
-    def get_energy_gain(self) -> int:
-        # can be negative
-        pass
-
-class CareerSimulation:
-    _turn_config: TurnConfiguration
-    _turns: list[list[TrainingResult]] # e.g. 100 turns * 5 train_results (1 per facility) = 500 object instances
-    
-    def __init__(self, turns_count: int, turn_config: TurnConfiguration, cards: list[Card]) -> None:
-        for i in range(turns_count):
-            cards_on_facilities = self._distribute_cards(cards)
-            training_result_per_facility = []
-            for cards_on_facility in cards_on_facilities:
-                training_effects_on_facility = []
-                for card_on_facility in cards_on_facility:
-                    training_effects_on_facility.append(TrainingEffect(card_on_facility, turn_config))
-                training_result_per_facility.append(TrainingResult(training_effects_on_facility))
-            self._turns.append(training_result_per_facility)
-                    
-
-
-    def _distribute_cards(self, cards: list[Card]) -> list[list[Card]]:
-        pass
-    
-    # TODO: whatever methods we need to more easily build the violing plots

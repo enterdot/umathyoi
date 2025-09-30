@@ -101,7 +101,7 @@ class CardUniqueEffect(Enum):
     all_cards_gain_bond_bonus_per_training = 121
     cards_gain_effect_bonus_next_turn_after_trained_with = 122
 
-@dataclass
+@dataclass(frozen=True)
 class Card:
     id: int
     name: str
@@ -294,12 +294,10 @@ class Card:
         return facility_type == self.preferred_facility
 
     def __hash__(self) -> int:
-        """Make Card hashable for LRU cache support."""
-        return hash(self.id)  # Use card ID as hash since it's unique
+        return hash(self.id)
     
     def __eq__(self, other) -> bool:
-        """Define equality for hashing."""
-        if not isinstance(other, Card):
+        if not isinstance(other, self.__class__):
             return False
         return self.id == other.id
 

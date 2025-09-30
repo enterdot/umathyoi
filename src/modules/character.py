@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
+from utils import CharacterConstants 
+from .skill import Skill
 
 class StatType(Enum):
     """Enum for the five core stats in Uma Musume."""
@@ -12,50 +14,33 @@ class StatType(Enum):
     def __str__(self) -> str:
         return self.name.title()
 
-@dataclass
+@dataclass(frozen=True)
 class StatGrowth:
-    _speed: int
-    _stamina: int
-    _power: int
-    _guts: int
-    _wit: int
+    speed: int
+    stamina: int
+    power: int
+    guts: int
+    wit: int
         
     def __post_init__(self) -> None:
-        self._assert_total_stat_growth()
+        total = sum(self.speed, self.stamina, self.power, self.guts, self.wit)
+        if total > CharacterConstants.MAX_TOTAL_STAT_GROWTH:
+            raise ValueError(f"Total stat growth bonus is {total}%, exceeds 30% limit")
     
-    def _assert_total_stat_growth(self) -> None:
-        total = sum(self._speed, self._stamina, self._power, self._guts, self._wit)
-        if total > 30: # TODO: add constant
-            raise RuntimeError(f"Total stat growth bonus is {total}%, exceeds 30% limit")
-
-    def set_stat_growth(self, stat_type: StatType, value: int) -> None:
+    def get_stat_growth(self, stat_type: StatType) -> int:
         match stat_type:
             case StatType.speed:
-                self._speed = value
+                return self.speed
             case StatType.stamina:
-                self._stamina = value
+                 returnself.stamina
             case StatType.power:
-                self._power = value
+                return self.power
             case StatType.guts:
-                self._guts = value
+                return self.guts
             case StatType.wit:
-                self._wit = value
-        self._assert_total_stat_growth()
-    
-    def get_stat_growth(self, stat_type: StatType) -> None:
-        match stat_type:
-            case StatType.speed:
-                return self._speed
-            case StatType.stamina:
-                 returnself._stamina
-            case StatType.power:
-                return self._power
-            case StatType.guts:
-                return self._guts
-            case StatType.wit:
-                return self._wit
+                return self.wit
 
-    def get_stat_growth_tag(self, stat_type: StatType) -> str:
+    def get_stat_growth_string(self, stat_type: StatType) -> str:
         return f"{self.get_stat_growth(stat_type)}%"
     
     def get_stat_growth_multipler(self, stat_type: StatType) -> float:
@@ -72,35 +57,29 @@ class Aptitude(Enum):
     F = -5
     G = -6
 
-@dataclass
+@dataclass(frozen=True)
 class GenericCharacter:
-    _stat_growth: StatGrowth
-    _track_aptitude: Aptitude
-    _distance_aptitude: Aptitude
-    _style_aptitude: Aptitude
+    """Represents a generic trainee (character)."""
+    stat_growth: StatGrowth
+    track_aptitude: Aptitude
+    distance_aptitude: Aptitude
+    style_aptitude: Aptitude
 
 
-@dataclass
+@dataclass(frozen=True)
 class Character(GenericCharacter):
-    """Represents a trainee (character) in Uma Musume."""
+    """Represents a trainee (character)."""
     
-    _id: int
-    _name: str
-    _view_name: str
-    
-    # TODO: expand to include fields from Gametora JSON:
-    # unique_skill
-    # skills
-    # rarity: int = 1
-    # cv: str = ""  # voice actor
-    # birthday: str = ""
-    # height: int = 0
-    # weight: int = 0
-    # three_sizes: str = ""
-    # shoe_size: float = 0.0
-    # preferred_distance: list[str] = None
-    # preferred_surface: list[str] = None
-    # preferred_strategy: list[str] = None
+    id: int
+    name: str
+    view_name: str
+    skills: Skill
+    unique_skill: Skill
 
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(id={self.id}, name='{self.name}')"
+    def __hash__(self) -> int:
+        return hash(self.id)
+    
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, self.__class__):
+            return False
+        return self.id == other.id
