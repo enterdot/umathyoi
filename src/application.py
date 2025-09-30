@@ -3,6 +3,9 @@ from utils import setup_logging, get_logger
 setup_logging("DEBUG")
 logger = get_logger(__name__)
 
+import warnings
+warnings.filterwarnings('error')
+
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
@@ -11,7 +14,6 @@ from gi.repository import Gtk, Gio, Adw
 from modules import CardDatabase, Deck, CardInspector, DeckList
 from windows import MainWindow
 from utils import auto_title_from_instance
-
 
 
 class MainApplication(Adw.Application):
