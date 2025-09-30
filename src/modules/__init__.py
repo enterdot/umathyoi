@@ -8,7 +8,7 @@ from .character_db import CharacterDatabase
 from .deck import Deck
 from .deck_list import DeckList
 from .card_inspector import CardInspector
-from .efficency_calculator import EfficencyCalculator
+from .efficiency_calculator import EfficiencyCalculator
 
 
 __all__ = [
@@ -22,5 +22,5 @@ __all__ = [
     'Deck',
     'DeckList',
     'CardInspector',
-    'EfficencyCalculator',
+    'EfficiencyCalculator',
 ]

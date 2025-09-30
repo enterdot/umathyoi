@@ -60,6 +60,7 @@ class Aptitude(Enum):
 @dataclass(frozen=True)
 class GenericCharacter:
     """Represents a generic trainee (character)."""
+
     stat_growth: StatGrowth
     track_aptitude: Aptitude
     distance_aptitude: Aptitude

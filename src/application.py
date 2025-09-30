@@ -20,13 +20,7 @@ class MainApplication(Adw.Application):
     """Main application class handling application-level logic and data."""
     
     def __init__(self, app_name: str, app_version: str, app_reverse_dns: str):
-        """Initialize the main application.
-        
-        Args:
-            app_name: Display name of the application
-            app_version: Version string
-            app_reverse_dns: Reverse DNS identifier for the application
-        """
+        """Initialize the main application."""
         super().__init__(application_id=app_reverse_dns)
         
         self.app_name = app_name
@@ -55,15 +49,7 @@ class MainApplication(Adw.Application):
         self.deck_list = DeckList(decks=test_decks)
     
     def _create_test_decks(self) -> list[Deck]:
-        """Create test decks for development and testing.
-        
-        Returns:
-            List of test decks with sample cards
-            
-        Note:
-            This method should be replaced with proper session loading
-            when data persistence is implemented.
-        """
+        """Create test decks for development and testing."""
         # Test deck 1 - Power focused
         deck1 = Deck("Power Deck")
         test_cards_1 = [
@@ -119,32 +105,19 @@ class MainApplication(Adw.Application):
         self.set_accels_for_action("app.about", ["F1"])
     
     def create_action(self, name: str, callback) -> None:
-        """Create and add an action to the application.
-        
-        Args:
-            name: Action name
-            callback: Function to call when action is activated
-        """
+        """Create and add an action to the application."""
         action = Gio.SimpleAction.new(name, None)
         action.connect('activate', callback)
         self.add_action(action)
     
     def on_activate(self, app: Adw.Application) -> None:
-        """Handle application activation by creating and presenting main window.
-        
-        Args:
-            app: Application instance (self)
-        """
+        """Handle application activation by creating and presenting main window."""
         window = MainWindow(self, self.app_name)
         window.present()
     
     def _on_preferences(self, action: Gio.SimpleAction, param) -> None:
         """Handle preferences action.
-        
-        Args:
-            action: Action that was activated
-            param: Action parameters (unused)
-            
+
         Note:
             Currently shows placeholder message. Should open preferences dialog
             when implemented.
@@ -152,12 +125,7 @@ class MainApplication(Adw.Application):
         logger.debug("Preferences dialog not yet implemented")
     
     def _on_about(self, action: Gio.SimpleAction, param) -> None:
-        """Handle about action by showing about dialog.
-        
-        Args:
-            action: Action that was activated
-            param: Action parameters (unused)
-        """
+        """Handle about action by showing about dialog."""
         window = self.get_active_window()
         if window:
             about_dialog = Adw.AboutWindow(
