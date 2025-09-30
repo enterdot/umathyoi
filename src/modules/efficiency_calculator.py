@@ -21,14 +21,26 @@ class Turn:
     skills: list[Skill]
 
     def __post_init__(self) -> None:
-        #TODO: distribute cards among facilities with random module
-        self.card_facilities: dict[Card, FacilityType]
+        # Distribute cards among facilities
+        card_facilities = self._distribute_cards()
+        object.__setattr__(self, 'card_facilities', card_facilities)
 
-        self.training_effects: dict[FacilityType, list[TrainingEffect]]
+        # Build training effects
+        training_effects = {facility: [] for facility in FacilityType}
         for card in self.cards:
-            training_effect = TrainingEffect(card, self)
-            self.training_effects[training_effect.facility_type].append(training_effect)
+            effect = TrainingEffect(card, self)
+            training_effects[effect.facility_type].append(effect)
+        object.__setattr__(self, 'training_effects', training_effects)
 
+    def _distribute_cards(self) -> dict[Card, FacilityType]:
+        """Randomly distribute cards among facilities."""
+        import random
+        card_facilities = {}
+        # TODO: Use actual game function for card distribution
+        for card in self.cards:
+            if random.random() < 0.6:  # 60% chance to appear
+                card_facilities[card] = random.choice(list(FacilityType))
+        return card_facilitie
 
     @property
     def combined_bond_gauge(self) -> int:
@@ -66,7 +78,7 @@ class Turn:
         return sum(1 for skill in self.skills if skill.type == skill_type)
 
 
-@dataclass
+@dataclass(frozen=True)
 class TrainingEffect:
     """The effect on training a card provides based on turn state"""
     card: Card
@@ -74,8 +86,8 @@ class TrainingEffect:
 
     def __post_init__(self):
         """Pre-build effect handlers and calculate combined normal and unique effects"""
-        self._unique_effect_handlers = self._make_unique_effect_handlers()
-        self.combined_effects = _calculate_combined_effects()
+        object.__setattr__(self, '_unique_effect_handlers', self._make_unique_effect_handlers())
+        object.__setattr__(self, 'combined_effects', self._calculate_combined_effects())
     
     @property
     def facility_type(self) -> FacilityType:
@@ -359,7 +371,7 @@ class TrainingEffect:
         
         unique_effects = self.card.get_all_unique_effects()
         flattend_effects = {}
-        for unique_effect_type, unique_effect_values in unique_effects:
+        for unique_effect_type, unique_effect_values in unique_effects.items():
             if unique_effect_type.value() < CardConstants.COMPLEX_UNIQUE_EFFECTS_ID_THRESHOLD:
                 # Unique effect is already equivalent to its normal effect counterpart
                 if len(unique_effect_values) != 1:
