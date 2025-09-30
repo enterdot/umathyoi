@@ -82,10 +82,10 @@ class CardUniqueEffect(Enum):
     training_effectiveness_if_min_bond_and_not_preferred_facility = 102
     training_effectiveness_if_min_card_types = 103
     training_effectiveness_for_fans = 104
-    stat_up_per_card_based_on_type = 105                                    # value=type_amount_per_stat_type, value_1=all_amount_per_non_stat_type [30090-symboli-rudolf]
+    stat_up_per_card_based_on_type = 105
     effect_bonus_per_friendship_trainings = 106
     effect_bonus_on_less_energy = 107
-    effect_bonus_on_more_max_energy = 108                                   # TODO: unclear, ignore and print warning when used - value=effect_id, value_1=, value_2=, value_3=, value_4= [30095-seeking-the-pearl] 
+    effect_bonus_on_more_max_energy = 108 
     effect_bonus_per_combined_bond = 109
     effect_bonus_per_card_on_facility = 110
     effect_bonus_per_facility_level = 111
@@ -94,10 +94,10 @@ class CardUniqueEffect(Enum):
     effect_bonus_on_more_energy = 114
     all_cards_gain_effect_bonus = 115
     effect_bonus_per_skill_type = 116
-    effect_bonus_per_combined_facility_level = 117                          # value=effect_id, value_1=max_combined_level, value_2=max_amount [30148-daiwa-scarlet]
+    effect_bonus_per_combined_facility_level = 117
     extra_appearance_if_min_bond = 118
     cards_appear_more_if_min_bond = 119
-    stat_or_skill_points_bonus_per_card_based_on_type = 120                 # value=skill_point_bonus_per_non_stat_type, value_1=min_bond, value_2=stat_bonus_per_stat_type, value_3=max_stat_bonus [30187-orfevre]
+    stat_or_skill_points_bonus_per_card_based_on_type = 120
     all_cards_gain_bond_bonus_per_training = 121
     cards_gain_effect_bonus_next_turn_after_trained_with = 122
 
@@ -287,7 +287,7 @@ class Card:
                         logger.warning(f"Card {self.id} has not implemented unique effect id {unique_effect_id}")
 
             return unique_effects
-        else
+        else:
             return None
 
     def is_preferred_facility(self, facility_type: FacilityType) -> bool:
