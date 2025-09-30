@@ -111,7 +111,7 @@ class MainWindow(Adw.ApplicationWindow):
                 color: alpha(@theme_fg_color, 0.5);
             }}
         """
-        css_provider.load_from_data(css.encode())
+        css_provider.load_from_string(css)
         
         Gtk.StyleContext.add_provider_for_display(
             Gdk.Display.get_default(),
