@@ -5,29 +5,24 @@ import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
-from typing import TYPE_CHECKING
 
 from modules import Card, CardInspector
 from .card_artwork import CardArtwork
 from utils import auto_tag_from_instance, auto_title_from_instance, UIConstants, CardConstants
 
-if TYPE_CHECKING:
-    from application import MainApplication
-    from windows import MainWindow
-
 
 class CardSelection(Adw.Bin):
     """Card selection sidebar with card list and detailed stats view."""
     
-    def __init__(self, window: 'MainWindow'):
+    def __init__(self, window):
         """Initialize card selection widget.
         
         Args:
             window: Parent window reference
         """
         super().__init__()
-        self.app: MainApplication = window.app
-        self.window: MainWindow = window
+        self.app = window.app
+        self.window = window
         self._list_box: Gtk.ListBox | None = None
 
         self.setup_ui()

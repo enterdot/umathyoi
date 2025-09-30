@@ -5,7 +5,6 @@ import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
-from typing import TYPE_CHECKING
 
 from modules import Card, Deck
 from .card_slot import CardSlot
@@ -15,19 +14,15 @@ from utils import (
     auto_title_from_instance,
     UIConstants, DeckConstants)
 
-if TYPE_CHECKING:
-    from application import MainApplication
-    from windows import MainWindow
-
 
 class DeckCarousel(Adw.Bin):
     """Carousel widget displaying multiple decks with visual scaling animations."""
     
-    def __init__(self, window: 'MainWindow'):
+    def __init__(self, window):
         """Initialize deck carousel."""
         super().__init__()
-        self.app: MainApplication = window.app
-        self.window: MainWindow = window
+        self.app = window.app
+        self.window = window
         self.setup_ui()
         self.connect_signals()
 

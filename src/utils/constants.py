@@ -19,6 +19,7 @@ class GameplayConstants:
     MAX_FACILITY_LEVEL = 5
     PREFERRED_FACILITY_BASE_WEIGHT = 100
     NON_APPEARANCE_BASE_WEIGHT = 50
+    PERCENTAGE_BASE = 100
 
 class CharacterConstants:
     """Constants related to characters."""

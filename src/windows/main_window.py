@@ -5,28 +5,20 @@ import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Gdk, Adw
-from typing import TYPE_CHECKING
 
 from views import DeckBuilderView
 from views import LegacyManagerView
 from utils import UIConstants, auto_title_from_instance
 
-if TYPE_CHECKING:
-    from application import MainApplication
-
 
 class MainWindow(Adw.ApplicationWindow):
     """Main application window with responsive design and CSS styling."""
     
-    def __init__(self, app: 'MainApplication', app_name: str):
-        """Initialize main window.
+    def __init__(self, app, app_name: str):
+        """Initialize main window."""
         
-        Args:
-            app: Application instance
-            app_name: Display name for window title
-        """
         super().__init__(application=app)
-        self.app: MainApplication = app
+        self.app = app
         
         self.set_title(app_name)
         self.set_default_size(UIConstants.DEFAULT_WINDOW_WIDTH, UIConstants.DEFAULT_WINDOW_HEIGHT)

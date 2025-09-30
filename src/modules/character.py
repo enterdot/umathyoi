@@ -34,7 +34,7 @@ class GenericCharacter:
     style_aptitude: Aptitude
 
     def __post_init__(self) -> None:
-        if sum(v for v in stat_growth.values()) > CharacterConstants.MAX_TOTAL_STAT_GROWTH:
+        if sum(v for v in self.stat_growth.values()) > CharacterConstants.MAX_TOTAL_STAT_GROWTH:
             raise ValueError(f"Total stat growth bonus exceeds {CharacterConstants.MAX_TOTAL_STAT_GROWTH}% limit")
     
     def get_stat_growth(self, stat_type: StatType) -> int:
@@ -54,7 +54,7 @@ class Character(GenericCharacter):
     id: int
     name: str
     view_name: str
-    skills: Skill
+    skills: list[Skill]
     unique_skill: Skill
 
     def __hash__(self) -> int:

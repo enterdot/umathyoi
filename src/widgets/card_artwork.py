@@ -2,16 +2,12 @@ import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Gdk', '4.0')
 from gi.repository import Gtk, Gdk, GLib
-from typing import TYPE_CHECKING
 
 import threading
 import asyncio
 from modules import Card
 from utils import auto_title_from_instance
 
-if TYPE_CHECKING:
-    from application import MainApplication
-    from windows import MainWindow
 
 class CardArtwork(Gtk.Box):
     """A widget that displays card artwork with async loading and placeholder."""
@@ -39,7 +35,7 @@ class CardArtwork(Gtk.Box):
         asyncio.set_event_loop(cls._shared_loop)
         cls._shared_loop.run_forever()
     
-    def __init__(self, window: 'MainWindow', card: Card = None, width: int = 45, height: int = 60):
+    def __init__(self, window, card: Card = None, width: int = 45, height: int = 60):
         """Initialize card artwork widget.
         
         Args:
@@ -49,8 +45,8 @@ class CardArtwork(Gtk.Box):
             height: Height of card artwork in pixels
         """
         super().__init__()
-        self.app: MainApplication = window.app
-        self.window: MainWindow = window
+        self.app = window.app
+        self.window = window
         self.set_name(auto_title_from_instance(self))
         self.card = card
         self.width = width

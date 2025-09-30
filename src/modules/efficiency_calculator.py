@@ -78,7 +78,7 @@ class Turn:
 
     @property
     def combined_bond_gauge(self) -> int:
-        return sum(card_bonds.values())
+        return sum(self.card_bonds.values())
 
     @property
     def combined_facility_levels(self) -> int:
@@ -86,7 +86,7 @@ class Turn:
     
     @property
     def card_types_in_deck(self) -> int:
-        return len({c.type for c in cards})
+        return len({c.type for c in self.cards})
 
     def get_card_count(self, card_type: CardType | None = None, facility_type: FacilityType | None = None) -> int:
         if facility_type is None:
@@ -406,11 +406,11 @@ class TrainingEffect:
         unique_effects = self.card.get_all_unique_effects()
         flattend_effects = {}
         for unique_effect_type, unique_effect_values in unique_effects.items():
-            if unique_effect_type.value() < CardConstants.COMPLEX_UNIQUE_EFFECTS_ID_THRESHOLD:
+            if unique_effect_type.value < CardConstants.COMPLEX_UNIQUE_EFFECTS_ID_THRESHOLD:
                 # Unique effect is already equivalent to its normal effect counterpart
                 if len(unique_effect_values) != 1:
                     logger.warning(f"Card {card.id} has single value unique effect {unique_effect_type.name()}, but has more than 1 value: {unique_effect_values}")
-                mapped_effect_type = CardEffect(unique_effect_type.value())
+                mapped_effect_type = CardEffect(unique_effect_type.value)
                 flattened_effects[mapped_effect_type] = flattened_effects.get(mapped_effect_type, 0) + unique_effect[0]
             else:
                 handler = self._unique_effect_handlers(unique_effect_type)
@@ -424,9 +424,9 @@ class TrainingEffect:
         
         for effect_type, unique_value in flattened_effects.items():
             if effect_type == CardEffect.friendship_effectiveness:
-                # Special multiplication rule for friendship
+                # Special multiplication rule for friendship training effectiveness
                 normal_value = combined_effects.get(effect_type, 0)
-                combined = ((100 + normal_value) * (100 + unique_value) / 100) - 100
+                combined = ((GameplayConstants.PERCENTAGE_BASE + normal_value) * (GameplayConstants.PERCENTAGE_BASE + unique_value) / GameplayConstants.PERCENTAGE_BASE) - GameplayConstants.PERCENTAGE_BASE
                 combined_effects[effect_type] = int(combined)
             else:
                 # Additive rule for all other effects
@@ -442,4 +442,3 @@ class EfficiencyCalculator:
     # For every turn created you can then do:
     # effects_on_speed_facility = self.turns[456].training_effects[FacilityType.speed]
     pass
-
