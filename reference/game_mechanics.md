@@ -22,7 +22,22 @@ Using a training facility costs Energy and provides stats relative to that train
 
 Resting recovers Energy, Recreation improves mood, Infirmary cures negative statuses, running a race provides random stats and many Skill points.
 
-The way the support cards come into play is that every turn, each of the 6 cards is randomly placed on one of the training facilities or none at all. The stat gain from using a training facility is improved by which and how many cards landed on it. Notably, if a card of type Speed lands on the Speed training facility, the amount of Speed and Power gained is strongly improved. The exact amount of stats gained however can only be calculated when taking into account the numerous effects the each card has.
+The way the support cards come into play is that each turn, cards are randomly distributed across the 5 training facilities or don't appear at all. The distribution is weighted by each card's **specialty_priority** effect.
+
+**Formula:**
+- Total weight = `500 + specialty_priority + 50`
+- Preferred facility chance = `(100 + specialty_priority) / total_weight`
+- Each non-preferred facility chance = `100 / total_weight`  
+- Non-appearance chance = `50 / total_weight`
+
+**Examples:**
+- At specialty_priority = 0: All facilities equal at ~18%, ~9% no-show
+- At specialty_priority = 30: Preferred ~22%, others ~17% each, ~9% no-show
+- At specialty_priority = 100: Preferred ~31%, others ~15% each, ~8% no-show
+
+**Special case:** Pal (Friend) cards have no preferred facility, so all 5 facilities receive base weight (100 each).
+
+The stat gain from using a training facility is improved by which and how many cards landed on it. Notably, if a card of type Speed lands on the Speed training facility (its preferred facility), the amount of Speed and Power gained is strongly improved. The exact amount of stats gained however can only be calculated when taking into account the numerous effects the each card has.
 
 Cards can go from level 1 to level 50 if they are of SSR rarity, to level 45 if of SR rarity and to level 40 if they are of R rarity. The Limit Break values (LB for short) mentioned in the codebase and in chats refers to the possibility of upgrading the level of the card, in this way:
 
