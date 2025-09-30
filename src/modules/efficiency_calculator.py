@@ -5,6 +5,7 @@ from .mood import Mood
 from .card import Card, CardType, CardEffect, CardUniqueEffect
 from .scenario import Scenario, Facility, FacilityType
 from .character import GenericCharacter, StatType
+from utils import GameplayConstants
 
 @dataclass(frozen=True)
 class Turn:
@@ -33,14 +34,47 @@ class Turn:
         object.__setattr__(self, 'training_effects', training_effects)
 
     def _distribute_cards(self) -> dict[Card, FacilityType]:
-        """Randomly distribute cards among facilities."""
+        """Distribute cards among facilities using specialty priority mechanic."""
         import random
+
         card_facilities = {}
-        # TODO: Use actual game function for card distribution
+        
         for card in self.cards:
-            if random.random() < 0.6:  # 60% chance to appear
-                card_facilities[card] = random.choice(list(FacilityType))
-        return card_facilitie
+            # Get card's specialty priority at current level
+            card_level = self.card_levels[card]
+            specialty_priority = card.get_effect_at_level(CardEffect.specialty_priority, card_level)
+            
+            # Calculate total weight for probability denominator
+            total_weight = (GameplayConstants.PREFERRED_FACILITY_BASE_WEIGHT * 5) + specialty_priority + GameplayConstants.NON_APPEARANCE_BASE_WEIGHT
+            
+            # Get preferred facility (None for Pal cards)
+            preferred_facility = card.preferred_facility
+            
+            # Build weights for each outcome
+            weights = []
+            outcomes = []
+            
+            for facility in FacilityType:
+                weight = GameplayConstants.PREFERRED_FACILITY_BASE_WEIGHT
+                if facility == preferred_facility:
+                    # Preferred facility gets bonus from specialty_priority
+                    weight += specialty_priority
+                
+                weights.append(weight)
+                outcomes.append(facility)
+            
+            # Add non-appearance as an outcome
+            weights.append(GameplayConstants.NON_APPEARANCE_BASE_WEIGHT)
+            outcomes.append(None)  # None represents "card doesn't appear"
+            
+            # Weighted random selection
+            chosen_outcome = random.choices(outcomes, weights=weights, k=1)[0]
+            
+            # Only add to dict if card actually appears
+            if chosen_outcome is not None:
+                card_facilities[card] = chosen_outcome
+        
+        return card_facilities
 
     @property
     def combined_bond_gauge(self) -> int:

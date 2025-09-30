@@ -17,6 +17,8 @@ class GameplayConstants:
     """Constants related to general gameplay"""
     MIN_FACILITY_LEVEL = 1
     MAX_FACILITY_LEVEL = 5
+    PREFERRED_FACILITY_BASE_WEIGHT = 100
+    NON_APPEARANCE_BASE_WEIGHT = 50
 
 class CharacterConstants:
     """Constants related to characters."""
