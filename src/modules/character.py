@@ -14,39 +14,6 @@ class StatType(Enum):
     def __str__(self) -> str:
         return self.name.title()
 
-@dataclass(frozen=True)
-class StatGrowth:
-    speed: int
-    stamina: int
-    power: int
-    guts: int
-    wit: int
-        
-    def __post_init__(self) -> None:
-        total = sum(self.speed, self.stamina, self.power, self.guts, self.wit)
-        if total > CharacterConstants.MAX_TOTAL_STAT_GROWTH:
-            raise ValueError(f"Total stat growth bonus is {total}%, exceeds 30% limit")
-    
-    def get_stat_growth(self, stat_type: StatType) -> int:
-        match stat_type:
-            case StatType.speed:
-                return self.speed
-            case StatType.stamina:
-                 returnself.stamina
-            case StatType.power:
-                return self.power
-            case StatType.guts:
-                return self.guts
-            case StatType.wit:
-                return self.wit
-
-    def get_stat_growth_string(self, stat_type: StatType) -> str:
-        return f"{self.get_stat_growth(stat_type)}%"
-    
-    def get_stat_growth_multipler(self, stat_type: StatType) -> float:
-        return (100 + self.get_stat_growth(stat_type)) / 100
-
-
 class Aptitude(Enum):
     S = 1
     A = 0
@@ -61,10 +28,23 @@ class Aptitude(Enum):
 class GenericCharacter:
     """Represents a generic trainee (character)."""
 
-    stat_growth: StatGrowth
+    stat_growth: dict[StatType, int]
     track_aptitude: Aptitude
     distance_aptitude: Aptitude
     style_aptitude: Aptitude
+
+    def __post_init__(self) -> None:
+        if sum(v for v in stat_growth.values()) > CharacterConstants.MAX_TOTAL_STAT_GROWTH:
+            raise ValueError(f"Total stat growth bonus exceeds {CharacterConstants.MAX_TOTAL_STAT_GROWTH}% limit")
+    
+    def get_stat_growth(self, stat_type: StatType) -> int:
+        return self.stat_growth.get(stat_type, 0)
+
+    def get_stat_growth_string(self, stat_type: StatType) -> str:
+        return f"{self.get_stat_growth(stat_type)}%"
+    
+    def get_stat_growth_multipler(self, stat_type: StatType) -> float:
+        return (100 + self.get_stat_growth(stat_type)) / 100
 
 
 @dataclass(frozen=True)
