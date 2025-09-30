@@ -401,7 +401,7 @@ class TrainingEffect:
         return combined_effects
                 
 
-class EfficencyCalculator:
+class EfficiencyCalculator:
     # Initiate with attributes required to make the 10000 Turn instances
     # Let modules and widgets update turn parameters via properties to trigger recalculations and events
     # Define events so the UI knows what the efficency_calculator is done and update itself accordingly
