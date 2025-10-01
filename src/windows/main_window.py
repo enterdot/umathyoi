@@ -89,8 +89,6 @@ class MainWindow(Adw.ApplicationWindow):
                 opacity: 1.0;
             }}
 
-            /* Empty card slot styling */
-
             .empty-card-slot {{
                 background-color: alpha(@theme_fg_color, 0.1);
                 border: 2px dashed alpha(@theme_fg_color, 0.3);
@@ -102,7 +100,20 @@ class MainWindow(Adw.ApplicationWindow):
                 font-weight: bold;
                 color: alpha(@theme_fg_color, 0.5);
             }}
+
+            .error-card-slot {{
+                background-color: alpha(@error_color, 0.1);
+                border: 2px solid alpha(@error_color, 0.3);
+                border-radius: 8px;
+            }}
+
+            .error-slot-indicator {{
+                font-size: 24px;
+                font-weight: bold;
+                color: @error_color;
+            }}
         """
+
         css_provider.load_from_string(css)
         
         Gtk.StyleContext.add_provider_for_display(
