@@ -3,37 +3,12 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Gdk', '4.0')
 from gi.repository import Gtk, Gdk, GLib
 
-import threading
-import asyncio
 from modules import Card
 from utils import auto_title_from_instance
 
 
 class CardArtwork(Gtk.Box):
     """A widget that displays card artwork with async loading and placeholder."""
-    
-    # Class-level shared event loop and thread
-    _shared_loop = None
-    _shared_thread = None
-    _loop_lock = threading.Lock()
-    
-    @classmethod
-    def _ensure_shared_loop(cls):
-        """Ensure the shared event loop is running."""
-        with cls._loop_lock:
-            if cls._shared_loop is None or cls._shared_loop.is_closed():
-                cls._shared_loop = asyncio.new_event_loop()
-                cls._shared_thread = threading.Thread(
-                    target=cls._run_shared_loop,
-                    daemon=True
-                )
-                cls._shared_thread.start()
-    
-    @classmethod
-    def _run_shared_loop(cls):
-        """Run the shared event loop in its own thread."""
-        asyncio.set_event_loop(cls._shared_loop)
-        cls._shared_loop.run_forever()
     
     def __init__(self, window, card: Card = None, width: int = 45, height: int = 60):
         """Initialize card artwork widget.
@@ -52,13 +27,12 @@ class CardArtwork(Gtk.Box):
         self.width = width
         self.height = height
         self.set_size_request(width, height)
-        self._ensure_shared_loop()
         
         # Create widgets
         self.artwork = Gtk.Picture()
         self.artwork.set_size_request(width, height)
         
-        # Create consistent empty frame (same size as artwork)
+        # Create consistent empty frame
         self.empty_frame = Gtk.Frame()
         self.empty_frame.set_size_request(width, height)
         self.empty_frame.add_css_class("empty-card-slot")
@@ -77,15 +51,13 @@ class CardArtwork(Gtk.Box):
         self.spinner.set_halign(Gtk.Align.CENTER)
         self.spinner.set_valign(Gtk.Align.CENTER)
         
-        # Create frame for loading state (same size)
+        # Create frame for loading state
         self.loading_frame = Gtk.Frame()
         self.loading_frame.set_size_request(width, height)
         self.loading_frame.set_child(self.spinner)
         
-        if card:
-            self.load_card_artwork()
-        else:
-            self.show_empty_frame()
+        self.load_card_artwork()
+
     
     def show_empty_frame(self):
         """Show consistent empty frame when card is None."""
@@ -124,13 +96,10 @@ class CardArtwork(Gtk.Box):
     def set_card(self, card: Card):
         """Set a new card and load its artwork."""
         self.card = card
-        if card:
-            self.load_card_artwork()
-        else:
-            self.show_empty_frame()
+        self.load_card_artwork()
     
     def load_card_artwork(self):
-        """Load card artwork asynchronously using shared event loop."""
+        """Load card artwork asynchronously in background thread."""
         if not self.card:
             self.show_empty_frame()
             return
@@ -138,31 +107,19 @@ class CardArtwork(Gtk.Box):
         # Show loading spinner while loading
         self.show_loading()
         
-        async def _load():
-            """Async function to load the image."""
-            try:
-                pixbuf = await self.app.card_db.load_card_image(
-                    self.card.id, self.width, self.height
-                )
-                
-                # Schedule UI update on main thread
-                def update_ui():
-                    self.show_artwork(pixbuf)
-                    return False  # Don't repeat
-                
-                GLib.idle_add(update_ui)
-                
-            except Exception as e:
-                # Handle any errors during loading
-                def show_error():
-                    self.show_empty_frame()
-                    return False
-                
-                GLib.idle_add(show_error)
+        def on_image_loaded(pixbuf):
+            """Called on GTK main thread when image loads."""
+            # Schedule UI update using GLib.idle_add for thread safety
+            def update_ui():
+                self.show_artwork(pixbuf)
+                return False  # Don't repeat
+            
+            GLib.idle_add(update_ui)
         
-        # Schedule the coroutine on the shared event loop
-        if self._shared_loop and not self._shared_loop.is_closed():
-            asyncio.run_coroutine_threadsafe(_load(), self._shared_loop)
-        else:
-            # Fallback: show empty frame if loop is not available
-            self.show_empty_frame()
+        # Start background download
+        self.app.card_db.load_card_image_async(
+            self.card.id,
+            self.width,
+            self.height,
+            on_image_loaded
+        )
