@@ -1,17 +1,14 @@
 import logging
 logger = logging.getLogger(__name__)
 
-import gi
-gi.require_version('Gdk', '4.0')
-from gi.repository import GdkPixbuf
-
 import json
 from typing import Iterator
-from pathlib import Path
 from datetime import date
-from utils import GameplayConstants, ApplicationConstants, stopwatch
+from utils import GameplayConstants, ApplicationConstants, stopwatch, auto_title_from_instance
 
 from .scenario import Scenario, Facility, FacilityType
+from .character import StatType
+
 
 class ScenarioDatabase:
     """Database for managing scenario data."""
@@ -34,9 +31,13 @@ class ScenarioDatabase:
     def count(self) -> int:
         return len(self._scenarios)
 
+    @property
+    def scenarios(self) -> list[Scenario]:
+        """Get list of all scenarios."""
+        return list(self._scenarios.values())
+
     def _load_scenarios_from_file(self, scenarios_file: str) -> None:
         """Load scenario data from JSON file."""
-
         try:
             with open(scenarios_file, 'r', encoding='utf-8') as f:
                 file_data = json.load(f)
@@ -51,31 +52,33 @@ class ScenarioDatabase:
 
         logger.info(f"Loading data: {len(scenarios_data)} scenarios")
         if 'updated_at' in metadata:
-                logger.info(f"Data updated at: {metadata['updated_at']}")
+            logger.info(f"Data updated at: {metadata['updated_at']}")
 
         self._load_scenarios(scenarios_data)
 
-        logger.info(f"Loaded data for {self.count} cards")
+        logger.info(f"Loaded data for {self.count} scenarios")
 
     def _load_scenarios(self, scenarios_data: dict) -> None:
-        """Load scenarios."""
-        for scenario_data in scenarios_data:
+        """Load scenarios from dictionary where keys are scenario identifiers."""
+        # scenarios_data is a dict like {"ura_finals": {...}, "aoharu": {...}}
+        for scenario_key, scenario_data in scenarios_data.items():
             try:
-                scenario_id=scenario_data["scenario_id"]
-                scenario_name=scenario_data["name"]
+                scenario_id = scenario_data["scenario_id"]
+                scenario_name = scenario_data["name"]
                 try:
-                    release=date.fromisoformat(scenario_data["release"])
-                except ValueError:
-                    release=None
-                facilities = _create_facilities_from_scenario_data(scenario_data)
+                    release = date.fromisoformat(scenario_data["release"])
+                except (ValueError, KeyError):
+                    release = None
+                
+                facilities = self._create_facilities_from_scenario_data(scenario_data)
                 scenario = Scenario(scenario_name, scenario_id, release, facilities)
                 self._scenarios[scenario_id] = scenario
-                logger.debug(f"Scenario {scenario_id} added to database")
+                logger.debug(f"Scenario {scenario_id} '{scenario_name}' added to database")
                 
             except (KeyError, ValueError) as e:
-                logger.warning(f"Skipping invalid data for scenario {scenario_data.get('scenario_id', 'unknown')}: {e}")
+                logger.warning(f"Skipping invalid data for scenario '{scenario_key}': {e}")
 
-    def _create_facilities_from_scenario_data(scenario_data: dict) -> dict[FacilityType, Facility]:
+    def _create_facilities_from_scenario_data(self, scenario_data: dict) -> dict[FacilityType, Facility]:
         """Create facilities dictionary from scenario JSON data."""
         facilities = {}
         
@@ -83,8 +86,8 @@ class ScenarioDatabase:
         
         for facility_name, facility_levels_data in facilities_data.items():
             try:
-                facility_type = _parse_facility_type(facility_name)
-                facility = create_facility_from_data(facility_type, facility_levels_data)
+                facility_type = self._parse_facility_type(facility_name)
+                facility = self._create_facility_from_data(facility_type, facility_levels_data)
                 facilities[facility_type] = facility
                 
             except (ValueError, KeyError) as e:
@@ -93,7 +96,7 @@ class ScenarioDatabase:
         
         return facilities
 
-    def _create_facility_from_data(facility_type: FacilityType, facility_data: dict) -> Facility:
+    def _create_facility_from_data(self, facility_type: FacilityType, facility_data: dict) -> Facility:
         """Create a Facility instance from JSON data."""
         stat_gain = {}
         skill_points_gain = {}
@@ -111,10 +114,10 @@ class ScenarioDatabase:
                 elif stat_name == 'energy':
                     energy_gain[level] = value
                 else:
-                    # Convert stat name to FacilityType enum
-                    facility_type = _parse_stat_type(stat_name)
-                    if facility_type:
-                        level_stat_gains[facility_type] = value
+                    # Convert stat name to StatType enum
+                    stat_type = self._parse_stat_type(stat_name)
+                    if stat_type:
+                        level_stat_gains[stat_type] = value
             
             stat_gain[level] = level_stat_gains
         
@@ -127,22 +130,22 @@ class ScenarioDatabase:
             energy_gain=energy_gain
         )
 
-    def _parse_stat_type(stat_name: str) -> FacilityType | None:
-        """Parse stat name string to FacilityType enum."""
+    def _parse_stat_type(self, stat_name: str) -> StatType | None:
+        """Parse stat name string to StatType enum."""
         stat_mapping = {
-            'speed': FacilityType.speed,
-            'stamina': FacilityType.stamina,
-            'power': FacilityType.power,
-            'guts': FacilityType.guts,
-            'wit': FacilityType.wit,
+            'speed': StatType.speed,
+            'stamina': StatType.stamina,
+            'power': StatType.power,
+            'guts': StatType.guts,
+            'wit': StatType.wit,
         }
         return stat_mapping.get(stat_name.lower())
 
-    def _parse_facility_type(facility_name: str) -> FacilityType:
+    def _parse_facility_type(self, facility_name: str) -> FacilityType:
         """Parse facility name to FacilityType enum."""
         facility_mapping = {
             'speed': FacilityType.speed,
-            'stamina': FacilityType.stamina, 
+            'stamina': FacilityType.stamina,
             'power': FacilityType.power,
             'guts': FacilityType.guts,
             'wit': FacilityType.wit,
@@ -154,9 +157,16 @@ class ScenarioDatabase:
         
         return facility_type
 
+    def get_scenario_by_id(self, scenario_id: int) -> Scenario | None:
+        """Get scenario by ID."""
+        return self._scenarios.get(scenario_id)
 
-    def get_scenario_by_name(self, name: str) -> Scenario:
-        pass
+    def get_scenario_by_name(self, name: str) -> Scenario | None:
+        """Get scenario by name."""
+        for scenario in self._scenarios.values():
+            if scenario.name.lower() == name.lower():
+                return scenario
+        return None
 
     def __iter__(self) -> Iterator[Scenario]:
         """Iterate over all scenarios in database."""
