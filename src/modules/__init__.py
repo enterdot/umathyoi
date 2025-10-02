@@ -5,7 +5,7 @@ from .skill import Skill, SkillType
 from .skill_db import SkillDatabase
 from .character import GenericCharacter, Character, StatType, Mood, Aptitude
 from .character_db import CharacterDatabase
-from .scenario import Scenario, Facility
+from .scenario import Scenario, Facility, FacilityType
 from .scenario_db import ScenarioDatabase
 from .deck import Deck
 from .deck_list import DeckList
@@ -21,7 +21,7 @@ __all__ = [
     'SkillDatabase',
     'GenericCharacter', 'Character', 'StatType', 'Mood', 'Aptitude',
     'CharacterDatabase',
-    'Scenario', 'Facility',
+    'Scenario', 'Facility', 'FacilityType'
     'ScenarioDatabase',
     'Deck',
     'DeckList',

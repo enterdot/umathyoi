@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 from modules import (
     CardDatabase,
     ScenarioDatabase,
+    FacilityType,
     CardEffect,
     CardRarity,
     Deck,
@@ -19,6 +20,8 @@ from modules import (
     StatType,
     Aptitude
 )
+
+from utils import stopwatch
 
 print("Loading databases...")
 card_db = CardDatabase('data/cards.json')
@@ -135,7 +138,16 @@ def test_efficiency_calculator():
     calculator.max_energy = 120
     calculator.mood = Mood.good
     calculator.fan_count = 50000
-    calculator.turn_count = 100  # Fewer turns for quick test
+    
+    calculator.facility_levels = {
+        FacilityType.speed: 5,
+        FacilityType.stamina: 5,
+        FacilityType.power: 5,
+        FacilityType.guts: 5,
+        FacilityType.wit: 5
+    }
+    
+    calculator.turn_count = 1000  # Fewer turns for quick test
     
     # Hook up event handlers to see progress
     def on_started(calc):
@@ -154,6 +166,8 @@ def test_efficiency_calculator():
     
     # Trigger calculation (should happen automatically due to init, but let's be explicit)
     print("\nRunning calculation...")
+
+    # @stopwatch(log_func=print, show_args=False) TODO: why does it not work? It works in the GTK app
     calculator._recalculate_sync()
 
     import time

@@ -32,7 +32,7 @@ def debounce(wait_ms: int = 500):
         return wrapper
     return decorator
 
-def stopwatch(log_func: Callable[[str], None] = None, show_args=False):
+def stopwatch(log_func: Callable[[str], None] = None, show_args = False):
     """
     Stopwatch decorator - logs execution time.
     
@@ -63,9 +63,8 @@ def stopwatch(log_func: Callable[[str], None] = None, show_args=False):
             
             return result
 
-
-        
         return wrapper
+
     return decorator
 
 

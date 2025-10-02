@@ -30,11 +30,11 @@ class Turn:
         card_facilities = self._distribute_cards()
         object.__setattr__(self, 'card_facilities', card_facilities)
 
-        # Build training effects
+        # Build training effects - only for cards that actually appeared
         training_effects = {facility: [] for facility in FacilityType}
-        for card in self.cards:
+        for card, facility_type in card_facilities.items():
             effect = TrainingEffect(card, self)
-            training_effects[effect.facility_type].append(effect)
+            training_effects[facility_type].append(effect)
         object.__setattr__(self, 'training_effects', training_effects)
 
     def _distribute_cards(self) -> dict[Card, FacilityType]:
@@ -620,7 +620,7 @@ class EfficiencyCalculator:
                     continue
                 
                 # Get base stats from facility
-                facility = turn.scenario.get_facility(facility_type)
+                facility = turn.scenario.facilities[facility_type]
                 facility_level = turn.facility_levels[facility_type]
                 base_stats = facility.get_all_stat_gains_at_level(facility_level)
                 base_skill_points = facility.get_skill_points_gain_at_level(facility_level)
@@ -791,6 +791,7 @@ class EfficiencyCalculator:
         print(f"Energy: {self.energy}/{self.max_energy}")
         print(f"Mood: {self.mood.name}")
         print(f"Fans: {self.fan_count:,}")
+        print(f"Facility level: {self.facility_levels.values()}")
         
         # Print per-facility results
         print(f"\n{'-'*80}")
