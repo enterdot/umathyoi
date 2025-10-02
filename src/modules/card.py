@@ -8,6 +8,7 @@ from .scenario import FacilityType
 
 from utils import CardConstants, memoize
 
+# TODO: Rename to CardRarity
 class Rarity(Enum):
     R = 1
     SR = 2
@@ -100,7 +101,9 @@ class CardUniqueEffect(Enum):
     all_cards_gain_bond_bonus_per_training = 121
     cards_gain_effect_bonus_next_turn_after_trained_with = 122
 
-@dataclass(frozen=True)
+# TODO: Freeze and remove lru_cache (memoize decorator)
+# TODO: Save all results per each level or just recalculate every time
+@dataclass(frozen=False)
 class Card:
     id: int
     name: str

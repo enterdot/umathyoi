@@ -7,12 +7,23 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from modules import CardDatabase, CardEffect
+from modules import (
+    CardDatabase,
+    ScenarioDatabase,
+    CardEffect,
+    Rarity,
+    Deck,
+    EfficiencyCalculator,
+    Mood
+)
+
+print("Loading databases...")
+card_db = CardDatabase('data/cards.json')
+#char_db = CharacterDatabase()
+scenario_db = ScenarioDatabase()
 
 def test_card_effects():
     """Test Card effects interpolation system."""
-    print("Loading card database...")
-    card_db = CardDatabase('data/cards.json')
     
     # Find the Special Week SSR Speed card (should be ID 30086 or similar)
     special_week = None
@@ -65,9 +76,71 @@ def test_card_effects():
     print(f"First 1000 calls (cache miss): {first_time:.4f}s")
     print(f"Second 1000 calls (cache hit): {second_time:.4f}s")
     print(f"Speedup: {first_time / second_time:.1f}x")
+
+
+
+def test_efficiency_calculator():
+   
+    # Create a simple test deck
+    print("Creating test deck...")
+    cards = []
     
-    # Show cache info
-    print(f"\nLRU Cache stats: {special_week._interpolate_effect_value.cache_info()}")
+    # Try to get 6 SSR cards of different types
+    ssr_cards = [c for c in card_db.cards.values() if c.rarity == Rarity.SSR]
+    if len(ssr_cards) >= 6:
+        cards = ssr_cards[:6]
+    else:
+        # Fallback: just use first 6 cards
+        cards = list(card_db.cards)[:6]
+    
+    deck = Deck(name="Test Deck", cards=cards)
+    print(f"Deck created with cards: {[c.name for c in cards]}")
+    
+    # Get first scenario and character
+    scenario = scenario_db.scenarios[0]
+    character = char_db.characters[0]
+    
+    print(f"Using scenario: {scenario.name}")
+    print(f"Using character: {character.name}")
+    
+    # Create calculator
+    print("\nInitializing calculator...")
+    calculator = EfficiencyCalculator(
+        deck=deck,
+        scenario=scenario,
+        character=character
+    )
+    
+    # Set test parameters
+    calculator.energy = 80
+    calculator.max_energy = 120
+    calculator.mood = Mood.good
+    calculator.fan_count = 50000
+    calculator.turn_count = 100  # Fewer turns for quick test
+    
+    # Hook up event handlers to see progress
+    def on_started(calc):
+        print("\nCalculation started...")
+    
+    def on_progress(calc, current, total):
+        if current % 10 == 0:
+            print(f"Progress: {current}/{total} turns...")
+    
+    def on_finished(calc, results):
+        print("Calculation finished!")
+    
+    calculator.calculation_started.subscribe(on_started)
+    calculator.calculation_progress.subscribe(on_progress)
+    calculator.calculation_finished.subscribe(on_finished)
+    
+    # Trigger calculation (should happen automatically due to init, but let's be explicit)
+    print("\nRunning calculation...")
+    calculator.recalculate()
+    
+    # Print results
+    calculator.print_results()
+
 
 if __name__ == "__main__":
     test_card_effects()
+    test_efficiency_calculator()

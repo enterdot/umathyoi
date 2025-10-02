@@ -9,9 +9,9 @@ import json
 from typing import Iterator
 from pathlib import Path
 from datetime import date
-from utils import GameplayConstants, stopwatch
+from utils import GameplayConstants, ApplicationConstants, stopwatch
 
-from .scenario import Scenario, FacilityType
+from .scenario import Scenario, Facility, FacilityType
 
 class ScenarioDatabase:
     """Database for managing scenario data."""
@@ -24,7 +24,7 @@ class ScenarioDatabase:
         try:
             self._load_scenarios_from_file(scenarios_file)
         except Exception as e:
-            logger.error(f"Could not load scenarios from {cards_file}: {e}")
+            logger.error(f"Could not load scenarios from {scenarios_file}: {e}")
             import sys
             sys.exit(1)
         

@@ -1,11 +1,11 @@
 from enum import Enum
 from dataclasses import dataclass
 from .skill import Skill, SkillType
-from .mood import Mood
 from .card import Card, CardType, CardEffect, CardUniqueEffect
+from .deck import Deck
 from .scenario import Scenario, Facility, FacilityType
-from .character import GenericCharacter, StatType
-from utils import GameplayConstants
+from .character import GenericCharacter, StatType, Mood
+from utils import GameplayConstants, debounce
 
 @dataclass(frozen=True)
 class Turn:
@@ -437,11 +437,11 @@ class TrainingEffect:
 class EfficiencyCalculator:
     """Initialize calculator with deck configuration."""
     
-    def __init__(self, deck: Deck, scenario: Scenario, character: Character):
+    def __init__(self, deck: Deck, scenario: Scenario, character: GenericCharacter):
         # Private attributes
         self._deck: Deck = deck
         self._scenario: Scenario = scenario
-        self._character: Character = character
+        self._character: GenericCharacter = character
         self._fan_count: int = 100000
         self._mood: Mood = Mood.good
         self._energy: int = 70
@@ -483,11 +483,11 @@ class EfficiencyCalculator:
 
     # Character property
     @property
-    def character(self) -> Character:
+    def character(self) -> GenericCharacter:
         return self._character
     
     @character.setter
-    def character(self, value: Character) -> None:
+    def character(self, value: GenericCharacter) -> None:
         self._character = value
         self.recalculate()
 
@@ -680,4 +680,140 @@ class EfficiencyCalculator:
         self._aggregated_skill_points = aggregated_skill_points
         
         self.calculation_finished.trigger(self, results=self._aggregated_stat_gains)
-                    
+
+    def get_results(self) -> dict | None:
+        """Get aggregated calculation results.
+        
+        Returns dict with structure:
+        {
+            'per_facility': {
+                FacilityType: {
+                    'stats': {StatType: {'mean': float, 'min': int, 'max': int}},
+                    'skill_points': {'mean': float, 'min': int, 'max': int}
+                }
+            },
+            'total': {
+                'stats': {StatType: {'mean': float, 'total': float}},
+                'skill_points': {'mean': float, 'total': float}
+            }
+        }
+        
+        Returns None if no calculation has been performed yet.
+        """
+        if not hasattr(self, '_aggregated_stat_gains'):
+            return None
+        
+        results = {'per_facility': {}, 'total': {'stats': {}, 'skill_points': {}}}
+        
+        # Calculate per-facility statistics
+        for facility_type in FacilityType:
+            facility_results = {'stats': {}, 'skill_points': {}}
+            
+            # Process each stat
+            for stat_type in StatType:
+                gains = self._aggregated_stat_gains[facility_type][stat_type]
+                if gains:
+                    facility_results['stats'][stat_type] = {
+                        'mean': sum(gains) / len(gains),
+                        'min': min(gains),
+                        'max': max(gains)
+                    }
+                else:
+                    facility_results['stats'][stat_type] = {'mean': 0.0, 'min': 0, 'max': 0}
+            
+            # Process skill points
+            skill_points = self._aggregated_skill_points[facility_type]
+            if skill_points:
+                facility_results['skill_points'] = {
+                    'mean': sum(skill_points) / len(skill_points),
+                    'min': min(skill_points),
+                    'max': max(skill_points)
+                }
+            else:
+                facility_results['skill_points'] = {'mean': 0.0, 'min': 0, 'max': 0}
+            
+            results['per_facility'][facility_type] = facility_results
+        
+        # Calculate totals across all facilities
+        for stat_type in StatType:
+            all_gains = []
+            for facility_type in FacilityType:
+                all_gains.extend(self._aggregated_stat_gains[facility_type][stat_type])
+            
+            if all_gains:
+                results['total']['stats'][stat_type] = {
+                    'mean': sum(all_gains) / len(all_gains),
+                    'total': sum(all_gains)
+                }
+            else:
+                results['total']['stats'][stat_type] = {'mean': 0.0, 'total': 0.0}
+        
+        # Calculate total skill points
+        all_skill_points = []
+        for facility_type in FacilityType:
+            all_skill_points.extend(self._aggregated_skill_points[facility_type])
+        
+        if all_skill_points:
+            results['total']['skill_points'] = {
+                'mean': sum(all_skill_points) / len(all_skill_points),
+                'total': sum(all_skill_points)
+            }
+        else:
+            results['total']['skill_points'] = {'mean': 0.0, 'total': 0.0}
+        
+        return results
+
+
+    def print_results(self) -> None:
+        """Print calculation results to terminal."""
+        results = self.get_results()
+        
+        if results is None:
+            print("No calculation results available. Run recalculate() first.")
+            return
+        
+        print(f"\n{'='*80}")
+        print(f"Efficiency Calculation Results ({self.turn_count} simulated turns)")
+        print(f"{'='*80}")
+        
+        # Print deck info
+        print(f"\nDeck: {self.deck.name}")
+        print(f"Scenario: {self.scenario.name}")
+        print(f"Stat Growth: {self.character.stat_growth}")
+        print(f"Energy: {self.energy}/{self.max_energy}")
+        print(f"Mood: {self.mood.name}")
+        print(f"Fans: {self.fan_count:,}")
+        
+        # Print per-facility results
+        print(f"\n{'-'*80}")
+        print("Per-Facility Average Gains:")
+        print(f"{'-'*80}")
+        
+        for facility_type in FacilityType:
+            facility_data = results['per_facility'][facility_type]
+            print(f"\n{facility_type.name.upper()} Training:")
+            
+            # Print stats
+            for stat_type in StatType:
+                stat_data = facility_data['stats'][stat_type]
+                if stat_data['mean'] > 0:
+                    print(f"  {stat_type.name.capitalize():10s}: {stat_data['mean']:6.2f} (min: {stat_data['min']:3d}, max: {stat_data['max']:3d})")
+            
+            # Print skill points
+            sp_data = facility_data['skill_points']
+            if sp_data['mean'] > 0:
+                print(f"  {'Skill Pts':10s}: {sp_data['mean']:6.2f} (min: {sp_data['min']:3d}, max: {sp_data['max']:3d})")
+        
+        # Print totals
+        print(f"\n{'-'*80}")
+        print("Total Gains Across All Facilities:")
+        print(f"{'-'*80}")
+        
+        for stat_type in StatType:
+            stat_data = results['total']['stats'][stat_type]
+            print(f"  {stat_type.name.capitalize():10s}: {stat_data['total']:8.1f} total, {stat_data['mean']:6.2f} avg per turn")
+        
+        sp_data = results['total']['skill_points']
+        print(f"  {'Skill Pts':10s}: {sp_data['total']:8.1f} total, {sp_data['mean']:6.2f} avg per turn")
+        
+        print(f"\n{'='*80}\n")
