@@ -8,8 +8,7 @@ from .scenario import FacilityType
 
 from utils import CardConstants, memoize
 
-# TODO: Rename to CardRarity
-class Rarity(Enum):
+class CardRarity(Enum):
     R = 1
     SR = 2
     SSR = 3
@@ -108,7 +107,7 @@ class Card:
     id: int
     name: str
     view_name: str
-    rarity: Rarity
+    rarity: CardRarity
     type: CardType
     effects: list[list[int]] # [type, value_at_level_1, value_at_level_5, value_at_level_10, ...]
     unique_effects: list[list[int]] # [[type, value1], [type, value1, value2]]
@@ -120,11 +119,11 @@ class Card:
 
     @property
     def max_level(self) -> int:
-        if self.rarity == Rarity.R:
+        if self.rarity == CardRarity.R:
             return CardConstants.R_MAX_LEVEL
-        elif self.rarity == Rarity.SR:
+        elif self.rarity == CardRarity.SR:
             return CardConstants.SR_MAX_LEVEL
-        elif self.rarity == Rarity.SSR:
+        elif self.rarity == CardRarity.SSR:
             return CardConstants.SSR_MAX_LEVEL
         else:
             raise RuntimeError(f"Invalid state for {self}, {rarity=}")
@@ -133,7 +132,7 @@ class Card:
     def preferred_facility(self) -> FacilityType:
         if self.type == CardType.pal:
             return None
-        return FacilityType(self.type.value())
+        return FacilityType(self.type.value)
 
     @memoize(maxsize=256)
     def _interpolate_effect_value(self, effect_type: CardEffect, level: int) -> int:
@@ -212,11 +211,11 @@ class Card:
         if not CardConstants.MIN_LIMIT_BREAK <= limit_break <= CardConstants.MAX_LIMIT_BREAK:
             raise RuntimeError(f"{limit_break=} is not in valid range [{CardConstants.MIN_LIMIT_BREAK}, {CardConstants.MAX_LIMIT_BREAK}]")
 
-        if rarity == Rarity.R:
+        if rarity == CardRarity.R:
             base_level = CardConstants.R_MAX_LEVEL_AT_MIN_LIMIT_BREAK
-        elif rarity == Rarity.SR:
+        elif rarity == CardRarity.SR:
             base_level = CardConstants.SR_MAX_LEVEL_AT_MIN_LIMIT_BREAK
-        elif rarity == Rarity.SSR:
+        elif rarity == CardRarity.SSR:
             base_level = CardConstants.SSR_MAX_LEVEL_AT_MIN_LIMIT_BREAK
         else:
             raise RuntimeError(f"Invalid state for {self}, {rarity=}")

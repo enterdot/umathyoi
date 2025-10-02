@@ -1,5 +1,5 @@
 from .event import Event
-from .card import Card, Rarity, CardType, CardEffect, CardUniqueEffect
+from .card import Card, CardRarity, CardType, CardEffect, CardUniqueEffect
 from .card_db import CardDatabase
 from .skill import Skill, SkillType
 from .skill_db import SkillDatabase
@@ -15,7 +15,7 @@ from .efficiency_calculator import EfficiencyCalculator
 
 __all__ = [
     'Event',
-    'Card', 'Rarity', 'CardType', 'CardEffect', 'CardUniqueEffect',
+    'Card', 'CardRarity', 'CardType', 'CardEffect', 'CardUniqueEffect',
     'CardDatabase',
     'Skill', 'SkillType',
     'SkillDatabase',

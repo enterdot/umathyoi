@@ -11,7 +11,7 @@ from modules import (
     CardDatabase,
     ScenarioDatabase,
     CardEffect,
-    Rarity,
+    CardRarity,
     Deck,
     EfficiencyCalculator,
     Mood,
@@ -92,7 +92,7 @@ def test_efficiency_calculator():
     cards = []
     
     # Try to get 6 SSR cards of different types
-    ssr_cards = [c for c in card_db.cards.values() if c.rarity == Rarity.SSR]
+    ssr_cards = [c for c in card_db.cards.values() if c.rarity == CardRarity.SSR]
     if len(ssr_cards) >= 6:
         cards = ssr_cards[:6]
     else:
@@ -154,11 +154,13 @@ def test_efficiency_calculator():
     
     # Trigger calculation (should happen automatically due to init, but let's be explicit)
     print("\nRunning calculation...")
-    calculator.recalculate()
+    calculator._recalculate_sync()
+
+    import time
+    time.sleep(0.5)    
     
     # Print results
     calculator.print_results()
-
 
 if __name__ == "__main__":
     test_card_effects()

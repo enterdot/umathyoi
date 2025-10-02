@@ -12,7 +12,7 @@ from typing import Iterator
 from pathlib import Path
 from platformdirs import user_cache_dir
 
-from .card import Rarity, CardType, Card
+from .card import CardRarity, CardType, Card
 from utils import ApplicationConstants, CardConstants, NetworkConstants, auto_title_from_instance, stopwatch
 
 
@@ -96,7 +96,7 @@ class CardDatabase:
                     id=card_id,
                     name=card_data["url_name"],
                     view_name=GLib.markup_escape_text(card_data["char_name"]),
-                    rarity=Rarity(card_data["rarity"]),
+                    rarity=CardRarity(card_data["rarity"]),
                     type=self._map_name_to_card_type(card_data["type"]),
                     effects=card_data.get("effects", []),
                     unique_effects=card_data.get("unique", {}).get("effects", []),
@@ -128,7 +128,7 @@ class CardDatabase:
         """Get card by ID."""
         return self.cards.get(card_id)
 
-    def get_cards_by_rarity(self, rarity: Rarity) -> Iterator[Card]:
+    def get_cards_by_rarity(self, rarity: CardRarity) -> Iterator[Card]:
         """Get all cards of specified rarity."""
         for card in self.cards.values():
             if card.rarity == rarity:
@@ -140,7 +140,7 @@ class CardDatabase:
             if card.type == card_type:
                 yield card
 
-    def search_cards(self, name_query: str | None = None, rarity: Rarity | None = None, 
+    def search_cards(self, name_query: str | None = None, rarity: CardRarity | None = None, 
                     card_type: CardType | None = None, min_owned: int | None = None) -> Iterator[Card]:
         """Search cards with multiple filter criteria."""
         for card in self.cards.values():

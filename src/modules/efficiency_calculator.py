@@ -577,6 +577,10 @@ class EfficiencyCalculator:
 
     @debounce(wait_ms=350)
     def recalculate(self) -> None:
+        """Run the Monte Carlo simulation (debounced for UI responsiveness)."""
+        self._recalculate_sync()
+
+    def _recalculate_sync(self) -> None:
         """Run the Monte Carlo simulation."""
         self.calculation_started.trigger(self)
         
