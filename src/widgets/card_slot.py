@@ -29,6 +29,9 @@ class CardSlot(Gtk.Box):
     
     def setup_ui(self) -> None:
 
+        #TODO: see if we can remove set_size_request and set_hexpand/set_vexpand
+        # wobble might be gone now that we use a stack for the various card slot states
+
         # Lock size to prevent wobble
         self.set_size_request(self.width, self.height)
         self.set_hexpand(False)
