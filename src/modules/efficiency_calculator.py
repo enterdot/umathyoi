@@ -434,11 +434,208 @@ class TrainingEffect:
         
         return combined_effects
                 
-
 class EfficiencyCalculator:
-    # Initiate with attributes required to make the 10000 Turn instances
-    # Let modules and widgets update turn parameters via properties to trigger recalculations and events
-    # Define events so the UI knows what the efficency_calculator is done and update itself accordingly
-    # For every turn created you can then do:
-    # effects_on_speed_facility = self.turns[456].training_effects[FacilityType.speed]
-    pass
+    """Initialize calculator with deck configuration."""
+    
+    def __init__(self, deck: Deck, scenario: Scenario, character: Character):
+        # Private attributes
+        self._deck: Deck = deck
+        self._scenario: Scenario = scenario
+        self._character: Character = character
+        self._fan_count: int = 100000
+        self._mood: Mood = Mood.good
+        self._energy: int = 70
+        self._max_energy: int = 104
+        self._facility_levels: dict[FacilityType, int] = {facility: 3 for facility in FacilityType}
+        self._card_levels: dict[Card, int] = {card: card.max_level for card in deck.cards}
+        self._card_bonds: dict[Card, int] = {card: 80 for card in deck.cards}
+        self._skills: list[Skill] = []
+
+        # Number of turns to simulate
+        self.turn_count = 1000
+
+        # Events
+        self.calculation_started = Event()
+        self.calculation_progress = Event()  # Passes (current, total)
+        self.calculation_finished = Event()
+        
+        logger.debug(f"{auto_title_from_instance(self)} initialized")
+
+    # Deck property
+    @property
+    def deck(self) -> Deck:
+        return self._deck
+    
+    @deck.setter
+    def deck(self, value: Deck) -> None:
+        self._deck = value
+        self.recalculate()
+
+    # Scenario property
+    @property
+    def scenario(self) -> Scenario:
+        return self._scenario
+    
+    @scenario.setter
+    def scenario(self, value: Scenario) -> None:
+        self._scenario = value
+        self.recalculate()
+
+    # Character property
+    @property
+    def character(self) -> Character:
+        return self._character
+    
+    @character.setter
+    def character(self, value: Character) -> None:
+        self._character = value
+        self.recalculate()
+
+    # Fan count property
+    @property
+    def fan_count(self) -> int:
+        return self._fan_count
+    
+    @fan_count.setter
+    def fan_count(self, value: int) -> None:
+        self._fan_count = value
+        self.recalculate()
+
+    # Mood property
+    @property
+    def mood(self) -> Mood:
+        return self._mood
+    
+    @mood.setter
+    def mood(self, value: Mood) -> None:
+        self._mood = value
+        self.recalculate()
+
+    # Energy property
+    @property
+    def energy(self) -> int:
+        return self._energy
+    
+    @energy.setter
+    def energy(self, value: int) -> None:
+        self._energy = value
+        self.recalculate()
+
+    # Max energy property
+    @property
+    def max_energy(self) -> int:
+        return self._max_energy
+    
+    @max_energy.setter
+    def max_energy(self, value: int) -> None:
+        self._max_energy = value
+        self.recalculate()
+
+    # Facility levels property
+    @property
+    def facility_levels(self) -> dict[FacilityType, int]:
+        return self._facility_levels
+    
+    @facility_levels.setter
+    def facility_levels(self, value: dict[FacilityType, int]) -> None:
+        self._facility_levels = value
+        self.recalculate()
+
+    # Card levels property
+    @property
+    def card_levels(self) -> dict[Card, int]:
+        return self._card_levels
+    
+    @card_levels.setter
+    def card_levels(self, value: dict[Card, int]) -> None:
+        self._card_levels = value
+        self.recalculate()
+
+    # Card bonds property
+    @property
+    def card_bonds(self) -> dict[Card, int]:
+        return self._card_bonds
+    
+    @card_bonds.setter
+    def card_bonds(self, value: dict[Card, int]) -> None:
+        self._card_bonds = value
+        self.recalculate()
+
+    # Skills property
+    @property
+    def skills(self) -> list[Skill]:
+        return self._skills
+    
+    @skills.setter
+    def skills(self, value: list[Skill]) -> None:
+        self._skills = value
+        self.recalculate()
+
+    @debounce(wait_ms=350)
+    def recalculate(self) -> None:
+        """Run the Monte Carlo simulation."""
+        
+        self.calculation_started.trigger(self)
+        
+        self._simulated_turns: list[Turn] = []
+        
+        for i in range(self.turn_count):
+            # Create Turn instance
+            turn = Turn(
+                scenario=self.scenario,
+                facility_levels=self.facility_levels.copy(),
+                energy=self.energy,
+                max_energy=self.max_energy,
+                fan_count=self.fan_count,
+                mood=self.mood,
+                character=self.character,
+                cards=list(self.deck.cards),
+                card_levels=self.card_levels.copy(),
+                card_bonds=self.card_bonds.copy(),
+                skills=self.skills.copy()
+            )
+            
+            self._simulated_turns.append(turn)
+            
+            # Report progress every 1%
+            if i % (self.turn_count // 100) == 0:
+                self.calculation_progress.trigger(self, current=i, total=self.turn_count)
+        
+        
+        # Aggregating results of all turns
+        for turn in self._simulated_turns:
+
+            for training_effect in turn.training_effects:
+
+                for combined_effect in training_effect.combined_effects:
+
+                    # friendship_multiplier for cards which type match the facility
+                    # (1 + friendship_effectiveness_1/100) * (1 + friendship_effectiveness_2/100) * ...
+
+                    # mood_multiplier
+                    # 1 + ( turn_mood/100 * (1 + mood_effect_increase_1/100 + mood_effect_increase_2/100 + ...))
+
+                    # training_multiplier
+                    # 1 + training_effectiveness_1/100 + training_effectiveness_2/100 + ...
+
+                    # speed_stat_total_bonus (for each facility that gives speed)
+                    # speed_stat_bonus_1 + speed_stat_bonus_2 + ...
+                    
+                    # similar for stamina, power, guts, wit and skill_points
+
+                    # support_multiplier
+                    # 1 + card_count_on_facility * 0.05
+                    
+                    # speed_growth_multiplier
+                    # 1 + character_speed_growth/100
+
+                    # similar for stamina, power, guts and wit growth
+
+                    # final_speed_gain
+                    # (facility_speed_base + speed_stat_base) * friendship_multiplier * mood_multiplier * training_multiplier * support_multiplier * speed_growth_multiplier
+
+                    # similar for stamina, power, guts and wit
+
+                    # final_skill_points_gain
+                    # facility_skill_points_base + skill_points_total_bonus
+                    
