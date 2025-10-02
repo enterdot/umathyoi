@@ -3,11 +3,12 @@ logger = logging.getLogger(__name__)
 
 from typing import Iterator
 from .character import Character, StatType
-from utils import auto_title_from_instance, ApplicationConstants
+from utils import auto_title_from_instance, ApplicationConstants, stopwatch
 
 class CharacterDatabase:
     """Database for managing characters loaded from Gametora website."""
-    
+
+    @stopwatch(show_args=False)
     def __init__(self, characters_file: str = ApplicationConstants.CHARACTERS_JSON) -> None:
         """Initialize character database."""
         self.characters: dict[int, Character] = {}

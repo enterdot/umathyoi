@@ -3,12 +3,13 @@ logger = logging.getLogger(__name__)
 
 from typing import Iterator
 from .skill import Skill
-from utils import auto_title_from_instance
+from utils import auto_title_from_instance, stopwatch
 
 
 class SkillDatabase:
     """Database for managing skills loaded from Gametora website."""
-    
+
+    @stopwatch(show_args=False)
     def __init__(self) -> None:
         """Initialize skill database."""
         self.skills: dict[int, Skill] = {}

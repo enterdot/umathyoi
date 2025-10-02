@@ -81,20 +81,14 @@ class CardSelection(Adw.Bin):
                 self._show_row(row)
 
     def _hide_row(self, row: Adw.ActionRow) -> None:
-        """Hide row when card is added to deck.
-        
-        Args:
-            row: Action row to hide
-        """
-        row.set_visible(False)
-    
+        """Visually disable row when card is added to deck."""
+        row.set_sensitive(False)  # Disables interaction and greys out
+        row.add_css_class("card-in-deck")
+
     def _show_row(self, row: Adw.ActionRow) -> None:
-        """Show row when card is removed from deck.
-        
-        Args:
-            row: Action row to show
-        """
-        row.set_visible(True)
+        """Re-enable row when card is removed from deck."""
+        row.set_sensitive(True)
+        row.remove_css_class("card-in-deck")
 
     def _create_card_list_view(self) -> Gtk.ScrolledWindow:
         """Create the main card list view.

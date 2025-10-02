@@ -12,6 +12,7 @@ from .placeholder import Placeholder
 from utils import (
     auto_tag_from_instance,
     auto_title_from_instance,
+    throttle, debounce,
     UIConstants, DeckConstants)
 
 
@@ -90,7 +91,7 @@ class DeckCarousel(Adw.Bin):
             carousel.set_spacing(round(max(UIConstants.CAROUSEL_MIN_SPACING, carousel.target_spacing)))
         
         self.last_nav_page_width = float(nav_page_width)
-    
+
     def update_carousel_hints(self, carousel: Adw.Carousel) -> None:
         """Update visual hints (scaling) for carousel pages based on position."""
         position = carousel.get_position()
@@ -123,27 +124,36 @@ class DeckCarousel(Adw.Bin):
         deck_grid.set_column_spacing(UIConstants.DECK_GRID_SPACING)
 
         for slot, card, limit_break in deck:
-            card_slot_widget = self._create_card_slot_widget(card, limit_break, deck, slot)
+            card_slot = self._create_card_slot(card, limit_break, deck, slot)
             row, col = divmod(slot, DeckConstants.DEFAULT_DECK_SIZE // 2)
-            deck_grid.attach(card_slot_widget, col, row, 1, 1)
+            deck_grid.attach(card_slot, col, row, 1, 1)
         
         return deck_grid
         
     
-    def _create_card_slot_widget(self, card: Card | None, limit_break: int, deck: Deck, slot: int) -> CardSlot:
+    def _create_card_slot(self, card: Card | None, limit_break: int, deck: Deck, slot: int) -> CardSlot:
         """Create a card slot widget for the deck grid."""
         card_slot = CardSlot(self.window, card, limit_break, UIConstants.CARD_SLOT_WIDTH, UIConstants.CARD_SLOT_HEIGHT, deck=deck, slot=slot)
         
         # Add click handler for card removal if slot contains a card
         if card is not None:
             click_gesture = Gtk.GestureClick()
-            click_gesture.connect("pressed", self._on_card_slot_clicked, slot)
+            click_gesture.connect("pressed", self._on_card_slot_clicked, card_slot, slot)
             card_slot.add_controller(click_gesture)
             card_slot._click_controller = click_gesture  # Store reference for removal
         else:
             card_slot._click_controller = None  # Initialize as None for empty slots
         
         return card_slot
+    
+    def _update_card_slot_click_gesture(self, card_slot: CardSlot) -> None:
+        if card_slot.card:
+            click_gesture = Gtk.GestureClick()
+            click_gesture.connect("pressed", self._on_card_slot_clicked, card_slot, slot)
+            card_slot.add_controller(click_gesture)
+            card_slot._click_gesture = click_gesture
+        else:
+            card_slot._click_gesture = None
 
     def _refresh_carousel_page(self, deck_slot: int) -> None:
         """Refresh a specific carousel page to reflect current deck state."""
@@ -172,7 +182,7 @@ class DeckCarousel(Adw.Bin):
                 card_slot_widget.set_limit_break(limit_break)
 
     def _update_card_slot_click_handler(self, card_slot_widget: CardSlot, slot: int, card: Card | None) -> None:
-        """Update click handler for card slot based on whether it contains a card."""
+        """Update click handler for card slot based on whether it contains a card."""        
         # Remove existing click handler if present
         if hasattr(card_slot_widget, '_click_controller') and card_slot_widget._click_controller:
             card_slot_widget.remove_controller(card_slot_widget._click_controller)
@@ -181,7 +191,7 @@ class DeckCarousel(Adw.Bin):
         # Add click handler only if slot contains a card
         if card is not None:
             click_gesture = Gtk.GestureClick()
-            click_gesture.connect("pressed", self._on_card_slot_clicked, slot)
+            click_gesture.connect("pressed", self._on_card_slot_clicked, card_slot_widget, slot)
             card_slot_widget.add_controller(click_gesture)
             card_slot_widget._click_controller = click_gesture
 
@@ -229,9 +239,8 @@ class DeckCarousel(Adw.Bin):
             card = active_deck.get_card_at_slot(card_slot) if active_deck else None
             self._update_single_card_slot(self.app.deck_list.active_slot, card_slot, card, limit_break)
 
-    def _on_card_slot_clicked(self, gesture: Gtk.GestureClick, n_press: int, x: float, y: float, slot: int) -> None:
+    def _on_card_slot_clicked(self, gesture: Gtk.GestureClick, n_press: int, x: float, y: float, card_slot_widget: CardSlot, slot: int) -> None:
         """Handle clicking on a card in the deck to remove it."""
-        active_deck = self.app.deck_list.active_deck
-        if active_deck:
+        if card_slot_widget.deck is self.app.deck_list.active_deck:
             logger.debug(f"Try removing card at slot {slot} from active deck")
-            active_deck.remove_card_at_slot(slot)
+            self.app.deck_list.active_deck.remove_card_at_slot(slot)

@@ -29,13 +29,14 @@ class CardArtwork(Gtk.Box):
         self.empty_frame = Gtk.Frame()
         self.empty_frame.set_size_request(width, height)
         self.empty_frame.add_css_class("empty-card-slot")
-        
-        empty_label = Gtk.Label()
-        empty_label.set_text("+")
-        empty_label.add_css_class("empty-slot-indicator")
-        empty_label.set_halign(Gtk.Align.CENTER)
-        empty_label.set_valign(Gtk.Align.CENTER)
-        self.empty_frame.set_child(empty_label)
+
+        empty_icon = Gtk.Image()
+        empty_icon.set_from_icon_name("list-add-symbolic")
+        empty_icon.set_pixel_size(24)
+        empty_icon.set_halign(Gtk.Align.CENTER)
+        empty_icon.set_valign(Gtk.Align.CENTER)
+        empty_icon.add_css_class("empty-slot-indicator")
+        self.empty_frame.set_child(empty_icon)
         
         # Loading frame (spinner)
         self.spinner = Gtk.Spinner()
@@ -51,13 +52,14 @@ class CardArtwork(Gtk.Box):
         self.error_frame = Gtk.Frame()
         self.error_frame.set_size_request(width, height)
         self.error_frame.add_css_class("error-card-slot")
-        
-        error_label = Gtk.Label()
-        error_label.set_text("×")
-        error_label.add_css_class("error-slot-indicator")
-        error_label.set_halign(Gtk.Align.CENTER)
-        error_label.set_valign(Gtk.Align.CENTER)
-        self.error_frame.set_child(error_label)
+
+        error_icon = Gtk.Image()
+        error_icon.set_from_icon_name("dialog-error-symbolic")
+        error_icon.set_pixel_size(24)
+        error_icon.set_halign(Gtk.Align.CENTER)
+        error_icon.set_valign(Gtk.Align.CENTER)
+        error_icon.add_css_class("error-slot-indicator")
+        self.error_frame.set_child(error_icon)
         
         self.load_card_artwork()
 

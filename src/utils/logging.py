@@ -3,14 +3,13 @@
 import logging
 import sys
 from typing import Any
+from enum import Enum
 
-
-def setup_logging(level: str = "DEBUG") -> None:
+def setup_logging(level: str = "debug") -> None:
     """Set up application-wide logging configuration.
-    
+
     Args:
-        level: Logging level ("DEBUG", "INFO", "WARNING", "ERROR")
-        format_style: "simple" or "detailed" formatting
+        level: Logging level ("debug", "info", "warning", "error")
     """
     # Clear any existing handlers
     root_logger = logging.getLogger()
@@ -26,10 +25,6 @@ def setup_logging(level: str = "DEBUG") -> None:
     # Configure root logger
     root_logger.setLevel(getattr(logging, level.upper()))
     root_logger.addHandler(handler)
-
-    logging.getLogger('asyncio').setLevel(logging.WARNING)
-    logging.getLogger('aiohttp').setLevel(logging.INFO)
-
 
 def get_logger(name: str) -> logging.Logger:
     """Get a logger for the given name.

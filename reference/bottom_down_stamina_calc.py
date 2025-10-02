@@ -20,25 +20,25 @@ class UmaMusumeCalculator:
         
         # Base stats
         self.speed = 1100
-        self.stamina = 400
-        self.power = 1100
+        self.stamina = 900
+        self.power = 800
         self.guts = 350
         self.wisdom = 350
         
         # Race parameters
-        self.distance = 3000  # meters
-        self.style = 'End'   # Front, Pace, Late, End
-        self.mood = 'Bad'  # Awful, Bad, Normal, Good, Great
+        self.distance = 2400  # meters
+        self.style = 'Pace'   # Front, Pace, Late, End
+        self.mood = 'Normal'  # Awful, Bad, Normal, Good, Great
         
         # Aptitudes
-        self.track_aptitude = 'B'     # S, A, B, C, D, E, F, G
-        self.distance_aptitude = 'B'  # S, A, B, C, D, E, F, G
-        self.style_aptitude = 'B'     # S, A, B, C, D, E, F, G
+        self.track_aptitude = 'A'     # S, A, B, C, D, E, F, G
+        self.distance_aptitude = 'A'  # S, A, B, C, D, E, F, G
+        self.style_aptitude = 'A'     # S, A, B, C, D, E, F, G
         
         # Conditions
-        self.surface = 'Dirt'      # Turf, Dirt
-        self.condition = 'Heavy'    # Firm, Good, Soft, Heavy
-        self.recovery_percent = 0.0  # Net recovery effect (can be negative for debuffs)
+        self.surface = 'Turf'      # Turf, Dirt
+        self.condition = 'Firm'    # Firm, Good, Soft, Heavy
+        self.recovery_percent = 5.5  # Net recovery effect (can be negative for debuffs)
         
         # =============================================================================
         # LOOKUP TABLES - Don't modify unless adding new game data

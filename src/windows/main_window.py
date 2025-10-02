@@ -112,6 +112,14 @@ class MainWindow(Adw.ApplicationWindow):
                 font-weight: bold;
                 color: @error_color;
             }}
+
+            .card-in-deck {{
+                opacity: 0.5;
+            }}
+
+            .card-in-deck:hover {{
+                opacity: 0.6;  /* Slight feedback on hover */
+            }}
         """
 
         css_provider.load_from_string(css)

@@ -1,10 +1,5 @@
 import logging
-from utils import setup_logging, get_logger
-setup_logging("DEBUG")
-logger = get_logger(__name__)
-
-import warnings
-warnings.filterwarnings('error')
+logger = logging.getLogger(__name__)
 
 import gi
 gi.require_version('Gtk', '4.0')

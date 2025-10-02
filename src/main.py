@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+import warnings
+warnings.filterwarnings('error')
+
+import logging
+from utils import setup_logging, get_logger
+setup_logging("info")
+logger = get_logger(__name__)
+
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Gdk', '4.0')

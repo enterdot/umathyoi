@@ -9,13 +9,14 @@ import json
 from typing import Iterator
 from pathlib import Path
 from datetime import date
-from utils import GameplayConstants
+from utils import GameplayConstants, stopwatch
 
 from .scenario import Scenario, FacilityType
 
 class ScenarioDatabase:
     """Database for managing scenario data."""
-    
+
+    @stopwatch(show_args=False)
     def __init__(self, scenarios_file: str = ApplicationConstants.SCENARIOS_JSON) -> None:
         """Initialize scenario database."""
         self._scenarios: dict[int, Scenario] = {}

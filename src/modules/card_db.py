@@ -3,7 +3,7 @@ logger = logging.getLogger(__name__)
 
 import gi
 gi.require_version('Gdk', '4.0')
-from gi.repository import GdkPixbuf
+from gi.repository import GdkPixbuf, GLib
 
 import json
 import requests  # Replace aiohttp with requests
@@ -13,12 +13,13 @@ from pathlib import Path
 from platformdirs import user_cache_dir
 
 from .card import Rarity, CardType, Card
-from utils import ApplicationConstants, CardConstants, NetworkConstants, auto_title_from_instance
+from utils import ApplicationConstants, CardConstants, NetworkConstants, auto_title_from_instance, stopwatch
 
 
 class CardDatabase:
     """Database for managing card data, images, and ownership information."""
     
+    @stopwatch(show_args=False)
     def __init__(self, cards_file: str = ApplicationConstants.CARDS_JSON) -> None:
         """Initialize card database.
         
@@ -94,7 +95,7 @@ class CardDatabase:
                 self.cards[card_id] = Card(
                     id=card_id,
                     name=card_data["url_name"],
-                    view_name=card_data["char_name"],
+                    view_name=GLib.markup_escape_text(card_data["char_name"]),
                     rarity=Rarity(card_data["rarity"]),
                     type=self._map_name_to_card_type(card_data["type"]),
                     effects=card_data.get("effects", []),
@@ -195,6 +196,7 @@ class CardDatabase:
         thread = threading.Thread(target=load_in_thread, daemon=True)
         thread.start()
 
+    @stopwatch(show_args=False)
     def _load_card_image_sync(self, card_id: int, width: int, height: int) -> GdkPixbuf.Pixbuf | None:
         """Synchronous internal method to load card image.
         

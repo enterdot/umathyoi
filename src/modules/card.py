@@ -4,10 +4,9 @@ logger = logging.getLogger(__name__)
 from enum import Enum
 from dataclasses import dataclass
 from typing import Iterator
-from functools import lru_cache
 from .scenario import FacilityType
 
-from utils import CardConstants
+from utils import CardConstants, memoize
 
 class Rarity(Enum):
     R = 1
@@ -133,7 +132,7 @@ class Card:
             return None
         return FacilityType(self.type.value())
 
-    @lru_cache(maxsize=256)
+    @memoize(maxsize=256)
     def _interpolate_effect_value(self, effect_type: CardEffect, level: int) -> int:
         """Calculate effect value at specific level using interpolation between milestones"""
 
