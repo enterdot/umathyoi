@@ -132,9 +132,11 @@ class CardSlot(Gtk.Box):
         if card and self.card is not card:
             self._card = card
             self.load_card_artwork(self._card)
+            self.limit_break_scale.set_sensitive(True)
         elif not card:
             self._card = None
             self.show_empty()
+            self.limit_break_scale.set_sensitive(False)
 
     @property
     def limit_break(self) -> int:
