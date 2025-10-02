@@ -67,6 +67,11 @@ class Deck:
         """Number of cards currently in the deck."""
         return sum(1 for card in self._cards if card is not None)
 
+    @property
+    def cards(self) -> list[Card]:
+        """List of cards currently in the deck."""
+        return [card for card in self._cards if card]
+
     def remove_card_at_slot(self, slot: int) -> Card | None:
         """Remove card at the specified slot.
         

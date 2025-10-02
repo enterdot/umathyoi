@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from enum import Enum
 from dataclasses import dataclass
 from .skill import Skill, SkillType
@@ -5,7 +8,8 @@ from .card import Card, CardType, CardEffect, CardUniqueEffect
 from .deck import Deck
 from .scenario import Scenario, Facility, FacilityType
 from .character import GenericCharacter, StatType, Mood
-from utils import GameplayConstants, debounce
+from .event import Event
+from utils import GameplayConstants, debounce, auto_title_from_instance
 
 @dataclass(frozen=True)
 class Turn:

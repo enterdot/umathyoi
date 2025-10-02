@@ -3,7 +3,7 @@ from .card import Card, Rarity, CardType, CardEffect, CardUniqueEffect
 from .card_db import CardDatabase
 from .skill import Skill, SkillType
 from .skill_db import SkillDatabase
-from .character import Character, StatType, Mood, Aptitude
+from .character import GenericCharacter, Character, StatType, Mood, Aptitude
 from .character_db import CharacterDatabase
 from .scenario import Scenario, Facility
 from .scenario_db import ScenarioDatabase
@@ -19,7 +19,7 @@ __all__ = [
     'CardDatabase',
     'Skill', 'SkillType',
     'SkillDatabase',
-    'Character', 'StatType', 'Mood', 'Aptitude',
+    'GenericCharacter', 'Character', 'StatType', 'Mood', 'Aptitude',
     'CharacterDatabase',
     'Scenario', 'Facility',
     'ScenarioDatabase',

@@ -14,7 +14,10 @@ from modules import (
     Rarity,
     Deck,
     EfficiencyCalculator,
-    Mood
+    Mood,
+    GenericCharacter,
+    StatType,
+    Aptitude
 )
 
 print("Loading databases...")
@@ -80,9 +83,12 @@ def test_card_effects():
 
 
 def test_efficiency_calculator():
-   
+    print("\n" + "="*80)
+    print("Testing Efficiency Calculator")
+    print("="*80)
+    
     # Create a simple test deck
-    print("Creating test deck...")
+    print("\nCreating test deck...")
     cards = []
     
     # Try to get 6 SSR cards of different types
@@ -91,17 +97,30 @@ def test_efficiency_calculator():
         cards = ssr_cards[:6]
     else:
         # Fallback: just use first 6 cards
-        cards = list(card_db.cards)[:6]
+        cards = list(card_db.cards.values())[:6]
     
     deck = Deck(name="Test Deck", cards=cards)
     print(f"Deck created with cards: {[c.name for c in cards]}")
     
-    # Get first scenario and character
+    # Get first scenario
     scenario = scenario_db.scenarios[0]
-    character = char_db.characters[0]
-    
     print(f"Using scenario: {scenario.name}")
-    print(f"Using character: {character.name}")
+    
+    # Create a generic test character with balanced stat growth
+    from modules import GenericCharacter, StatType, Aptitude
+    character = GenericCharacter(
+        stat_growth={
+            StatType.speed: 10,
+            StatType.stamina: 0,
+            StatType.power: 10,
+            StatType.guts: 0,
+            StatType.wit: 10,
+        },
+        track_aptitude=Aptitude.A,
+        distance_aptitude=Aptitude.A,
+        style_aptitude=Aptitude.A
+    )
+    print(f"Created test character with stat growth: {character.stat_growth}")
     
     # Create calculator
     print("\nInitializing calculator...")
