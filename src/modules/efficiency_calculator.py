@@ -9,7 +9,7 @@ from .deck import Deck
 from .scenario import Scenario, Facility, FacilityType
 from .character import GenericCharacter, StatType, Mood
 from .event import Event
-from utils import GameplayConstants, debounce, auto_title_from_instance
+from utils import GameplayConstants, CardConstants, debounce, auto_title_from_instance
 
 @dataclass(frozen=True)
 class Turn:
@@ -408,14 +408,14 @@ class TrainingEffect:
             return effects
         
         unique_effects = self.card.get_all_unique_effects()
-        flattend_effects = {}
+        flattened_effects = {}
         for unique_effect_type, unique_effect_values in unique_effects.items():
             if unique_effect_type.value < CardConstants.COMPLEX_UNIQUE_EFFECTS_ID_THRESHOLD:
                 # Unique effect is already equivalent to its normal effect counterpart
                 if len(unique_effect_values) != 1:
-                    logger.warning(f"Card {card.id} has single value unique effect {unique_effect_type.name()}, but has more than 1 value: {unique_effect_values}")
+                    logger.warning(f"Card {card.id} should have 1 value for its unique effect {unique_effect_type.name()}, but has more: {unique_effect_values}")
                 mapped_effect_type = CardEffect(unique_effect_type.value)
-                flattened_effects[mapped_effect_type] = flattened_effects.get(mapped_effect_type, 0) + unique_effect[0]
+                flattened_effects[mapped_effect_type] = flattened_effects.get(mapped_effect_type, 0) + unique_effect_values[0]
             else:
                 handler = self._unique_effect_handlers(unique_effect_type)
                 if handler:

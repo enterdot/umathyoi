@@ -92,6 +92,21 @@ class CardDatabase:
         for card_data in cards_data:
             try:
                 card_id = card_data["support_id"]
+                
+                # Transform unique effects from dict format to list format
+                unique_effects_list = []
+                unique_data = card_data.get("unique", {})
+                if unique_data and "effects" in unique_data:
+                    for effect_dict in unique_data["effects"]:
+                        # Convert dict {"type": type, "value": value, "value_1": value_1, ...} to list
+                        # Keys are always in order: type, value, value_1, value_2, ...
+                        effect_row = [effect_dict["type"]]
+                        for key in effect_dict:
+                            if key.startswith("value"):
+                                effect_row.append(effect_dict[key])
+                        
+                        unique_effects_list.append(effect_row)
+                
                 self.cards[card_id] = Card(
                     id=card_id,
                     name=card_data["url_name"],
@@ -99,8 +114,8 @@ class CardDatabase:
                     rarity=CardRarity(card_data["rarity"]),
                     type=self._map_name_to_card_type(card_data["type"]),
                     effects=card_data.get("effects", []),
-                    unique_effects=card_data.get("unique", {}).get("effects", []),
-                    unique_effects_unlock_level=card_data.get("unique", {}).get("level", 0)
+                    unique_effects=unique_effects_list,
+                    unique_effects_unlock_level=unique_data.get("level", 0)
                 )
                 logger.debug(f"Card {card_id} added to database")
             except (KeyError, ValueError) as e:
