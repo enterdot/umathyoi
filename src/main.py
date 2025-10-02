@@ -5,7 +5,7 @@ warnings.filterwarnings('error')
 
 import logging
 from utils import setup_logging, get_logger
-setup_logging("info")
+setup_logging("debug")
 logger = get_logger(__name__)
 
 import gi
