@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 from typing import Iterator
 from .card import Card
 from .event import Event
-from utils import DeckConstants
+from utils import DeckConstants, CardConstants
 
 
 class Deck:
@@ -78,9 +78,10 @@ class Deck:
         """
         removed_card = self._cards[slot]
         self._cards[slot] = None
-        self._limit_breaks[slot] = 0  # Reset when removing
-        logger.debug(f"Removed card at slot {slot} from deck '{self.name}'")
-        self.card_removed_at_slot.trigger(self, card=removed_card, slot=slot)
+        self._limit_breaks[slot] = 0  # Reset when removing #TODO: Use constant
+        if removed_card:
+            logger.debug(f"Removed card at slot {slot} from deck '{self.name}'")
+            self.card_removed_at_slot.trigger(self, card=removed_card, slot=slot)
         return removed_card
 
     def remove_card_by_id(self, card_id: int) -> int | None:
@@ -127,7 +128,7 @@ class Deck:
         slot = self.find_first_empty_slot()
         if slot is not None:
             self._cards[slot] = card
-            self.set_limit_break_at_slot(limit_break, slot)
+            self.set_limit_break_at_slot(slot, limit_break)
             logger.debug(f"Added card {card.id} at slot {slot} to deck '{self.name}'")
             self.card_added_at_slot.trigger(self, card=card, slot=slot)
             return slot
@@ -155,7 +156,7 @@ class Deck:
 
         self._cards[slot] = card
         self.card_added_at_slot.trigger(self, card=card, slot=slot)
-        self.set_limit_break_at_slot(limit_break, slot)
+        self.set_limit_break_at_slot(slot, limit_break)
         return True
 
     def find_first_empty_slot(self, reverse: bool = False) -> int | None:
@@ -195,16 +196,22 @@ class Deck:
         """
         return self._limit_breaks[slot]
 
-    def set_limit_break_at_slot(self, limit_break: int, slot: int) -> bool:
+    def set_limit_break_at_slot(self, slot: int, limit_break: int) -> bool:
         """Set limit break level at specified slot.
         
         Args:
-            limit_break: New limit break level
             slot: Slot position
+            limit_break: New limit break level
             
         Returns:
             True if set successfully, False if slot is empty
         """
+        # Validate parameters
+        if not 0 <= slot < self._size:
+            raise ValueError(f"Invalid slot {slot}, must be in range [0, {self._size})")
+        if not CardConstants.MIN_LIMIT_BREAK <= limit_break <= CardConstants.MAX_LIMIT_BREAK:
+            raise ValueError(f"Invalid limit_break {limit_break}, must be in range [{CardConstants.MIN_LIMIT_BREAK}, {CardConstants.MAX_LIMIT_BREAK}]")
+        
         if self._cards[slot] is None:
             logger.debug(f"Cannot set limit break on empty slot {slot} for deck '{self.name}'")
             return False
@@ -234,6 +241,9 @@ class Deck:
         """
         for slot, (card, limit_break) in enumerate(zip(self._cards, self._limit_breaks)):
             yield (slot, card, limit_break)
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.count}/{self._size}): {[elem for elem in self if elem[1]]}"
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(name='{self.name}', count={self.count}/{self._size}, cards={[card.id for card in self._cards if card]})"
