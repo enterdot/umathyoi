@@ -574,7 +574,6 @@ class EfficiencyCalculator:
     @debounce(wait_ms=350)
     def recalculate(self) -> None:
         """Run the Monte Carlo simulation."""
-        
         self.calculation_started.trigger(self)
         
         self._simulated_turns: list[Turn] = []
@@ -601,41 +600,84 @@ class EfficiencyCalculator:
             if i % (self.turn_count // 100) == 0:
                 self.calculation_progress.trigger(self, current=i, total=self.turn_count)
         
-        
         # Aggregating results of all turns
+        # Store stat gains per facility: {facility_type: {stat_type: [gains...]}}
+        aggregated_gains = {facility: {stat: [] for stat in StatType} for facility in FacilityType}
+        aggregated_skill_points = {facility: [] for facility in FacilityType}
+        
         for turn in self._simulated_turns:
-
-            for training_effect in turn.training_effects:
-
-                for combined_effect in training_effect.combined_effects:
-
-                    # friendship_multiplier for cards which type match the facility
-                    # (1 + friendship_effectiveness_1/100) * (1 + friendship_effectiveness_2/100) * ...
-
-                    # mood_multiplier
-                    # 1 + ( turn_mood/100 * (1 + mood_effect_increase_1/100 + mood_effect_increase_2/100 + ...))
-
-                    # training_multiplier
-                    # 1 + training_effectiveness_1/100 + training_effectiveness_2/100 + ...
-
-                    # speed_stat_total_bonus (for each facility that gives speed)
-                    # speed_stat_bonus_1 + speed_stat_bonus_2 + ...
+            # Process each facility's training effects
+            for facility_type, training_effects in turn.training_effects.items():
+                if not training_effects:
+                    continue
+                
+                # Get base stats from facility
+                facility = turn.scenario.get_facility(facility_type)
+                facility_level = turn.facility_levels[facility_type]
+                base_stats = facility.get_all_stat_gains_at_level(facility_level)
+                base_skill_points = facility.get_skill_points_gain_at_level(facility_level)
+                
+                # Calculate stat bonuses (sum across all cards)
+                stat_bonuses = {stat: 0 for stat in StatType}
+                for effect in training_effects:
+                    stat_bonuses[StatType.speed] += effect.combined_effects.get(CardEffect.speed_stat_bonus, 0)
+                    stat_bonuses[StatType.stamina] += effect.combined_effects.get(CardEffect.stamina_stat_bonus, 0)
+                    stat_bonuses[StatType.power] += effect.combined_effects.get(CardEffect.power_stat_bonus, 0)
+                    stat_bonuses[StatType.guts] += effect.combined_effects.get(CardEffect.guts_stat_bonus, 0)
+                    stat_bonuses[StatType.wit] += effect.combined_effects.get(CardEffect.wit_stat_bonus, 0)
+                
+                # Calculate skill points bonus
+                skill_points_bonus = sum(effect.combined_effects.get(CardEffect.skill_points_bonus, 0) 
+                                        for effect in training_effects)
+                
+                # Calculate friendship multiplier (multiplicative across matching cards)
+                friendship_mult = 1.0
+                for effect in training_effects:
+                    if effect.card.is_preferred_facility(facility_type):
+                        friendship_effectiveness = effect.combined_effects.get(CardEffect.friendship_effectiveness, 0)
+                        friendship_mult *= (1 + friendship_effectiveness / GameplayConstants.PERCENTAGE_BASE)
+                
+                # Calculate mood multiplier
+                mood_base = turn.mood.multiplier  # Returns the base multiplier for mood
+                mood_effect_sum = sum(effect.combined_effects.get(CardEffect.mood_effect_increase, 0) 
+                                    for effect in training_effects)
+                mood_mult = 1 + (mood_base - 1) * (1 + mood_effect_sum / GameplayConstants.PERCENTAGE_BASE)
+                
+                # Calculate training effectiveness multiplier
+                training_effectiveness_sum = sum(effect.combined_effects.get(CardEffect.training_effectiveness, 0) 
+                                               for effect in training_effects)
+                training_mult = 1 + training_effectiveness_sum / GameplayConstants.PERCENTAGE_BASE
+                
+                # Calculate support multiplier (5% per card on facility)
+                support_mult = 1 + len(training_effects) * 0.05
+                
+                # Calculate final gains for each stat
+                for stat in StatType:
+                    # Get base stat from facility
+                    base_stat = base_stats.get(stat, 0)
+                    if base_stat == 0:
+                        aggregated_gains[facility_type][stat].append(0)
+                        continue
                     
-                    # similar for stamina, power, guts, wit and skill_points
-
-                    # support_multiplier
-                    # 1 + card_count_on_facility * 0.05
+                    # Add stat bonus from cards
+                    total_base = base_stat + stat_bonuses[stat]
                     
-                    # speed_growth_multiplier
-                    # 1 + character_speed_growth/100
-
-                    # similar for stamina, power, guts and wit growth
-
-                    # final_speed_gain
-                    # (facility_speed_base + speed_stat_base) * friendship_multiplier * mood_multiplier * training_multiplier * support_multiplier * speed_growth_multiplier
-
-                    # similar for stamina, power, guts and wit
-
-                    # final_skill_points_gain
-                    # facility_skill_points_base + skill_points_total_bonus
+                    # Get character growth multiplier for this stat
+                    growth_mult = turn.character.get_stat_growth_multipler(stat)
+                    
+                    # Apply formula: base * friendship * mood * training * support * growth
+                    final_gain = total_base * friendship_mult * mood_mult * training_mult * support_mult * growth_mult
+                    
+                    # Round down as per game rules
+                    aggregated_gains[facility_type][stat].append(int(final_gain))
+                
+                # Calculate final skill points
+                final_skill_points = base_skill_points + skill_points_bonus
+                aggregated_skill_points[facility_type].append(final_skill_points)
+        
+        # Store results
+        self._aggregated_stat_gains = aggregated_gains
+        self._aggregated_skill_points = aggregated_skill_points
+        
+        self.calculation_finished.trigger(self, results=self._aggregated_stat_gains)
                     
