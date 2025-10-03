@@ -402,6 +402,9 @@ class EfficiencyCalculator:
         self._static_effects = {}
         self._dynamic_unique_effects = {}
         
+        # NEW: Pre-calculate which stat bonuses each card has (avoid .get() in hot loop)
+        self._card_stat_bonuses = {}
+        
         for card in self._deck.cards:
             level = self._card_levels[card]
             effects = card.get_all_effects_at_level(level)
@@ -413,17 +416,28 @@ class EfficiencyCalculator:
                     dynamic_effects = {}
                     for eff_type, values in unique.items():
                         if eff_type.value < CardConstants.COMPLEX_UNIQUE_EFFECTS_ID_THRESHOLD:
-                            # Static unique effect
                             mapped = CardEffect(eff_type.value)
                             effects[mapped] = effects.get(mapped, 0) + values[0]
                         else:
-                            # Dynamic unique effect - store for later calculation
                             dynamic_effects[eff_type] = values
                     
                     if dynamic_effects:
                         self._dynamic_unique_effects[card] = dynamic_effects
             
             self._static_effects[card] = effects
+            
+            # Pre-extract stat bonuses to avoid dict lookups in hot loop
+            self._card_stat_bonuses[card] = {
+                'speed': effects.get(CardEffect.speed_stat_bonus, 0),
+                'stamina': effects.get(CardEffect.stamina_stat_bonus, 0),
+                'power': effects.get(CardEffect.power_stat_bonus, 0),
+                'guts': effects.get(CardEffect.guts_stat_bonus, 0),
+                'wit': effects.get(CardEffect.wit_stat_bonus, 0),
+                'skill': effects.get(CardEffect.skill_points_bonus, 0),
+                'training': effects.get(CardEffect.training_effectiveness, 0),
+                'mood': effects.get(CardEffect.mood_effect_increase, 0),
+                'friendship': effects.get(CardEffect.friendship_effectiveness, 0),
+            }
     
     def _calculate_dynamic_effects(self, card: Card, facility_type: FacilityType, 
                                    combined_bond: int) -> dict[CardEffect, int]:
@@ -493,62 +507,133 @@ class EfficiencyCalculator:
         turn_time = time.perf_counter() - start
         agg_start = time.perf_counter()
         
-        # Aggregation
+        # Aggregation with detailed profiling
         aggregated_gains = {f: {s: [] for s in StatType} for f in FacilityType}
         aggregated_skill_points = {f: [] for f in FacilityType}
-        
+
         combined_bond = sum(self._card_bonds.values())
-        
+
+        # Profile timers
+        grouping_time = 0
+        effect_calc_time = 0
+        accumulation_time = 0
+        multiplier_time = 0
+        final_calc_time = 0
+
         for card_facilities in turn_data:
+            # Group cards by facility
+            group_start = time.perf_counter()
             by_facility = {f: [] for f in FacilityType}
             for card, facility in card_facilities.items():
                 by_facility[facility].append(card)
+            grouping_time += time.perf_counter() - group_start
             
             for facility_type, cards_on_facility in by_facility.items():
                 if not cards_on_facility:
                     continue
                 
+                # Get facility data
+                effect_start = time.perf_counter()
                 facility = self._scenario.facilities[facility_type]
                 level = self._facility_levels[facility_type]
                 base_stats = facility.get_all_stat_gains_at_level(level)
                 base_skill_points = facility.get_skill_points_gain_at_level(level)
+                effect_calc_time += time.perf_counter() - effect_start
                 
                 # Accumulate effects from all cards
+                accum_start = time.perf_counter()
                 stat_bonuses = {s: 0 for s in StatType}
                 skill_bonus = 0
                 friendship_mult = 1.0
                 training_eff = 0
                 mood_eff = 0
                 
-                for card in cards_on_facility:
-                    # Start with static effects
-                    effects = self._static_effects[card].copy()
-                    
-                    # Add dynamic effects
-                    dynamic = self._calculate_dynamic_effects(card, facility_type, combined_bond)
-                    for eff_type, value in dynamic.items():
-                        effects[eff_type] = effects.get(eff_type, 0) + value
-                    
-                    # Accumulate
-                    stat_bonuses[StatType.speed] += effects.get(CardEffect.speed_stat_bonus, 0)
-                    stat_bonuses[StatType.stamina] += effects.get(CardEffect.stamina_stat_bonus, 0)
-                    stat_bonuses[StatType.power] += effects.get(CardEffect.power_stat_bonus, 0)
-                    stat_bonuses[StatType.guts] += effects.get(CardEffect.guts_stat_bonus, 0)
-                    stat_bonuses[StatType.wit] += effects.get(CardEffect.wit_stat_bonus, 0)
-                    skill_bonus += effects.get(CardEffect.skill_points_bonus, 0)
-                    training_eff += effects.get(CardEffect.training_effectiveness, 0)
-                    mood_eff += effects.get(CardEffect.mood_effect_increase, 0)
-                    
-                    if card.is_preferred_facility(facility_type):
-                        friend_eff = effects.get(CardEffect.friendship_effectiveness, 0)
-                        friendship_mult *= (1 + friend_eff / 100)
+            for card in cards_on_facility:
+                # Get pre-calculated bonuses (no dict copy, no .get() calls)
+                bonuses = self._card_stat_bonuses[card]
+                
+                # Add static bonuses
+                stat_bonuses[StatType.speed] += bonuses['speed']
+                stat_bonuses[StatType.stamina] += bonuses['stamina']
+                stat_bonuses[StatType.power] += bonuses['power']
+                stat_bonuses[StatType.guts] += bonuses['guts']
+                stat_bonuses[StatType.wit] += bonuses['wit']
+                skill_bonus += bonuses['skill']
+                training_eff += bonuses['training']
+                mood_eff += bonuses['mood']
+                
+                # Handle dynamic unique effects inline (if any)
+                if card in self._dynamic_unique_effects:
+                    for eff_type, values in self._dynamic_unique_effects[card].items():
+                        if eff_type == CardUniqueEffect.effect_bonus_if_min_bond:
+                            if self._card_bonds[card] >= values[0]:
+                                effect_id = CardEffect(values[1])
+                                bonus = values[2]
+                                if effect_id == CardEffect.speed_stat_bonus:
+                                    stat_bonuses[StatType.speed] += bonus
+                                elif effect_id == CardEffect.stamina_stat_bonus:
+                                    stat_bonuses[StatType.stamina] += bonus
+                                elif effect_id == CardEffect.power_stat_bonus:
+                                    stat_bonuses[StatType.power] += bonus
+                                elif effect_id == CardEffect.guts_stat_bonus:
+                                    stat_bonuses[StatType.guts] += bonus
+                                elif effect_id == CardEffect.wit_stat_bonus:
+                                    stat_bonuses[StatType.wit] += bonus
+                                elif effect_id == CardEffect.skill_points_bonus:
+                                    skill_bonus += bonus
+                                elif effect_id == CardEffect.training_effectiveness:
+                                    training_eff += bonus
+                                elif effect_id == CardEffect.mood_effect_increase:
+                                    mood_eff += bonus
+                        
+                        elif eff_type == CardUniqueEffect.effect_bonus_per_combined_bond:
+                            effect_id = CardEffect(values[0])
+                            bonus = 20 + combined_bond // values[1]
+                            if effect_id == CardEffect.training_effectiveness:
+                                training_eff += bonus
+                            # Add other effect types as needed
+                        
+                        elif eff_type == CardUniqueEffect.effect_bonus_per_facility_level:
+                            effect_id = CardEffect(values[0])
+                            bonus = self._facility_levels[facility_type] * values[1]
+                            if effect_id == CardEffect.training_effectiveness:
+                                training_eff += bonus
+                        
+                        elif eff_type == CardUniqueEffect.effect_bonus_if_friendship_training:
+                            if card.is_preferred_facility(facility_type):
+                                effect_id = CardEffect(values[0])
+                                bonus = values[1]
+                                if effect_id == CardEffect.training_effectiveness:
+                                    training_eff += bonus
+                        
+                        elif eff_type == CardUniqueEffect.effect_bonus_on_more_energy:
+                            effect_id = CardEffect(values[0])
+                            bonus = min(self._energy // values[1], values[2])
+                            if effect_id == CardEffect.training_effectiveness:
+                                training_eff += bonus
+                        
+                        elif eff_type == CardUniqueEffect.effect_bonus_on_less_energy:
+                            if self._energy <= 100:
+                                effect_id = CardEffect(values[0])
+                                bonus = min(values[3], values[4] + (self._max_energy - max(self._energy, values[2])) // values[1])
+                                if effect_id == CardEffect.training_effectiveness:
+                                    training_eff += bonus
+                
+                # Friendship multiplier
+                if card.is_preferred_facility(facility_type):
+                    friendship_mult *= (1 + bonuses['friendship'] / 100)
+                
+                accumulation_time += time.perf_counter() - accum_start
                 
                 # Calculate multipliers
+                mult_start = time.perf_counter()
                 mood_mult = 1 + (self._mood.multiplier - 1) * (1 + mood_eff / 100)
                 training_mult = 1 + training_eff / 100
                 support_mult = 1 + len(cards_on_facility) * 0.05
+                multiplier_time += time.perf_counter() - mult_start
                 
                 # Calculate final gains
+                final_start = time.perf_counter()
                 for stat in StatType:
                     base = base_stats.get(stat, 0)
                     if base == 0:
@@ -561,21 +646,27 @@ class EfficiencyCalculator:
                     aggregated_gains[facility_type][stat].append(int(final))
                 
                 aggregated_skill_points[facility_type].append(base_skill_points + skill_bonus)
-        
+                final_calc_time += time.perf_counter() - final_start
+
         agg_time = time.perf_counter() - agg_start
         total = time.perf_counter() - start
-        
+
         self._aggregated_stat_gains = aggregated_gains
         self._aggregated_skill_points = aggregated_skill_points
-        
+
         print(f"\n{'='*60}")
         print(f"Performance Profile ({self.turn_count} turns)")
         print(f"{'='*60}")
-        print(f"Turn generation: {turn_time*1000:7.2f}ms ({turn_time/total*100:5.1f}%)")
-        print(f"Aggregation:     {agg_time*1000:7.2f}ms ({agg_time/total*100:5.1f}%)")
-        print(f"Total:           {total*1000:7.2f}ms")
+        print(f"Turn generation:   {turn_time*1000:7.2f}ms ({turn_time/total*100:5.1f}%)")
+        print(f"Aggregation:       {agg_time*1000:7.2f}ms ({agg_time/total*100:5.1f}%)")
+        print(f"  Grouping:        {grouping_time*1000:7.2f}ms ({grouping_time/agg_time*100:5.1f}%)")
+        print(f"  Effect lookup:   {effect_calc_time*1000:7.2f}ms ({effect_calc_time/agg_time*100:5.1f}%)")
+        print(f"  Accumulation:    {accumulation_time*1000:7.2f}ms ({accumulation_time/agg_time*100:5.1f}%)")
+        print(f"  Multipliers:     {multiplier_time*1000:7.2f}ms ({multiplier_time/agg_time*100:5.1f}%)")
+        print(f"  Final calc:      {final_calc_time*1000:7.2f}ms ({final_calc_time/agg_time*100:5.1f}%)")
+        print(f"Total:             {total*1000:7.2f}ms")
         print(f"{'='*60}\n")
-        
+
         self.calculation_finished.trigger(self, results=self._aggregated_stat_gains)
 
     def get_results(self) -> dict | None:
