@@ -401,9 +401,8 @@ class EfficiencyCalculator:
         """Pre-calculate the static parts (normal + simple unique effects)."""
         self._static_effects = {}
         self._dynamic_unique_effects = {}
-        
-        # NEW: Pre-calculate which stat bonuses each card has (avoid .get() in hot loop)
         self._card_stat_bonuses = {}
+        self._card_distribution = {}
         
         for card in self._deck.cards:
             level = self._card_levels[card]
@@ -438,6 +437,36 @@ class EfficiencyCalculator:
                 'mood': effects.get(CardEffect.mood_effect_increase, 0),
                 'friendship': effects.get(CardEffect.friendship_effectiveness, 0),
             }
+
+            specialty = card.get_effect_at_level(CardEffect.specialty_priority, self._card_levels[card])
+            preferred = card.preferred_facility
+            
+            # Build cumulative probability ranges for fast selection
+            # Instead of random.choices(), we'll use random.random() and check ranges
+            total_weight = 500 + specialty + 50
+            
+            # Create cumulative ranges: [0, facility1_end, facility2_end, ..., total_weight]
+            cumulative = []
+            current = 0
+            outcomes = []
+            
+            for facility in FacilityType:
+                weight = 100 + specialty if facility == preferred else 100
+                current += weight
+                cumulative.append(current)
+                outcomes.append(facility)
+            
+            # Add non-appearance
+            current += 50
+            cumulative.append(current)
+            outcomes.append(None)
+            
+            self._card_distribution[card] = {
+                'cumulative': cumulative,
+                'outcomes': outcomes,
+                'total_weight': total_weight
+            }
+
     
     def _calculate_dynamic_effects(self, card: Card, facility_type: FacilityType, 
                                    combined_bond: int) -> dict[CardEffect, int]:
@@ -487,31 +516,21 @@ class EfficiencyCalculator:
         dict_building_time = 0
 
         for i in range(self.turn_count):
-            # Distribute cards
             card_facilities = {}
             
             for card in self._deck.cards:
-                # Get specialty priority
-                spec_start = time.perf_counter()
-                specialty = card.get_effect_at_level(CardEffect.specialty_priority, self._card_levels[card])
-                total_weight = 500 + specialty + 50
-                preferred = card.preferred_facility
-                specialty_lookup_time += time.perf_counter() - spec_start
+                # Fast random selection using pre-calculated cumulative probabilities
+                dist_data = self._card_distribution[card]
+                rand_val = random.random() * dist_data['total_weight']
                 
-                # Build weights
-                rand_start = time.perf_counter()
-                weights = [100 + specialty if f == preferred else 100 for f in FacilityType]
-                weights.append(50)
+                # Binary search would be fastest, but for 6 outcomes linear search is fine
+                for idx, threshold in enumerate(dist_data['cumulative']):
+                    if rand_val < threshold:
+                        chosen = dist_data['outcomes'][idx]
+                        break
                 
-                outcomes = list(FacilityType) + [None]
-                chosen = random.choices(outcomes, weights=weights, k=1)[0]
-                random_selection_time += time.perf_counter() - rand_start
-                
-                # Add to dict
-                dict_start = time.perf_counter()
                 if chosen is not None:
                     card_facilities[card] = chosen
-                dict_building_time += time.perf_counter() - dict_start
             
             turn_data.append(card_facilities)
             
