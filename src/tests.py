@@ -146,7 +146,7 @@ def test_efficiency_calculator():
         FacilityType.wit: 5
     }
     
-    calculator.turn_count = 1  # Fewer turns for quick test
+    calculator.turn_count = 10000  # Fewer turns for quick test
     
     # Hook up event handlers to see progress
     def on_started(calc):
