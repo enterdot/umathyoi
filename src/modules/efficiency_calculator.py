@@ -263,33 +263,31 @@ class TrainingEffect:
         return combined_effects
                 
 class EfficiencyCalculator:
-    """Initialize calculator with deck configuration."""
+    """Calculator that pre-computes static effects, calculates dynamic ones on-demand."""
     
     def __init__(self, deck: Deck, scenario: Scenario, character: GenericCharacter):
-        # Private attributes
-        self._deck: Deck = deck
-        self._scenario: Scenario = scenario
-        self._character: GenericCharacter = character
-        self._fan_count: int = 100000
-        self._mood: Mood = Mood.good
-        self._energy: int = 70
-        self._max_energy: int = 104
-        self._facility_levels: dict[FacilityType, int] = {facility: 3 for facility in FacilityType}
-        self._card_levels: dict[Card, int] = {card: card.max_level for card in deck.cards}
-        self._card_bonds: dict[Card, int] = {card: 80 for card in deck.cards}
-        self._skills: list[Skill] = []
-
-        # Number of turns to simulate
+        self._deck = deck
+        self._scenario = scenario
+        self._character = character
+        self._fan_count = 100000
+        self._mood = Mood.good
+        self._energy = 80
+        self._max_energy = 120
+        self._facility_levels = {facility: 3 for facility in FacilityType}
+        self._card_levels = {card: card.max_level for card in deck.cards}
+        self._card_bonds = {card: 80 for card in deck.cards}
+        self._skills = []
+        
         self.turn_count = 1000
-
+        
         # Events
         self.calculation_started = Event()
-        self.calculation_progress = Event()  # Passes (current, total)
+        self.calculation_progress = Event()
         self.calculation_finished = Event()
         
-        logger.debug(f"{auto_title_from_instance(self)} initialized")
+        # Pre-calculate static card data once
+        self._precalculate_static_effects()
 
-    # Deck property
     @property
     def deck(self) -> Deck:
         return self._deck
@@ -399,145 +397,186 @@ class EfficiencyCalculator:
         self._skills = value
         self.recalculate()
 
+    def _precalculate_static_effects(self):
+        """Pre-calculate the static parts (normal + simple unique effects)."""
+        self._static_effects = {}
+        self._dynamic_unique_effects = {}
+        
+        for card in self._deck.cards:
+            level = self._card_levels[card]
+            effects = card.get_all_effects_at_level(level)
+            
+            # Handle unique effects
+            if level >= card.unique_effects_unlock_level:
+                unique = card.get_all_unique_effects()
+                if unique:
+                    dynamic_effects = {}
+                    for eff_type, values in unique.items():
+                        if eff_type.value < CardConstants.COMPLEX_UNIQUE_EFFECTS_ID_THRESHOLD:
+                            # Static unique effect
+                            mapped = CardEffect(eff_type.value)
+                            effects[mapped] = effects.get(mapped, 0) + values[0]
+                        else:
+                            # Dynamic unique effect - store for later calculation
+                            dynamic_effects[eff_type] = values
+                    
+                    if dynamic_effects:
+                        self._dynamic_unique_effects[card] = dynamic_effects
+            
+            self._static_effects[card] = effects
+    
+    def _calculate_dynamic_effects(self, card: Card, facility_type: FacilityType, 
+                                   combined_bond: int) -> dict[CardEffect, int]:
+        """Calculate dynamic unique effects based on turn state."""
+        if card not in self._dynamic_unique_effects:
+            return {}
+        
+        effects = {}
+        for eff_type, values in self._dynamic_unique_effects[card].items():
+            if eff_type == CardUniqueEffect.effect_bonus_if_min_bond:
+                effects[CardEffect(values[1])] = values[2] * (self._card_bonds[card] >= values[0])
+            
+            elif eff_type == CardUniqueEffect.effect_bonus_per_combined_bond:
+                effects[CardEffect(values[0])] = 20 + combined_bond // values[1]
+            
+            elif eff_type == CardUniqueEffect.effect_bonus_per_facility_level:
+                effects[CardEffect(values[0])] = self._facility_levels[facility_type] * values[1]
+            
+            elif eff_type == CardUniqueEffect.effect_bonus_if_friendship_training:
+                effects[CardEffect(values[0])] = values[1] * card.is_preferred_facility(facility_type)
+            
+            elif eff_type == CardUniqueEffect.effect_bonus_on_more_energy:
+                effects[CardEffect(values[0])] = min(self._energy // values[1], values[2])
+            
+            elif eff_type == CardUniqueEffect.effect_bonus_on_less_energy:
+                effects[CardEffect(values[0])] = min(values[3], values[4] + (self._max_energy - max(self._energy, values[2])) // values[1]) * (self._energy <= 100)
+        
+        return effects
+    
     @debounce(wait_ms=350)
-    def recalculate(self) -> None:
-        """Run the Monte Carlo simulation (debounced for UI responsiveness)."""
+    def recalculate(self):
         self._recalculate_sync()
-
-    @stopwatch(log_func=print, show_args=False)
-    def _recalculate_sync(self) -> None:
-        """Run the Monte Carlo simulation with detailed profiling."""
+    
+    def _recalculate_sync(self):
+        """Monte Carlo simulation with minimal object creation."""
+        import random
         import time
         
-        total_start = time.perf_counter()
-        
+        start = time.perf_counter()
         self.calculation_started.trigger(self)
         
-        self._simulated_turns: list[Turn] = []
-        
-        # Profile turn creation
-        turn_creation_time = 0
+        # Store minimal turn data
+        turn_data = []
         
         for i in range(self.turn_count):
-            turn_start = time.perf_counter()
+            # Distribute cards
+            card_facilities = {}
+            for card in self._deck.cards:
+                specialty = card.get_effect_at_level(CardEffect.specialty_priority, self._card_levels[card])
+                total_weight = 500 + specialty + 50
+                preferred = card.preferred_facility
+                
+                weights = [100 + specialty if f == preferred else 100 for f in FacilityType]
+                weights.append(50)
+                
+                outcomes = list(FacilityType) + [None]
+                chosen = random.choices(outcomes, weights=weights, k=1)[0]
+                
+                if chosen is not None:
+                    card_facilities[card] = chosen
             
-            # Create Turn instance
-            turn = Turn(
-                scenario=self.scenario,
-                facility_levels=self.facility_levels.copy(),
-                energy=self.energy,
-                max_energy=self.max_energy,
-                fan_count=self.fan_count,
-                mood=self.mood,
-                character=self.character,
-                cards=list(self.deck.cards),
-                card_levels=self.card_levels.copy(),
-                card_bonds=self.card_bonds.copy(),
-                skills=self.skills.copy()
-            )
+            turn_data.append(card_facilities)
             
-            turn_creation_time += time.perf_counter() - turn_start
-            
-            self._simulated_turns.append(turn)
-            
-            # Report progress every 1%
             if (i + 1) % max(1, self.turn_count // 100) == 0:
                 self.calculation_progress.trigger(self, current=i+1, total=self.turn_count)
         
-        aggregation_start = time.perf_counter()
+        turn_time = time.perf_counter() - start
+        agg_start = time.perf_counter()
         
-        # Aggregating results of all turns
-        aggregated_gains = {facility: {stat: [] for stat in StatType} for facility in FacilityType}
-        aggregated_skill_points = {facility: [] for facility in FacilityType}
+        # Aggregation
+        aggregated_gains = {f: {s: [] for s in StatType} for f in FacilityType}
+        aggregated_skill_points = {f: [] for f in FacilityType}
         
-        for turn in self._simulated_turns:
-            # Process each facility's training effects
-            for facility_type, training_effects in turn.training_effects.items():
-                if not training_effects:
+        combined_bond = sum(self._card_bonds.values())
+        
+        for card_facilities in turn_data:
+            by_facility = {f: [] for f in FacilityType}
+            for card, facility in card_facilities.items():
+                by_facility[facility].append(card)
+            
+            for facility_type, cards_on_facility in by_facility.items():
+                if not cards_on_facility:
                     continue
                 
-                # Get base stats from facility
-                facility = turn.scenario.facilities[facility_type]
-                facility_level = turn.facility_levels[facility_type]
-                base_stats = facility.get_all_stat_gains_at_level(facility_level)
-                base_skill_points = facility.get_skill_points_gain_at_level(facility_level)
+                facility = self._scenario.facilities[facility_type]
+                level = self._facility_levels[facility_type]
+                base_stats = facility.get_all_stat_gains_at_level(level)
+                base_skill_points = facility.get_skill_points_gain_at_level(level)
                 
-                # Calculate stat bonuses (sum across all cards)
-                stat_bonuses = {stat: 0 for stat in StatType}
-                for effect in training_effects:
-                    stat_bonuses[StatType.speed] += effect.combined_effects.get(CardEffect.speed_stat_bonus, 0)
-                    stat_bonuses[StatType.stamina] += effect.combined_effects.get(CardEffect.stamina_stat_bonus, 0)
-                    stat_bonuses[StatType.power] += effect.combined_effects.get(CardEffect.power_stat_bonus, 0)
-                    stat_bonuses[StatType.guts] += effect.combined_effects.get(CardEffect.guts_stat_bonus, 0)
-                    stat_bonuses[StatType.wit] += effect.combined_effects.get(CardEffect.wit_stat_bonus, 0)
-                
-                # Calculate skill points bonus
-                skill_points_bonus = sum(effect.combined_effects.get(CardEffect.skill_points_bonus, 0) 
-                                        for effect in training_effects)
-                
-                # Calculate friendship multiplier (multiplicative across matching cards)
+                # Accumulate effects from all cards
+                stat_bonuses = {s: 0 for s in StatType}
+                skill_bonus = 0
                 friendship_mult = 1.0
-                for effect in training_effects:
-                    if effect.card.is_preferred_facility(facility_type):
-                        friendship_effectiveness = effect.combined_effects.get(CardEffect.friendship_effectiveness, 0)
-                        friendship_mult *= (1 + friendship_effectiveness / GameplayConstants.PERCENTAGE_BASE)
+                training_eff = 0
+                mood_eff = 0
                 
-                # Calculate mood multiplier
-                mood_base = turn.mood.multiplier
-                mood_effect_sum = sum(effect.combined_effects.get(CardEffect.mood_effect_increase, 0) 
-                                    for effect in training_effects)
-                mood_mult = 1 + (mood_base - 1) * (1 + mood_effect_sum / GameplayConstants.PERCENTAGE_BASE)
+                for card in cards_on_facility:
+                    # Start with static effects
+                    effects = self._static_effects[card].copy()
+                    
+                    # Add dynamic effects
+                    dynamic = self._calculate_dynamic_effects(card, facility_type, combined_bond)
+                    for eff_type, value in dynamic.items():
+                        effects[eff_type] = effects.get(eff_type, 0) + value
+                    
+                    # Accumulate
+                    stat_bonuses[StatType.speed] += effects.get(CardEffect.speed_stat_bonus, 0)
+                    stat_bonuses[StatType.stamina] += effects.get(CardEffect.stamina_stat_bonus, 0)
+                    stat_bonuses[StatType.power] += effects.get(CardEffect.power_stat_bonus, 0)
+                    stat_bonuses[StatType.guts] += effects.get(CardEffect.guts_stat_bonus, 0)
+                    stat_bonuses[StatType.wit] += effects.get(CardEffect.wit_stat_bonus, 0)
+                    skill_bonus += effects.get(CardEffect.skill_points_bonus, 0)
+                    training_eff += effects.get(CardEffect.training_effectiveness, 0)
+                    mood_eff += effects.get(CardEffect.mood_effect_increase, 0)
+                    
+                    if card.is_preferred_facility(facility_type):
+                        friend_eff = effects.get(CardEffect.friendship_effectiveness, 0)
+                        friendship_mult *= (1 + friend_eff / 100)
                 
-                # Calculate training effectiveness multiplier
-                training_effectiveness_sum = sum(effect.combined_effects.get(CardEffect.training_effectiveness, 0) 
-                                               for effect in training_effects)
-                training_mult = 1 + training_effectiveness_sum / GameplayConstants.PERCENTAGE_BASE
+                # Calculate multipliers
+                mood_mult = 1 + (self._mood.multiplier - 1) * (1 + mood_eff / 100)
+                training_mult = 1 + training_eff / 100
+                support_mult = 1 + len(cards_on_facility) * 0.05
                 
-                # Calculate support multiplier (5% per card on facility)
-                support_mult = 1 + len(training_effects) * 0.05
-                
-                # Calculate final gains for each stat
+                # Calculate final gains
                 for stat in StatType:
-                    # Get base stat from facility
-                    base_stat = base_stats.get(stat, 0)
-                    if base_stat == 0:
+                    base = base_stats.get(stat, 0)
+                    if base == 0:
                         aggregated_gains[facility_type][stat].append(0)
                         continue
                     
-                    # Add stat bonus from cards
-                    total_base = base_stat + stat_bonuses[stat]
-                    
-                    # Get character growth multiplier for this stat
-                    growth_mult = turn.character.get_stat_growth_multipler(stat)
-                    
-                    # Apply formula: base * friendship * mood * training * support * growth
-                    final_gain = total_base * friendship_mult * mood_mult * training_mult * support_mult * growth_mult
-                    
-                    # Round down as per game rules
-                    aggregated_gains[facility_type][stat].append(int(final_gain))
+                    total_base = base + stat_bonuses[stat]
+                    growth = self._character.get_stat_growth_multipler(stat)
+                    final = total_base * friendship_mult * mood_mult * training_mult * support_mult * growth
+                    aggregated_gains[facility_type][stat].append(int(final))
                 
-                # Calculate final skill points
-                final_skill_points = base_skill_points + skill_points_bonus
-                aggregated_skill_points[facility_type].append(final_skill_points)
+                aggregated_skill_points[facility_type].append(base_skill_points + skill_bonus)
         
-        aggregation_time = time.perf_counter() - aggregation_start
+        agg_time = time.perf_counter() - agg_start
+        total = time.perf_counter() - start
         
-        # Store results
         self._aggregated_stat_gains = aggregated_gains
         self._aggregated_skill_points = aggregated_skill_points
         
-        self.calculation_finished.trigger(self, results=self._aggregated_stat_gains)
-        
-        total_time = time.perf_counter() - total_start
-        
-        # Print profiling results
         print(f"\n{'='*60}")
         print(f"Performance Profile ({self.turn_count} turns)")
         print(f"{'='*60}")
-        print(f"Turn creation:  {turn_creation_time*1000:7.2f}ms ({turn_creation_time/total_time*100:5.1f}%)")
-        print(f"Aggregation:    {aggregation_time*1000:7.2f}ms ({aggregation_time/total_time*100:5.1f}%)")
-        print(f"Total:          {total_time*1000:7.2f}ms")
+        print(f"Turn generation: {turn_time*1000:7.2f}ms ({turn_time/total*100:5.1f}%)")
+        print(f"Aggregation:     {agg_time*1000:7.2f}ms ({agg_time/total*100:5.1f}%)")
+        print(f"Total:           {total*1000:7.2f}ms")
         print(f"{'='*60}\n")
+        
+        self.calculation_finished.trigger(self, results=self._aggregated_stat_gains)
 
     def get_results(self) -> dict | None:
         """Get aggregated calculation results.
