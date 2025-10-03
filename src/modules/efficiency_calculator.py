@@ -479,31 +479,45 @@ class EfficiencyCalculator:
         start = time.perf_counter()
         self.calculation_started.trigger(self)
         
-        # Store minimal turn data
+        # Store minimal turn data with profiling
         turn_data = []
-        
+
+        specialty_lookup_time = 0
+        random_selection_time = 0
+        dict_building_time = 0
+
         for i in range(self.turn_count):
             # Distribute cards
             card_facilities = {}
+            
             for card in self._deck.cards:
+                # Get specialty priority
+                spec_start = time.perf_counter()
                 specialty = card.get_effect_at_level(CardEffect.specialty_priority, self._card_levels[card])
                 total_weight = 500 + specialty + 50
                 preferred = card.preferred_facility
+                specialty_lookup_time += time.perf_counter() - spec_start
                 
+                # Build weights
+                rand_start = time.perf_counter()
                 weights = [100 + specialty if f == preferred else 100 for f in FacilityType]
                 weights.append(50)
                 
                 outcomes = list(FacilityType) + [None]
                 chosen = random.choices(outcomes, weights=weights, k=1)[0]
+                random_selection_time += time.perf_counter() - rand_start
                 
+                # Add to dict
+                dict_start = time.perf_counter()
                 if chosen is not None:
                     card_facilities[card] = chosen
+                dict_building_time += time.perf_counter() - dict_start
             
             turn_data.append(card_facilities)
             
             if (i + 1) % max(1, self.turn_count // 100) == 0:
                 self.calculation_progress.trigger(self, current=i+1, total=self.turn_count)
-        
+
         turn_time = time.perf_counter() - start
         agg_start = time.perf_counter()
         
@@ -658,6 +672,9 @@ class EfficiencyCalculator:
         print(f"Performance Profile ({self.turn_count} turns)")
         print(f"{'='*60}")
         print(f"Turn generation:   {turn_time*1000:7.2f}ms ({turn_time/total*100:5.1f}%)")
+        print(f"  Specialty lookup: {specialty_lookup_time*1000:7.2f}ms ({specialty_lookup_time/turn_time*100:5.1f}%)")
+        print(f"  Random selection: {random_selection_time*1000:7.2f}ms ({random_selection_time/turn_time*100:5.1f}%)")
+        print(f"  Dict building:    {dict_building_time*1000:7.2f}ms ({dict_building_time/turn_time*100:5.1f}%)")
         print(f"Aggregation:       {agg_time*1000:7.2f}ms ({agg_time/total*100:5.1f}%)")
         print(f"  Grouping:        {grouping_time*1000:7.2f}ms ({grouping_time/agg_time*100:5.1f}%)")
         print(f"  Effect lookup:   {effect_calc_time*1000:7.2f}ms ({effect_calc_time/agg_time*100:5.1f}%)")
