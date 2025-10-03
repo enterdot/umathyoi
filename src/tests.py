@@ -84,7 +84,6 @@ def test_card_effects():
     print(f"Speedup: {first_time / second_time:.1f}x")
 
 
-
 def test_efficiency_calculator():
     print("\n" + "="*80)
     print("Testing Efficiency Calculator")
@@ -147,15 +146,14 @@ def test_efficiency_calculator():
         FacilityType.wit: 5
     }
     
-    calculator.turn_count = 1000  # Fewer turns for quick test
+    calculator.turn_count = 1  # Fewer turns for quick test
     
     # Hook up event handlers to see progress
     def on_started(calc):
         print("\nCalculation started...")
     
     def on_progress(calc, current, total):
-        if current % 10 == 0:
-            print(f"Progress: {current}/{total} turns...")
+        print(f"Progress: {current}/{total} turns...")
     
     def on_finished(calc, results):
         print("Calculation finished!")
@@ -167,7 +165,6 @@ def test_efficiency_calculator():
     # Trigger calculation (should happen automatically due to init, but let's be explicit)
     print("\nRunning calculation...")
 
-    # @stopwatch(log_func=print, show_args=False) TODO: why does it not work? It works in the GTK app
     calculator._recalculate_sync()
 
     import time

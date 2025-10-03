@@ -9,7 +9,7 @@ from .deck import Deck
 from .scenario import Scenario, Facility, FacilityType
 from .character import GenericCharacter, StatType, Mood
 from .event import Event
-from utils import GameplayConstants, CardConstants, debounce, auto_title_from_instance
+from utils import GameplayConstants, CardConstants, debounce, auto_title_from_instance, stopwatch
 
 @dataclass(frozen=True)
 class Turn:
@@ -580,6 +580,7 @@ class EfficiencyCalculator:
         """Run the Monte Carlo simulation (debounced for UI responsiveness)."""
         self._recalculate_sync()
 
+    @stopwatch(log_func=print, show_args=False)
     def _recalculate_sync(self) -> None:
         """Run the Monte Carlo simulation."""
         self.calculation_started.trigger(self)
@@ -605,8 +606,8 @@ class EfficiencyCalculator:
             self._simulated_turns.append(turn)
             
             # Report progress every 1%
-            if i % (self.turn_count // 100) == 0:
-                self.calculation_progress.trigger(self, current=i, total=self.turn_count)
+            if (i + 1) % max(1, self.turn_count // 100) == 0:
+                self.calculation_progress.trigger(self, current=i+1, total=self.turn_count)
         
         # Aggregating results of all turns
         # Store stat gains per facility: {facility_type: {stat_type: [gains...]}}
