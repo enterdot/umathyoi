@@ -1,44 +1,51 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 import gi
-gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
+
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gdk, Adw
 
-from views import DeckBuilderView
-from views import LegacyManagerView
-from utils import UIConstants, auto_title_from_instance
+from views import DeckBuilderView, LegacyManagerView
+from common import auto_title_from_instance
 
 
 class MainWindow(Adw.ApplicationWindow):
     """Main application window with responsive design and CSS styling."""
-    
+
+    DEFAULT_BREAKPOINT_WIDTH: int = 848
+    MIN_WINDOW_WIDTH: int = 560
+    MIN_WINDOW_HEIGHT: int = 720
+    DEFAULT_WINDOW_WIDTH: int = 1024
+    DEFAULT_WINDOW_HEIGHT: int = 720
+
     def __init__(self, app, app_name: str):
         """Initialize main window."""
-        
+
         super().__init__(application=app)
         self.app = app
-        
+
         self.set_title(app_name)
-        self.set_default_size(UIConstants.DEFAULT_WINDOW_WIDTH, UIConstants.DEFAULT_WINDOW_HEIGHT)
-        self.set_size_request(UIConstants.MIN_WINDOW_WIDTH, UIConstants.MIN_WINDOW_HEIGHT)
+        self.set_default_size(MainWindow.DEFAULT_WINDOW_WIDTH, MainWindow.DEFAULT_WINDOW_HEIGHT)
+        self.set_size_request(MainWindow.MIN_WINDOW_WIDTH, MainWindow.MIN_WINDOW_HEIGHT)
 
         self.width_breakpoint: Adw.Breakpoint
         self.height_breakpoint: Adw.Breakpoint
-        self._setup_breakpoints(UIConstants.DEFAULT_BREAKPOINT_WIDTH, None)
+        self._setup_breakpoints(MainWindow.DEFAULT_BREAKPOINT_WIDTH, None)
 
         self._load_css()
         self._setup_ui()
 
-        logger.info(f"Presenting {auto_title_from_instance(self)} ({UIConstants.DEFAULT_WINDOW_WIDTH} by {UIConstants.DEFAULT_WINDOW_HEIGHT})")
+        logger.info(f"Presenting {auto_title_from_instance(self)} ({MainWindow.DEFAULT_WINDOW_WIDTH} by {MainWindow.DEFAULT_WINDOW_HEIGHT})")
         self.present()
 
         logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     def _setup_breakpoints(self, width: int | None, height: int | None) -> None:
         """Set up responsive breakpoints for different screen sizes.
-        
+
         Args:
             width: Breakpoint width in pixels, or None to skip
             height: Breakpoint height in pixels, or None to skip
@@ -49,12 +56,12 @@ class MainWindow(Adw.ApplicationWindow):
         if height:
             self.height_breakpoint = Adw.Breakpoint.new(Adw.BreakpointCondition.parse(f"max-height: {str(height)}sp"))
             self.add_breakpoint(self.height_breakpoint)
-    
+
     def _setup_ui(self) -> None:
         """Set up the main window UI components."""
         header_bar = Adw.HeaderBar()
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        
+
         view_stack = Adw.ViewStack()
         view_switcher = Adw.ViewSwitcher()
         view_switcher.set_stack(view_stack)
@@ -64,11 +71,11 @@ class MainWindow(Adw.ApplicationWindow):
 
         view_stack.add_titled(deck_builder_view, "deck_builder_view", "Deck Builder")
         view_stack.add_titled(legacy_manager_view, "legacy_manager_view", "Legacy Manager")
-        
+
         header_bar.set_title_widget(view_switcher)
         main_box.append(header_bar)
         main_box.append(view_stack)
-        
+
         self.set_content(main_box)
 
     def _load_css(self) -> None:
@@ -79,13 +86,13 @@ class MainWindow(Adw.ApplicationWindow):
 
             .carousel-side {{
                 transform: scale(0.85);
-                transition: transform {UIConstants.CSS_TRANSITION_DURATION}ms ease;
+                transition: transform {MainWindow.CSS_TRANSITION_DURATION}ms ease;
                 opacity: 0.8;
             }}
 
             .carousel-active {{
                 transform: scale(1.0);
-                transition: transform {UIConstants.CSS_TRANSITION_DURATION}ms ease;
+                transition: transform {MainWindow.CSS_TRANSITION_DURATION}ms ease;
                 opacity: 1.0;
             }}
 
@@ -123,9 +130,5 @@ class MainWindow(Adw.ApplicationWindow):
         """
 
         css_provider.load_from_string(css)
-        
-        Gtk.StyleContext.add_provider_for_display(
-            Gdk.Display.get_default(),
-            css_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
+
+        Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)

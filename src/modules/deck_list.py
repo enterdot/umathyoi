@@ -1,38 +1,41 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from .deck import Deck
 from .event import Event
-from utils import auto_title_from_instance
+from common import auto_title_from_instance
+
 
 class DeckList:
+
+    SIZE: int = 5
+
     def __init__(self, decks: list[Deck | None] | None = None) -> None:
 
-        self._size = 5
-
-        logger.info(f"Initializing deck list with {self._size} slots")
+        logger.info(f"Initializing deck list with {DeckList.SIZE} slots")
 
         if decks is not None:
-            if len(decks) > self._size:
-                logger.warning(f"Size is {self._size} but {len(decks)} decks were given, discarding {len(decks) - self._size}")
-                decks = decks[:self._size]
+            if len(decks) > DeckList.SIZE:
+                logger.warning(f"Size is {DeckList.SIZE} but {len(decks)} decks were given, discarding {len(decks) - DeckList.SIZE}")
+                decks = decks[: DeckList.SIZE]
             self._decks = [deck if deck is not None else Deck() for deck in decks]
 
-            if len(self._decks) < self._size:
-                self._decks.extend([Deck() for _ in range(self._size - len(self._decks))])
+            if len(self._decks) < DeckList.SIZE:
+                self._decks.extend([Deck() for _ in range(DeckList.SIZE - len(self._decks))])
         else:
-            self._decks = [Deck() for _ in range(self._size)]
-        
+            self._decks = [Deck() for _ in range(DeckList.SIZE)]
+
         for slot, deck in enumerate(self._decks):
             if deck:
-                logger.info(f"Slot {slot}: {repr(deck)}")
-        
+                logger.info(f"Slot {slot}: {deck}")
+
         self._active_slot: int = 0
 
         # Existing deck list events
         self.slot_activated: Event = Event()
         self.slot_deactivated: Event = Event()
-        
+
         # Active deck events to match all Deck events
         self.card_added_to_active_deck_at_slot: Event = Event()
         self.card_removed_from_active_deck_at_slot: Event = Event()
@@ -42,24 +45,24 @@ class DeckList:
 
         # Set up event forwarding for all decks
         self._setup_deck_event_forwarding()
-        
+
         logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     def _setup_deck_event_forwarding(self):
         """Subscribe to all deck events and forward active deck events."""
         # Mapping of deck events to their corresponding active deck events
         event_mapping = {
-            'card_added_at_slot': self.card_added_to_active_deck_at_slot,
-            'card_removed_at_slot': self.card_removed_from_active_deck_at_slot,
-            'limit_break_set_at_slot': self.limit_break_set_for_active_deck_at_slot,
-            'deck_was_cleared': self.active_deck_was_cleared,
-            'deck_pushed_past_capacity': self.active_deck_pushed_past_capacity,
+            "card_added_at_slot": self.card_added_to_active_deck_at_slot,
+            "card_removed_at_slot": self.card_removed_from_active_deck_at_slot,
+            "limit_break_set_at_slot": self.limit_break_set_for_active_deck_at_slot,
+            "deck_was_cleared": self.active_deck_was_cleared,
+            "deck_pushed_past_capacity": self.active_deck_pushed_past_capacity,
         }
-        
+
         # Ensure that we have a mapping for every Deck event
         sample_deck = Deck()
         deck_events = {name for name, attr in vars(sample_deck).items() if isinstance(attr, Event)}
-        mapped_events = set(event_mapping.keys())        
+        mapped_events = set(event_mapping.keys())
         if not mapped_events == deck_events:
             logger.error(f"Missing from mapping: {deck_events - mapped_events}")
             logger.error(f"Extraneous in mapping: {deck_events - mapped_events}")
@@ -68,21 +71,23 @@ class DeckList:
         for deck in self._decks:
             for deck_event_name, active_event in event_mapping.items():
                 deck_event = getattr(deck, deck_event_name)
+
                 # Create a closure that captures the current active_event
                 def create_handler(target_event):
                     def handler(source_deck, **kwargs):
                         # Only forward if this deck is the active deck
                         if source_deck is self.active_deck:
                             target_event.trigger(self, **kwargs)
+
                     handler.__name__ = f"{deck_event_name} - forward event by {__name__}"
                     return handler
-                
+
                 deck_event.subscribe(create_handler(active_event))
 
     @property
     def size(self) -> int:
         """Maximum number of decks this deck list can hold."""
-        return self._size
+        return DeckList.SIZE
 
     @property
     def active_deck(self) -> Deck | None:
@@ -94,18 +99,18 @@ class DeckList:
 
     @active_slot.setter
     def active_slot(self, index: int) -> None:
-        if 0 <= index < self._size:
+        if 0 <= index < DeckList.SIZE:
             if index != self.active_slot:
                 self.slot_deactivated.trigger(self, index=self.active_slot, deck=self.active_deck)
                 self._active_slot = index
                 self.slot_activated.trigger(self, index=self.active_slot, deck=self.active_deck)
-                logger.debug(f"Activated deck '{self.active_deck.name}' in slot {self._active_slot}")
+                logger.debug(f"Activated deck '{self.active_deck}' in slot {self._active_slot}")
         else:
             raise ValueError(f"Slot {index} is out of bounds")
 
     def get_slot_at_offset(self, offset: int) -> int:
         offset_index = self._active_slot + offset
-        offset_index = ((offset_index % self._size) + self._size) % self._size
+        offset_index = ((offset_index % DeckList.SIZE) + DeckList.SIZE) % DeckList.SIZE
         return offset_index
 
     def get_deck_at_offset(self, offset: int) -> Deck:
@@ -124,7 +129,7 @@ class DeckList:
 
     def find_deck_by_slot(self, target_slot: int) -> Deck | None:
         """Get deck at specific slot (convenience method)."""
-        if 0 <= target_slot < self._size:
+        if 0 <= target_slot < DeckList.SIZE:
             return self._decks[target_slot]
         return None
 
@@ -132,8 +137,5 @@ class DeckList:
         return deck in self._decks
 
     def __iter__(self):
-        for index in range(self._size):
+        for index in range(DeckList.SIZE):
             yield (index, self._decks[index])
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(size={self._size}, decks={repr(self._decks)})"

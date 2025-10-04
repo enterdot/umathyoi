@@ -1,48 +1,50 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from typing import Iterator
 from .card import Card
 from .event import Event
-from utils import auto_title_from_instance
+from common import auto_title_from_instance
 
 
 class Deck:
     """A deck containing up to 6 cards with limit break levels."""
-    
-    def __init__(self, name: str = "New Deck", cards: list[Card | None] | None = None, limit_breaks: list[int] | None = None) -> None:
 
-        self._size = 6
-        self.name: str = name
+    SIZE: int = 6
 
-        self._cards: list[Card | None] = [None] * self._size
+    def __init__(self, cards: list[Card | None] | None = None, limit_breaks: list[int] | None = None) -> None:
+
+        # self._size = 6
+
+        self._cards: list[Card | None] = [None] * Deck.SIZE
         if cards is not None:
-            if len(cards) > self._size:
-                logger.warning(f"Deck size is {self._size} but {len(cards)} cards were given, discarding {len(cards) - self._size}")
-                self._cards = cards[:self._size]
+            if len(cards) > Deck.SIZE:
+                logger.warning(f"Deck size is {Deck.SIZE} but {len(cards)} cards were given, discarding {len(cards) - Deck.SIZE}")
+                self._cards = cards[: Deck.SIZE]
             else:
-                self._cards = cards + [None] * (self._size - len(cards))
+                self._cards = cards + [None] * (Deck.SIZE - len(cards))
 
-        self._limit_breaks: list[int] = [0] * self._size
+        self._limit_breaks: list[int] = [0] * Deck.SIZE
         if limit_breaks is not None:
-            if len(limit_breaks) > self._size:
-                logger.warning(f"Deck size is {self._size} but {len(limit_breaks)} limit breaks were given, discarding {len(limit_breaks) - self._size}")
-                self._limit_breaks = limit_breaks[:self._size]
+            if len(limit_breaks) > Deck.SIZE:
+                logger.warning(f"Deck size is {Deck.SIZE} but {len(limit_breaks)} limit breaks were given, discarding {len(limit_breaks) - Deck.SIZE}")
+                self._limit_breaks = limit_breaks[: Deck.SIZE]
             else:
-                self._limit_breaks = limit_breaks + [0] * (self._size - len(limit_breaks))
+                self._limit_breaks = limit_breaks + [0] * (Deck.SIZE - len(limit_breaks))
 
         self.card_added_at_slot: Event = Event()
         self.card_removed_at_slot: Event = Event()
         self.limit_break_set_at_slot: Event = Event()
         self.deck_was_cleared: Event = Event()
         self.deck_pushed_past_capacity: Event = Event()
-        
+
         logger.info(f"{auto_title_from_instance(self)} initialized: {self}")
 
     @property
     def size(self) -> int:
         """Maximum number of cards this deck can hold."""
-        return self._size
+        return Deck.SIZE
 
     @property
     def is_full(self) -> bool:
@@ -66,10 +68,10 @@ class Deck:
 
     def remove_card_at_slot(self, slot: int) -> Card | None:
         """Remove card at the specified slot.
-        
+
         Args:
             slot: Slot position (0-based)
-            
+
         Returns:
             The removed card, or None if slot was empty
         """
@@ -77,16 +79,16 @@ class Deck:
         self._cards[slot] = None
         self._limit_breaks[slot] = Card.MIN_LIMIT_BREAK
         if removed_card:
-            logger.debug(f"Removed card at slot {slot} from deck '{self.name}'")
+            logger.debug(f"Removed card at slot {slot} from deck {self}")
             self.card_removed_at_slot.trigger(self, card=removed_card, slot=slot)
         return removed_card
 
     def remove_card_by_id(self, card_id: int) -> int | None:
         """Remove card with the specified ID.
-        
+
         Args:
             card_id: ID of card to remove
-            
+
         Returns:
             Slot position where card was removed, or None if not found
         """
@@ -98,10 +100,10 @@ class Deck:
 
     def remove_card(self, card: Card) -> int | None:
         """Remove the specified card.
-        
+
         Args:
             card: Card to remove
-            
+
         Returns:
             Slot position where card was removed, or None if not found
         """
@@ -109,39 +111,39 @@ class Deck:
 
     def add_card(self, card: Card, limit_break: int = Card.MIN_LIMIT_BREAK) -> int | None:
         """Add card to first available slot.
-        
+
         Args:
             card: Card to add
             limit_break: Initial limit break level
-            
+
         Returns:
             Slot position where card was added, or None if deck is full
         """
-        logger.debug(f"Adding card {card.id} at limit break {limit_break} to deck '{self.name}'")
+        logger.debug(f"Adding card {card.id} at limit break {limit_break} to deck {self}")
         if card in self:
-            logger.debug(f"Failed to add card {card.id}, already in deck '{self.name}'")
+            logger.debug(f"Failed to add card {card.id}, already in deck {self}")
             return None
 
         slot = self.find_first_empty_slot()
         if slot is not None:
             self._cards[slot] = card
             self.set_limit_break_at_slot(slot, limit_break)
-            logger.debug(f"Added card {card.id} at slot {slot} to deck '{self.name}'")
+            logger.debug(f"Added card {card.id} at slot {slot} to deck {self}")
             self.card_added_at_slot.trigger(self, card=card, slot=slot)
             return slot
         else:
-            logger.debug(f"Could not add card {card.id}, deck '{self.name}' is full")
+            logger.debug(f"Could not add card {card.id}, deck {self} is full")
             self.deck_pushed_past_capacity.trigger(self, card=card)
             return None
 
     def add_card_at_slot(self, slot: int, card: Card, limit_break: int = Card.MIN_LIMIT_BREAK) -> bool:
         """Add card at specific slot.
-        
+
         Args:
             slot: Target slot position
             card: Card to add
             limit_break: Initial limit break level
-            
+
         Returns:
             True if card was added, False if slot occupied or card already in deck
         """
@@ -158,14 +160,14 @@ class Deck:
 
     def find_first_empty_slot(self, reverse: bool = False) -> int | None:
         """Find first empty slot in deck.
-        
+
         Args:
             reverse: If True, search from last slot to first
-            
+
         Returns:
             Slot position, or None if deck is full
         """
-        slots = range(self._size - 1, -1, -1) if reverse else range(self._size)
+        slots = range(Deck.SIZE - 1, -1, -1) if reverse else range(Deck.SIZE)
         for slot in slots:
             if self._cards[slot] is None:
                 return slot
@@ -173,10 +175,10 @@ class Deck:
 
     def get_card_at_slot(self, slot: int) -> Card | None:
         """Get card at specified slot.
-        
+
         Args:
             slot: Slot position
-            
+
         Returns:
             Card at slot, or None if empty
         """
@@ -184,10 +186,10 @@ class Deck:
 
     def get_limit_break_at_slot(self, slot: int) -> int:
         """Get limit break level at specified slot.
-        
+
         Args:
             slot: Slot position
-            
+
         Returns:
             Limit break level
         """
@@ -195,32 +197,32 @@ class Deck:
 
     def set_limit_break_at_slot(self, slot: int, limit_break: int) -> bool:
         """Set limit break level at specified slot.
-        
+
         Args:
             slot: Slot position
             limit_break: New limit break level
-            
+
         Returns:
             True if set successfully, False if slot is empty
         """
         # Validate parameters
-        if not 0 <= slot < self._size:
-            raise ValueError(f"Invalid slot {slot}, must be in range [0, {self._size})")
+        if not 0 <= slot < Deck.SIZE:
+            raise ValueError(f"Invalid slot {slot}, must be in range [0, {Deck.SIZE})")
         if not Card.MIN_LIMIT_BREAK <= limit_break <= Card.MAX_LIMIT_BREAK:
             raise ValueError(f"Invalid limit_break {limit_break}, must be in range [{Card.MIN_LIMIT_BREAK}, {Card.MAX_LIMIT_BREAK}]")
-        
+
         if self._cards[slot] is None:
-            logger.debug(f"Cannot set limit break on empty slot {slot} for deck '{self.name}'")
+            logger.debug(f"Cannot set limit break on empty slot {slot} for deck {self}")
             return False
         self._limit_breaks[slot] = limit_break
-        logger.debug(f"Set limit break {self._limit_breaks[slot]} at slot {slot} for deck '{self.name}'")
+        logger.debug(f"Set limit break {self._limit_breaks[slot]} at slot {slot} for deck {self}")
         self.limit_break_set_at_slot.trigger(self, limit_break=limit_break, slot=slot)
         return True
 
     def clear(self) -> None:
         """Remove all cards from deck."""
         cards_removed_count = 0
-        for slot in range(self._size):
+        for slot in range(Deck.SIZE):
             card_removed = self.remove_card_at_slot(slot)
             if card_removed is not None:
                 cards_removed_count += 1
@@ -232,7 +234,7 @@ class Deck:
 
     def __iter__(self) -> Iterator[tuple[int, Card | None, int]]:
         """Iterate over deck slots.
-        
+
         Yields:
             Tuple of (slot, card, limit_break) for each position
         """
@@ -240,7 +242,4 @@ class Deck:
             yield (slot, card, limit_break)
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.count}/{self._size}): {[elem for elem in self if elem[1]]}"
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(name='{self.name}', count={self.count}/{self._size}, cards={[card.id for card in self._cards if card]})"
+        return f"{[elem[1].id for elem in self if elem[1]]}"

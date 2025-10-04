@@ -1,20 +1,22 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 import gi
-gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
+
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw
 
 from modules import Card, Deck
 from .card_slot import CardSlot
 from .placeholder import Placeholder
-from utils import auto_title_from_instance, UIConstants
+from common import auto_title_from_instance, UIConstants
 
 
 class DeckCarousel(Adw.Bin):
     """Carousel widget displaying multiple decks with visual scaling animations."""
-    
+
     def __init__(self, window):
         """Initialize deck carousel."""
         super().__init__()
@@ -24,14 +26,14 @@ class DeckCarousel(Adw.Bin):
         self.connect_signals()
 
         logger.debug(f"{auto_title_from_instance(self)} initialized")
-        
+
     def setup_ui(self) -> None:
         """Set up the carousel UI components."""
         container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         container.set_spacing(UIConstants.CAROUSEL_SPACING)
         container.set_margin_bottom(UIConstants.CAROUSEL_MARGIN)
         container.set_margin_top(UIConstants.CAROUSEL_MARGIN)
-        
+
         self.carousel = Adw.Carousel()
         self.carousel.set_allow_mouse_drag(True)
         self.carousel.set_allow_scroll_wheel(True)
@@ -40,7 +42,7 @@ class DeckCarousel(Adw.Bin):
         self.carousel.set_spacing(UIConstants.CAROUSEL_MIN_SPACING)
         self.carousel.set_vexpand(True)
         self.carousel.set_valign(Gtk.Align.CENTER)
-            
+
         # Create pages for all decks in deck list
         for deck_slot, deck in self.app.deck_list:
             self.carousel.append(self.create_carousel_page(deck_slot, deck))
@@ -52,24 +54,24 @@ class DeckCarousel(Adw.Bin):
         deck_efficiency.set_vexpand(False)
         deck_efficiency.set_valign(Gtk.Align.END)
         deck_efficiency.set_margin_bottom(UIConstants.DECK_EFFICIENCY_MARGIN_BOTTOM)
-        
+
         container.append(self.carousel)
         container.append(deck_efficiency)
         self.set_child(container)
-    
+
     def connect_signals(self) -> None:
         """Connect carousel and deck event signals."""
         # Carousel navigation signals
         self.carousel.connect("page-changed", self._on_page_changed)
         self.carousel.connect("notify::position", self._on_notify_position)
-        
+
         # Window resize signals for responsive spacing
         self.window.connect("notify::default-width", self._on_window_width_changed)
         self.window.connect("notify::default-height", self._on_window_height_changed)
-        
+
         # Active deck change signals
         self.app.deck_list.slot_activated.subscribe(self._on_active_deck_changed)
-        
+
         # Active deck content change signals
         self.app.deck_list.card_added_to_active_deck_at_slot.subscribe(self._on_card_added_to_active_deck)
         self.app.deck_list.card_removed_from_active_deck_at_slot.subscribe(self._on_card_removed_from_active_deck)
@@ -79,13 +81,13 @@ class DeckCarousel(Adw.Bin):
         """Update carousel spacing based on window width for responsive design."""
         nav_page = self.get_parent()
         nav_page_width = float(nav_page.get_width())
-        
-        if hasattr(self, 'last_nav_page_width'):
-            if not hasattr(carousel, 'target_spacing'):
+
+        if hasattr(self, "last_nav_page_width"):
+            if not hasattr(carousel, "target_spacing"):
                 carousel.target_spacing = float(carousel.get_spacing())
             carousel.target_spacing += (nav_page_width - self.last_nav_page_width) / 2
             carousel.set_spacing(round(max(UIConstants.CAROUSEL_MIN_SPACING, carousel.target_spacing)))
-        
+
         self.last_nav_page_width = float(nav_page_width)
 
     def update_carousel_hints(self, carousel: Adw.Carousel) -> None:
@@ -96,7 +98,7 @@ class DeckCarousel(Adw.Bin):
         for page_index in range(carousel.get_n_pages()):
             page = carousel.get_nth_page(page_index)
             distance = abs(page_index - current_page_index)
-            
+
             if distance == 0:
                 page.remove_css_class("carousel-side")
                 page.add_css_class("carousel-active")
@@ -107,7 +109,7 @@ class DeckCarousel(Adw.Bin):
     def create_carousel_page(self, deck_slot: int, deck: Deck) -> Adw.NavigationPage:
         """Create a carousel page for a deck."""
         deck_grid = self._create_deck_grid(deck)
-        logger.debug(f"Created grid for {deck=}")
+        logger.debug(f"Created grid for deck {deck}")
         return Adw.NavigationPage.new_with_tag(deck_grid, f"Deck {deck_slot}", f"deck_carousel_{deck_slot}")
 
     def _create_deck_grid(self, deck: Deck) -> Gtk.Grid:
@@ -121,7 +123,7 @@ class DeckCarousel(Adw.Bin):
             card_slot_widget = self._create_card_slot(slot, card, limit_break)
             row, col = divmod(slot, deck.size // 2)
             deck_grid.attach(card_slot_widget, col, row, 1, 1)
-        
+
         deck_grid.deck = deck
         return deck_grid
 
@@ -130,14 +132,14 @@ class DeckCarousel(Adw.Bin):
         card_slot_widget = CardSlot(self.window, UIConstants.CARD_SLOT_WIDTH, UIConstants.CARD_SLOT_HEIGHT)
         card_slot_widget.card = card
         card_slot_widget.limit_break = limit_break
-        
+
         # Add click handler only if card is present
         if card is not None:
             card_slot_widget.set_click_handler(self._on_card_slot_clicked, slot)
-        
+
         # Add limit break change handler
         card_slot_widget.set_limit_break_changed_handler(self._on_limit_break_changed, slot)
-        
+
         return card_slot_widget
 
     def _update_card_slot(self, deck_page: int, slot: int, card: Card | None, limit_break: int) -> None:
@@ -145,16 +147,16 @@ class DeckCarousel(Adw.Bin):
         if 0 <= deck_page < self.carousel.get_n_pages():
             nav_page = self.carousel.get_nth_page(deck_page)
             deck_grid = nav_page.get_child()
-            
+
             # Find the specific card slot widget using grid position
             row, col = divmod(slot, deck_grid.deck.size // 2)
             card_slot_widget = deck_grid.get_child_at(col, row)
-            
+
             if card_slot_widget and isinstance(card_slot_widget, CardSlot):
                 # Update existing widget in-place
                 card_slot_widget.card = card
                 card_slot_widget.limit_break = limit_break
-                
+
                 # Update click handler based on whether card is present
                 if card is not None:
                     card_slot_widget.set_click_handler(self._on_card_slot_clicked, slot)
@@ -199,21 +201,21 @@ class DeckCarousel(Adw.Bin):
 
     def _on_card_added_to_active_deck(self, deck_list, **kwargs) -> None:
         """Handle when a card is added to the active deck."""
-        card = kwargs.get('card')
-        slot = kwargs.get('slot')
+        card = kwargs.get("card")
+        slot = kwargs.get("slot")
         if card is not None and slot is not None:
             self._update_card_slot(self.app.deck_list.active_slot, slot, card, Card.MIN_LIMIT_BREAK)
 
     def _on_card_removed_from_active_deck(self, deck_list, **kwargs) -> None:
         """Handle when a card is removed from the active deck."""
-        slot = kwargs.get('slot')
+        slot = kwargs.get("slot")
         if slot is not None:
             self._update_card_slot(self.app.deck_list.active_slot, slot, None, Card.MIN_LIMIT_BREAK)
 
     def _on_limit_break_changed_in_active_deck(self, deck_list, **kwargs) -> None:
         """Handle when a limit break level changes in the active deck."""
-        slot = kwargs.get('slot')
-        limit_break = kwargs.get('limit_break')
+        slot = kwargs.get("slot")
+        limit_break = kwargs.get("limit_break")
         if slot is not None and limit_break is not None:
             # Get current card at that slot
             active_deck = self.app.deck_list.active_deck

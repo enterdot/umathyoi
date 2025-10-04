@@ -1,27 +1,23 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from .card import Card
 from .event import Event
-from utils import auto_title_from_instance
+from common import auto_title_from_instance
 
 
 class CardInspector:
     """Tracks currently inspected card and limit break level for info display."""
-    
+
     def __init__(self, card: Card | None = None, limit_break: int = 0) -> None:
-        """Initialize card stats tracker.
-        
-        Args:
-            card: Initial card to inspect
-            limit_break: Initial limit break level (0-4)
-        """
+        """Initialize card stats tracker."""
         self._card: Card | None = card
         self._limit_break: int = limit_break
 
         self.card_changed: Event = Event()
         self.limit_break_changed: Event = Event()
-        
+
         logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     @property
@@ -31,11 +27,7 @@ class CardInspector:
 
     @card.setter
     def card(self, card: Card | None) -> None:
-        """Set currently inspected card.
-        
-        Args:
-            card: Card to inspect, or None to clear
-        """
+        """Set currently inspected card."""
         if card != self._card:
             prev_card = self._card
             self._card = card
@@ -48,20 +40,11 @@ class CardInspector:
 
     @limit_break.setter
     def limit_break(self, limit_break: int) -> None:
-        """Set limit break level.
-        
-        Args:
-            limit_break: Limit break level
-        """
+        """Set limit break level."""
         if not (Card.MIN_LIMIT_BREAK <= limit_break <= Card.MAX_LIMIT_BREAK):
             raise ValueError(f"{limit_break=} is not in range [{Card.MIN_LIMIT_BREAK}, {Card.MAX_LIMIT_BREAK}]")
-        
+
         if limit_break != self._limit_break:
             prev_limit_break = self._limit_break
             self._limit_break = limit_break
-            self.limit_break_changed.trigger(
-                self, 
-                card=self._card, 
-                limit_break=self._limit_break,
-                prev_limit_break=prev_limit_break
-            )
+            self.limit_break_changed.trigger(self, card=self._card, limit_break=self._limit_break, prev_limit_break=prev_limit_break)

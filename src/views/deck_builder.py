@@ -1,20 +1,22 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 import gi
-gi.require_version('Adw', '1')
+
+gi.require_version("Adw", "1")
 from gi.repository import Adw
 
 from widgets import CardSelection, DeckCarousel
-from utils import auto_title_from_instance, auto_tag_from_instance
+from common import auto_title_from_instance, auto_tag_from_instance
 
 
 class DeckBuilderView(Adw.Bin):
     """Main deck builder view with card selection sidebar and deck carousel."""
-    
+
     def __init__(self, window):
         """Initialize deck builder view.
-        
+
         Args:
             window: Parent window reference
         """
@@ -26,7 +28,7 @@ class DeckBuilderView(Adw.Bin):
         self.setup_ui()
         self.setup_responsive_ui()
         self.connect_signals()
-        
+
         logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     def setup_ui(self) -> None:
@@ -62,7 +64,6 @@ class DeckBuilderView(Adw.Bin):
         split_view = self.get_child()
         self.window.width_breakpoint.add_setter(split_view, "collapsed", True)
         logger.debug(f"{auto_title_from_instance(self)} responsive UI configured")
-
 
     def connect_signals(self) -> None:
         """Connect any additional signals (currently none needed)."""

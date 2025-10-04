@@ -1,17 +1,19 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 import gi
-gi.require_version('Adw', '1')
+
+gi.require_version("Adw", "1")
 from gi.repository import Adw
 
 from widgets import Placeholder
-from utils import auto_title_from_instance
+from common import auto_title_from_instance
 
 
 class LegacyManagerView(Adw.Bin):
     """Legacy manager view (placeholder for future implementation)."""
-    
+
     def __init__(self, window):
         """Initialize legacy manager view."""
         super().__init__()
@@ -22,7 +24,7 @@ class LegacyManagerView(Adw.Bin):
         self.setup_ui()
         self.setup_responsive_ui()
         self.connect_signals()
-        
+
         logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     def setup_ui(self) -> None:

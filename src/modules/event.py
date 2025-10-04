@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from typing import Callable, Any
@@ -22,7 +23,7 @@ class Event:
         for callback in self._callbacks:
             callback(caller, **kwargs)
             logger.debug(f"{caller.__class__.__name__} triggered {self.count} callbacks")
-    
+
     @property
     def count(self) -> int:
         """Number of subscribed callbacks."""

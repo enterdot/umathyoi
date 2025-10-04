@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from enum import Enum
@@ -6,6 +7,7 @@ from dataclasses import dataclass
 from typing import ClassVar
 
 from .scenario import FacilityType
+
 
 class CardRarity(Enum):
     R = 1
@@ -26,6 +28,7 @@ class CardType(Enum):
 
     def __str__(self) -> str:
         return self.name.title()
+
 
 class CardEffect(Enum):
     friendship_effectiveness = 1
@@ -49,11 +52,12 @@ class CardEffect(Enum):
     specialty_priority = 19
     event_recovery_increase = 25
     event_effectiveness = 26
-    failure_protection =27
+    failure_protection = 27
     energy_cost_reduction = 28
     skill_points_bonus = 30
     wit_friendship_recovery_bonus = 31
     skill_points_up = 32
+
 
 class CardUniqueEffect(Enum):
     friendship_effectiveness = 1
@@ -83,7 +87,7 @@ class CardUniqueEffect(Enum):
     stat_up_per_card_based_on_type = 105
     effect_bonus_per_friendship_trainings = 106
     effect_bonus_on_less_energy = 107
-    effect_bonus_on_more_max_energy = 108 
+    effect_bonus_on_more_max_energy = 108
     effect_bonus_per_combined_bond = 109
     effect_bonus_per_card_on_facility = 110
     effect_bonus_per_facility_level = 111
@@ -99,18 +103,13 @@ class CardUniqueEffect(Enum):
     all_cards_gain_bond_bonus_per_training = 121
     cards_gain_effect_bonus_next_turn_after_trained_with = 122
 
-# TODO: Freeze and remove lru_cache (memoize decorator)
-# TODO: Save all results per each level or just recalculate every time
+
 @dataclass(frozen=True)
 class Card:
 
-    NO_LIMIT_BREAK_MAX_LEVEL: ClassVar[dict[CardRarity, int]] = {
-        CardRarity.R: 20,
-        CardRarity.SR: 25,
-        CardRarity.SSR: 30
-    }
+    NO_LIMIT_BREAK_MAX_LEVEL: ClassVar[dict[CardRarity, int]] = {CardRarity.R: 20, CardRarity.SR: 25, CardRarity.SSR: 30}
     LEVELS_PER_LIMIT_BREAK: ClassVar[int] = 5
-    MIN_LEVEL: ClassVar[int] = 1    
+    MIN_LEVEL: ClassVar[int] = 1
     FRIENDSHIP_BOND_THRESHOLD: ClassVar[int] = 80
     DYNAMIC_UNIQUE_EFFECT_ID_THRESHOLD: ClassVar[int] = 100
     MILESTONE_LEVELS: ClassVar[list[int]] = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
@@ -122,11 +121,26 @@ class Card:
     view_name: str
     rarity: CardRarity
     type: CardType
-    effects: list[list[int]]            # [type, value_at_lvl1, value_at_lvl5, value_at_lvl10, ...]
-    unique_effects: list[list[int]]     # [[type, value1], [type, value1, value2]]
-    unique_effects_unlock_level: int    # unique effects unlock at this level
+    effects: list[list[int]]  # [type, value_at_lvl1, value_at_lvl5, value_at_lvl10, ...]
+    unique_effects: list[list[int]]  # [[type, value1], [type, value1, value2]]
+    unique_effects_unlock_level: int  # unique effects unlock at this level
 
-    
+    def __post_init__(self):
+        cache = {}
+
+        # Pre-calculate effects at ALL levels
+        for level in range(self.min_level, self.max_level + 1):
+            for effects_row in self.effects:
+                if len(effects_row) > 0:
+                    try:
+                        effect_type = CardEffect(effects_row[0])
+                        value = self._interpolate_effect_value(effect_type, level)
+                        cache[(effect_type, level)] = value
+                    except ValueError:
+                        continue
+
+        object.__setattr__(self, "_effect_cache", cache)
+
     @property
     def min_level(self) -> int:
         return Card.MIN_LEVEL
@@ -141,21 +155,20 @@ class Card:
             return None
         return FacilityType(self.type.value)
 
-    # @memoize(maxsize=256) #TODO: pre-cache during init instead so dataclass can stay frozen
     def _interpolate_effect_value(self, effect_type: CardEffect, level: int) -> int:
         """Calculate effect value at specific level using interpolation between milestones"""
 
         if not self.min_level <= level <= self.max_level:
             logger.warning(f"{level=} is out of range for card {self.id}")
             return 0
-        
+
         # Find the effects array for this effect type
         effect = None
         for effects_row in self.effects:
             if len(effects_row) > 0 and effects_row[0] == effect_type.value:
                 effect = effects_row
                 break
-        
+
         # Valid effect should have values for all milestone levels plus the effect type ID
         if not effect or len(effect) < len(Card.MILESTONE_LEVELS) + 1:
             logger.debug(f"Card {self.id} does not have effect type {effect_type} ({effect_type.name})")
@@ -173,48 +186,47 @@ class Card:
         if not milestones:
             logger.warning(f"Card {self.id} has no valid milestone for effect type {effect_type} ({effect_type.name})")
             return 0
-        
+
         # If level matches a milestone exactly, return that value
         for milestone_level, value in milestones:
             if level == milestone_level:
                 return value
-        
+
         # Find the two milestones to interpolate between
         lower_milestone = None
         upper_milestone = None
-        
+
         for milestone_level, value in milestones:
             if milestone_level <= level:
                 lower_milestone = (milestone_level, value)
             elif milestone_level > level and upper_milestone is None:
                 upper_milestone = (milestone_level, value)
                 break
-        
+
         # Handle edge cases
         if lower_milestone is None:
             # Level is below first milestone, return first milestone value
             return milestones[0][1]
-        
+
         if upper_milestone is None:
             # Level is above last milestone, return last milestone value
             return lower_milestone[1]
-        
+
         # Linear interpolation between the two milestones
         lower_level, lower_value = lower_milestone
         upper_level, upper_value = upper_milestone
-        
+
         # Calculate interpolation progress (0.0 to 1.0)
         progress = (level - lower_level) / (upper_level - lower_level)
-        
+
         # Interpolate and round to nearest integer
         interpolated_value = lower_value + (upper_value - lower_value) * progress
         return round(interpolated_value)
 
-
     def get_level_at_limit_break(self, limit_break: int) -> int:
         """
         Get maximum level at the specified limit break.
-        """        
+        """
         if not Card.MIN_LIMIT_BREAK <= limit_break <= Card.MAX_LIMIT_BREAK:
             raise ValueError(f"{limit_break=} is not in valid range [{Card.MIN_LIMIT_BREAK}, {Card.MAX_LIMIT_BREAK}]")
 
@@ -222,20 +234,20 @@ class Card:
 
     def get_effect_at_level(self, effect: CardEffect, level: int) -> int:
         """Get effect value at specified level."""
-        return self._interpolate_effect_value(effect, level)
+        return self._effect_cache.get((effect, level), 0)
 
     def get_effect_at_limit_break(self, effect: CardEffect, limit_break: int) -> int:
-         """Get effect value at specified limit break."""
-         level = self.get_level_at_limit_break(limit_break)
-         return self.get_effect_at_level(effect, level)
+        """Get effect value at specified limit break."""
+        level = self.get_level_at_limit_break(limit_break)
+        return self.get_effect_at_level(effect, level)
 
     def get_effect_at_min_level(self, effect: CardEffect) -> int:
         """Get effect value at minimum level."""
-        return self._interpolate_effect_value(effect, self.min_level)
+        return self.get_effect_at_level(effect, self.min_level)
 
     def get_effect_at_max_level(self, effect: CardEffect) -> int:
         """Get effect value at maximum level."""
-        return self._interpolate_effect_value(effect, self.max_level)
+        return self.get_effect_at_level(effect, self.max_level)
 
     def get_effect_at_min_limit_break(self, effect: CardEffect) -> int:
         """Get effect value at maximum level for minimum limit break."""
@@ -248,23 +260,23 @@ class Card:
     def get_all_effects_at_level(self, level: int) -> dict[CardEffect, int]:
         """Get all effects for this card at the specified level."""
         effects = {}
-        
+
         # Get all effect types present on this card
         present_effect_ids = set()
         for effects_row in self.effects:
             if len(effects_row) > 0:
                 present_effect_ids.add(effects_row[0])
-        
+
         # Calculate value for each present effect type
         for effect_type_id in present_effect_ids:
             try:
                 effect_type = CardEffect(effect_type_id)
-                value = self._interpolate_effect_value(CardEffect(effect_type_id), level)
+                value = self.get_effect_at_level(CardEffect(effect_type_id), level)
                 if value > 0:  # Only include non-zero effects
                     effects[effect_type] = value
             except ValueError:
                 continue
-        
+
         return effects
 
     def get_all_effects_at_limit_break(self, limit_break: int) -> dict[str, int]:
@@ -294,11 +306,11 @@ class Card:
 
     def __hash__(self) -> int:
         return hash(self.id)
-    
+
     def __eq__(self, other) -> bool:
         if not isinstance(other, self.__class__):
             return False
         return self.id == other.id
 
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(id={self.id}, name='{self.name}', rarity={self.rarity}, type={self.type})"
+    def __str__(self) -> str:
+        return f"{self.name}"

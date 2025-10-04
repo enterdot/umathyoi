@@ -1,17 +1,19 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 import gi
-gi.require_version('Gtk', '4.0')
+
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk, GLib
 
 from modules import Card
-from utils import auto_title_from_instance, texture_from_pixbuf
+from common import auto_title_from_instance, texture_from_pixbuf
 
 
 class CardSlot(Gtk.Box):
     """Widget representing a single card slot in a deck with artwork and limit break selector."""
-    
+
     def __init__(self, window, width: int, height: int):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.app = window.app
@@ -22,15 +24,15 @@ class CardSlot(Gtk.Box):
 
         self.setup_ui()
         self.connect_signals()
-        
+
         self.set_name(auto_title_from_instance(self))
-    
+
     def setup_ui(self) -> None:
 
         # Stack holds all possible states
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.NONE)
-        
+
         # Empty state
         empty_frame = Gtk.Frame()
         empty_frame.set_size_request(self.width, self.height)
@@ -39,7 +41,7 @@ class CardSlot(Gtk.Box):
         empty_label.set_text("+")
         empty_label.add_css_class("empty-slot-indicator")
         empty_frame.set_child(empty_label)
-        
+
         # Loading state
         loading_frame = Gtk.Frame()
         loading_frame.set_size_request(self.width, self.height)
@@ -47,10 +49,10 @@ class CardSlot(Gtk.Box):
         self.spinner.set_halign(Gtk.Align.CENTER)
         self.spinner.set_valign(Gtk.Align.CENTER)
         loading_frame.set_child(self.spinner)
-        
+
         # Artwork state
         self.artwork = Gtk.Picture()
-        
+
         # Error state
         error_frame = Gtk.Frame()
         error_frame.set_size_request(self.width, self.height)
@@ -62,36 +64,31 @@ class CardSlot(Gtk.Box):
         error_icon.set_halign(Gtk.Align.CENTER)
         error_icon.set_valign(Gtk.Align.CENTER)
         error_frame.set_child(error_icon)
-        
+
         # Add all states to stack
         self.stack.add_named(empty_frame, "empty")
         self.stack.add_named(loading_frame, "loading")
         self.stack.add_named(self.artwork, "artwork")
         self.stack.add_named(error_frame, "error")
-        
+
         self.append(self.stack)
 
         # Limit break selector
         limit_break_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         limit_break_box.set_halign(Gtk.Align.FILL)
         limit_break_box.set_visible(True)
-        
-        self.limit_break_adjustment = Gtk.Adjustment(
-            value=self.limit_break, lower=Card.MIN_LIMIT_BREAK, upper=Card.MAX_LIMIT_BREAK, step_increment=1, page_increment=1
-        )
-        self.limit_break_scale = Gtk.Scale(
-            orientation=Gtk.Orientation.HORIZONTAL, 
-            adjustment=self.limit_break_adjustment
-        )
+
+        self.limit_break_adjustment = Gtk.Adjustment(value=self.limit_break, lower=Card.MIN_LIMIT_BREAK, upper=Card.MAX_LIMIT_BREAK, step_increment=1, page_increment=1)
+        self.limit_break_scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=self.limit_break_adjustment)
         self.limit_break_scale.set_draw_value(False)
         self.limit_break_scale.set_round_digits(0)
         self.limit_break_scale.set_digits(0)
         self.limit_break_scale.set_hexpand(True)
-        
+
         # Add limit break marks
         for i in range(Card.MAX_LIMIT_BREAK + 1):
             self.limit_break_scale.add_mark(i, Gtk.PositionType.BOTTOM, str(i))
-        
+
         limit_break_box.append(self.limit_break_scale)
         self.append(limit_break_box)
 
@@ -105,13 +102,13 @@ class CardSlot(Gtk.Box):
         """Connect widget signals."""
         # Limit break handler is set externally via set_limit_break_changed_handler()
         self._limit_break_handler_id = None
-    
+
     @property
     def card(self) -> Card | None:
-        if not hasattr(self, '_card'):
+        if not hasattr(self, "_card"):
             self._card = None
         return self._card
-    
+
     @card.setter
     def card(self, card: Card | None) -> None:
         if card and self.card is not card:
@@ -125,10 +122,10 @@ class CardSlot(Gtk.Box):
 
     @property
     def limit_break(self) -> int:
-        if not hasattr(self, '_limit_break'):
+        if not hasattr(self, "_limit_break"):
             self._limit_break = Card.MIN_LIMIT_BREAK
         return self._limit_break
-    
+
     @limit_break.setter
     def limit_break(self, limit_break: int) -> None:
         if not Card.MIN_LIMIT_BREAK <= limit_break <= Card.MAX_LIMIT_BREAK:
@@ -140,67 +137,62 @@ class CardSlot(Gtk.Box):
         self.limit_break_adjustment.set_value(limit_break)
         if self._limit_break_handler_id is not None:
             self.limit_break_scale.handler_unblock(self._limit_break_handler_id)
-    
+
     def show_empty(self):
         """Show empty slot indicator."""
         self.stack.set_visible_child_name("empty")
-    
+
     def show_loading(self):
         """Show loading spinner."""
         self.spinner.start()
         self.stack.set_visible_child_name("loading")
-    
+
     def show_artwork(self, pixbuf):
         """Show card artwork."""
         self.spinner.stop()
-        
+
         if pixbuf:
-            #texture = Gdk.Texture.new_for_pixbuf(pixbuf)
+            # texture = Gdk.Texture.new_for_pixbuf(pixbuf)
             texture = texture_from_pixbuf(pixbuf)
             self.artwork.set_paintable(texture)
             self.artwork.add_css_class("card")
             self.stack.set_visible_child_name("artwork")
         else:
             self.show_error()
-    
+
     def show_error(self):
         """Show error state."""
         self.spinner.stop()
         self.stack.set_visible_child_name("error")
-    
+
     def load_card_artwork(self, card):
         """Load card artwork asynchronously."""
         self.show_loading()
-        
+
         def on_image_loaded(pixbuf):
             def update_ui():
                 self.show_artwork(pixbuf)
                 return False
-            
+
             GLib.idle_add(update_ui)
-        
-        self.app.card_db.load_card_image_async(
-            card.id,
-            self.width,
-            self.height,
-            on_image_loaded
-        )
+
+        self.app.card_db.load_card_image_async(card.id, self.width, self.height, on_image_loaded)
 
     def set_click_handler(self, callback: callable, *args) -> None:
         """Set click handler for this card slot.
-        
+
         Args:
             callback: Function to call when clicked
             *args: Additional arguments to pass to callback
         """
         self.remove_click_handler()
-        
+
         if callback:
             click_gesture = Gtk.GestureClick()
             click_gesture.connect("pressed", lambda gesture, n_press, x, y: callback(*args))
             self.add_controller(click_gesture)
             self._click_controller = click_gesture
-    
+
     def remove_click_handler(self) -> None:
         """Remove the current click handler if one exists."""
         if self._click_controller:
@@ -209,19 +201,16 @@ class CardSlot(Gtk.Box):
 
     def set_limit_break_changed_handler(self, callback: callable, *args) -> None:
         """Set handler for limit break scale changes.
-        
+
         Args:
             callback: Function to call when limit break changes
             *args: Additional arguments to pass to callback
         """
         self.remove_limit_break_changed_handler()
-        
+
         if callback:
-            self._limit_break_handler_id = self.limit_break_scale.connect(
-                "value-changed",
-                lambda scale: callback(int(scale.get_value()), *args)
-            )
-    
+            self._limit_break_handler_id = self.limit_break_scale.connect("value-changed", lambda scale: callback(int(scale.get_value()), *args))
+
     def remove_limit_break_changed_handler(self) -> None:
         """Remove the current limit break change handler if one exists."""
         if self._limit_break_handler_id is not None:

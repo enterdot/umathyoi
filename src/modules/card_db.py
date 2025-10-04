@@ -1,65 +1,62 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 import gi
-gi.require_version('Gdk', '4.0')
+
+gi.require_version("Gdk", "4.0")
 from gi.repository import GdkPixbuf, GLib
 
 import json
-import requests  # Replace aiohttp with requests
+import requests
 import threading
 from typing import Iterator
 from pathlib import Path
 from platformdirs import user_cache_dir
 
 from .card import CardRarity, CardType, Card
-from utils import ApplicationConstants, NetworkConstants, auto_title_from_instance, stopwatch
+from common import ApplicationConstants, NetworkConstants, auto_title_from_instance, stopwatch
 
 
 class CardDatabase:
     """Database for managing card data, images, and ownership information."""
-    
+
     @stopwatch(show_args=False)
     def __init__(self, cards_file: str = ApplicationConstants.CARDS_JSON) -> None:
         """Initialize card database.
-        
+
         Args:
             cards_file: Path to JSON file containing card data
         """
         self.cards: dict[int, Card] = {}
         self.image_cache: dict[int, GdkPixbuf.Pixbuf] = {}
         self.owned_copies: dict[int, int] = {}
-        
+
         # Thread-safe lock for cache access
         self._cache_lock = threading.Lock()
-        
+
         # Shared requests session for connection pooling
         self._session = requests.Session()
-        self._session.headers.update({
-            'User-Agent': f'{ApplicationConstants.NAME}/{ApplicationConstants.VERSION}'
-        })
+        self._session.headers.update({"User-Agent": f"{ApplicationConstants.NAME}/{ApplicationConstants.VERSION}"})
         # Configure connection pooling
-        adapter = requests.adapters.HTTPAdapter(
-            pool_connections=20,
-            pool_maxsize=20,
-            max_retries=3
-        )
-        self._session.mount('http://', adapter)
-        self._session.mount('https://', adapter)
-        
+        adapter = requests.adapters.HTTPAdapter(pool_connections=20, pool_maxsize=20, max_retries=3)
+        self._session.mount("http://", adapter)
+        self._session.mount("https://", adapter)
+
         # Setup disk cache directory
         self._cache_dir = Path(user_cache_dir(ApplicationConstants.CACHE_NAME)) / ApplicationConstants.CARD_ARTWORK_CACHE_NAME
         self._cache_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"Card artwork cache directory: {self._cache_dir}")
-        
+
         try:
             self._load_cards_from_file(cards_file)
         except Exception as e:
             logger.error(f"Could not load cards from {cards_file}: {e}")
             import sys
+
             sys.exit(1)
         self._load_ownership_data()
-        
+
         logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     @property
@@ -69,7 +66,7 @@ class CardDatabase:
     def _load_cards_from_file(self, cards_file: str) -> None:
         """Load card data from JSON file."""
         try:
-            with open(cards_file, 'r', encoding='utf-8') as f:
+            with open(cards_file, "r", encoding="utf-8") as f:
                 file_data = json.load(f)
                 logger.info(f"Loaded card data from {f.name}")
         except FileNotFoundError:
@@ -77,11 +74,11 @@ class CardDatabase:
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON in cards file: {e}")
 
-        cards_data = file_data['data']
-        metadata = file_data.get('metadata', {})
+        cards_data = file_data["data"]
+        metadata = file_data.get("metadata", {})
 
         logger.info(f"Loading data: {metadata.get('record_count', len(cards_data))} cards")
-        if 'scraped_at' in metadata:
+        if "scraped_at" in metadata:
             logger.info(f"Data scraped at: {metadata['scraped_at']}")
 
         self._load_cards(cards_data)
@@ -92,7 +89,7 @@ class CardDatabase:
         for card_data in cards_data:
             try:
                 card_id = card_data["support_id"]
-                
+
                 # Transform unique effects from dict format to list format
                 unique_effects_list = []
                 unique_data = card_data.get("unique", {})
@@ -104,9 +101,9 @@ class CardDatabase:
                         for key in effect_dict:
                             if key.startswith("value"):
                                 effect_row.append(effect_dict[key])
-                        
+
                         unique_effects_list.append(effect_row)
-                
+
                 self.cards[card_id] = Card(
                     id=card_id,
                     name=card_data["url_name"],
@@ -115,29 +112,22 @@ class CardDatabase:
                     type=self._map_name_to_card_type(card_data["type"]),
                     effects=card_data.get("effects", []),
                     unique_effects=unique_effects_list,
-                    unique_effects_unlock_level=unique_data.get("level", 0)
+                    unique_effects_unlock_level=unique_data.get("level", 0),
                 )
-                logger.debug(f"Card {card_id} added to database")
+                logger.debug(f"Card {self.cards[card_id]} added to database")
             except (KeyError, ValueError) as e:
                 logger.warning(f"Skipping invalid data for card {card_data.get('support_id', 'unknown')}: {e}")
 
     def _map_name_to_card_type(self, name: str) -> CardType:
         """Map type name to CardType enum."""
-        type_mapping = {
-            'speed': CardType.speed,
-            'stamina': CardType.stamina,
-            'power': CardType.power,
-            'guts': CardType.guts,
-            'intelligence': CardType.wit,
-            'friend': CardType.pal
-        }
+        type_mapping = {"speed": CardType.speed, "stamina": CardType.stamina, "power": CardType.power, "guts": CardType.guts, "intelligence": CardType.wit, "friend": CardType.pal}
         return type_mapping.get(name)
 
     def _load_ownership_data(self) -> None:
         """Load card ownership data from persistent storage."""
         # TODO: Load serialized ownership data from file
         for card_id in self.cards:
-            self.owned_copies[card_id] = 3 # TEMP VALUE FOR TESTING
+            self.owned_copies[card_id] = 3  # TEMP VALUE FOR TESTING
 
     def get_card_by_id(self, card_id: int) -> Card | None:
         """Get card by ID."""
@@ -155,12 +145,10 @@ class CardDatabase:
             if card.type == card_type:
                 yield card
 
-    def search_cards(self, name_query: str | None = None, rarity: CardRarity | None = None, 
-                    card_type: CardType | None = None, min_owned: int | None = None) -> Iterator[Card]:
+    def search_cards(self, name_query: str | None = None, rarity: CardRarity | None = None, card_type: CardType | None = None, min_owned: int | None = None) -> Iterator[Card]:
         """Search cards with multiple filter criteria."""
         for card in self.cards.values():
-            if name_query and (name_query.lower() not in card.name.lower() and 
-                              name_query.lower() not in card.view_name.lower()):
+            if name_query and (name_query.lower() not in card.name.lower() and name_query.lower() not in card.view_name.lower()):
                 continue
             if rarity and card.rarity != rarity:
                 continue
@@ -185,35 +173,35 @@ class CardDatabase:
         owned = self.get_owned_copies(card_id)
         return max(0, owned - 1)
 
-    def load_card_image_async(self, card_id: int, width: int, height: int, 
-                              callback: callable) -> None:
+    def load_card_image_async(self, card_id: int, width: int, height: int, callback: callable) -> None:
         """Load and cache card artwork asynchronously.
-        
+
         This method returns immediately and calls the callback with the result
         when loading completes. The callback is called on GTK's main thread.
-        
+
         Args:
             card_id: Card identifier
             width: Desired image width in pixels
             height: Desired image height in pixels
             callback: Function to call with result: callback(pixbuf: GdkPixbuf.Pixbuf | None)
         """
+
         def load_in_thread():
             """This runs in a background thread."""
             try:
                 pixbuf = self._load_card_image_sync(card_id, width, height)
                 callback(pixbuf)
             except Exception as e:
-                logger.error(f"Error loading image for card {card_id}: {e}")
+                logger.error(f"Error loading image for card {self.cards[card_id]}: {e}")
                 callback(None)
-        
+
         # Start background thread
         thread = threading.Thread(target=load_in_thread, daemon=True)
         thread.start()
 
     def _load_card_image_sync(self, card_id: int, width: int, height: int) -> GdkPixbuf.Pixbuf | None:
         """Synchronous internal method to load card image.
-        
+
         This method does the actual work and can be called from any thread.
         """
         # Check memory cache first (thread-safe read)
@@ -227,7 +215,7 @@ class CardDatabase:
         if disk_pixbuf:
             with self._cache_lock:
                 self.image_cache[card_id] = disk_pixbuf
-            logger.debug(f"Loaded card {card_id} from disk cache")
+            logger.debug(f"Loaded card {self.cards[card_id]} from disk cache")
             return disk_pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
         # Download from internet as fallback
@@ -237,7 +225,7 @@ class CardDatabase:
                 self.image_cache[card_id] = downloaded_pixbuf
             return downloaded_pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
-        logger.error(f"Could not load image data for card {card_id}")
+        logger.error(f"Could not load image data for card {self.cards[card_id]}")
         return None
 
     def _create_pixbuf_from_data(self, image_data: bytes) -> GdkPixbuf.Pixbuf | None:
@@ -265,13 +253,8 @@ class CardDatabase:
         try:
             cache_files = list(self._cache_dir.glob("*.png"))
             total_size = sum(f.stat().st_size for f in cache_files)
-            
-            return {
-                "cache_dir": str(self._cache_dir),
-                "cached_cards": len(cache_files),
-                "total_size_mb": round(total_size / (1024 * 1024), 2),
-                "total_cards": self.count
-            }
+
+            return {"cache_dir": str(self._cache_dir), "cached_cards": len(cache_files), "total_size_mb": round(total_size / (1024 * 1024), 2), "total_cards": self.count}
         except Exception as e:
             logger.error(f"Error getting cache info: {e}")
             return {"error": str(e)}
@@ -280,6 +263,7 @@ class CardDatabase:
         """Clear the disk cache."""
         try:
             import shutil
+
             if self._cache_dir.exists():
                 shutil.rmtree(self._cache_dir)
                 self._cache_dir.mkdir(parents=True, exist_ok=True)
@@ -303,59 +287,46 @@ class CardDatabase:
     def _load_from_disk_cache(self, card_id: int) -> GdkPixbuf.Pixbuf | None:
         """Load card image from disk cache."""
         cache_file = self._get_cache_file_path(card_id)
-        
+
         if not cache_file.exists():
             return None
-        
+
         try:
             image_data = cache_file.read_bytes()
             return self._create_pixbuf_from_data(image_data)
         except Exception as e:
-            logger.warning(f"Failed to load cached image for card {card_id}: {e}")
-            try:
-                cache_file.unlink()
-            except:
-                pass
+            logger.warning(f"Failed to load cached image for card {self.cards[card_id]}: {e}")
+            cache_file.unlink(missing_ok=True)
             return None
 
     def _download_and_cache_image(self, card_id: int) -> GdkPixbuf.Pixbuf | None:
         """Download card image and save to disk cache."""
         url = NetworkConstants.IMAGE_BASE_URL.format(card_id=card_id)
-        logger.debug(f"Downloading image for card {card_id}")
+        logger.debug(f"Downloading image for card {self.cards[card_id]}")
 
         try:
-            response = self._session.get(
-                url, 
-                timeout=NetworkConstants.IMAGE_TIMEOUT_SECONDS
-            )
-            
+            response = self._session.get(url, timeout=NetworkConstants.IMAGE_TIMEOUT_SECONDS)
+
             if response.status_code == 200:
                 image_data = response.content
                 logger.debug(f"Downloaded image for card {card_id}: {len(image_data)} bytes")
-                
+
                 # Save to disk cache
                 cache_file = self._get_cache_file_path(card_id)
                 try:
                     cache_file.write_bytes(image_data)
-                    logger.debug(f"Cached image for card {card_id} to {cache_file}")
+                    logger.debug(f"Cached image for card {self.cards[card_id]} to {cache_file}")
                 except Exception as e:
-                    logger.warning(f"Failed to save image cache for card {card_id}: {e}")
-                
+                    logger.warning(f"Failed to save image cache for card {self.cards[card_id]}: {e}")
+
                 # Create pixbuf
                 return self._create_pixbuf_from_data(image_data)
             else:
-                logger.warning(f"HTTP {response.status_code} when downloading artwork for card {card_id}")
-                
+                logger.warning(f"HTTP {response.status_code} when downloading artwork for card {self.cards[card_id]}")
+
         except requests.RequestException as e:
-            logger.warning(f"Network error downloading artwork for card {card_id}: {e}")
+            logger.warning(f"Network error downloading artwork for card {self.cards[card_id]}: {e}")
         except Exception as e:
-            logger.error(f"Unexpected error downloading artwork for card {card_id}: {e}")
+            logger.error(f"Unexpected error downloading artwork for card {self.cards[card_id]}: {e}")
 
         return None
-
-    def __del__(self):
-        """Cleanup when database is destroyed."""
-        try:
-            self._session.close()
-        except:
-            pass
