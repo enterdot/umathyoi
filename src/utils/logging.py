@@ -2,8 +2,6 @@
 
 import logging
 import sys
-from typing import Any
-from enum import Enum
 
 def setup_logging(level: str = "debug") -> None:
     """Set up application-wide logging configuration.

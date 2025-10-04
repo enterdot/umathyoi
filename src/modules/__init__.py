@@ -21,7 +21,7 @@ __all__ = [
     'SkillDatabase',
     'GenericCharacter', 'Character', 'StatType', 'Mood', 'Aptitude',
     'CharacterDatabase',
-    'Scenario', 'Facility', 'FacilityType'
+    'Scenario', 'Facility', 'FacilityType',
     'ScenarioDatabase',
     'Deck',
     'DeckList',

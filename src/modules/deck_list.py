@@ -1,29 +1,27 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from typing import Iterator
 from .deck import Deck
 from .event import Event
-from utils import DeckConstants, auto_title_from_instance
+from utils import auto_title_from_instance
 
 class DeckList:
-    def __init__(self, size: int = DeckConstants.DEFAULT_DECK_LIST_SIZE, decks: list[Deck | None] | None = None) -> None:
-        if size < DeckConstants.MIN_DECK_SIZE:
-            raise ValueError(f"Size {size} is not valid, it must be at least {DeckConstants.MIN_DECK_SIZE}.")
-        self._size: int = size
+    def __init__(self, decks: list[Deck | None] | None = None) -> None:
+
+        self._size = 5
 
         logger.info(f"Initializing deck list with {self._size} slots")
 
         if decks is not None:
-            if len(decks) > size:
-                logger.warning(f"Size is {size} but {len(decks)} decks were given, discarding {len(decks) - size}")
-                decks = decks[:size]
+            if len(decks) > self._size:
+                logger.warning(f"Size is {self._size} but {len(decks)} decks were given, discarding {len(decks) - self._size}")
+                decks = decks[:self._size]
             self._decks = [deck if deck is not None else Deck() for deck in decks]
 
-            if len(self._decks) < size:
-                self._decks.extend([Deck() for _ in range(size - len(self._decks))])
+            if len(self._decks) < self._size:
+                self._decks.extend([Deck() for _ in range(self._size - len(self._decks))])
         else:
-            self._decks = [Deck() for _ in range(size)]
+            self._decks = [Deck() for _ in range(self._size)]
         
         for slot, deck in enumerate(self._decks):
             if deck:
@@ -58,17 +56,14 @@ class DeckList:
             'deck_pushed_past_capacity': self.active_deck_pushed_past_capacity,
         }
         
-        # Assert that we have a mapping for every Deck event
+        # Ensure that we have a mapping for every Deck event
         sample_deck = Deck()
-        deck_events = {name for name, attr in vars(sample_deck).items() 
-                      if isinstance(attr, Event)}
-        mapped_events = set(event_mapping.keys())
-        
-        assert mapped_events == deck_events, (
-            f"Event mapping mismatch!\n"
-            f"Missing from mapping: {deck_events - mapped_events}\n"
-            f"Extra in mapping: {mapped_events - deck_events}"
-        )
+        deck_events = {name for name, attr in vars(sample_deck).items() if isinstance(attr, Event)}
+        mapped_events = set(event_mapping.keys())        
+        if not mapped_events == deck_events:
+            logger.error(f"Missing from mapping: {deck_events - mapped_events}")
+            logger.error(f"Extraneous in mapping: {deck_events - mapped_events}")
+            raise RuntimeError("Event mapping mismatch")
 
         for deck in self._decks:
             for deck_event_name, active_event in event_mapping.items():

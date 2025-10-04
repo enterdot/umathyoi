@@ -3,12 +3,10 @@ logger = logging.getLogger(__name__)
 
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gdk, Gtk, GLib
+from gi.repository import Gtk, GLib
 
 from modules import Card
-from modules import Deck
-from .card_artwork import CardArtwork
-from utils import auto_title_from_instance, UIConstants, CardConstants
+from utils import auto_title_from_instance, texture_from_pixbuf
 
 
 class CardSlot(Gtk.Box):
@@ -32,7 +30,6 @@ class CardSlot(Gtk.Box):
         # Stack holds all possible states
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.NONE)
-        self.stack.set_transition_duration(0)
         
         # Empty state
         empty_frame = Gtk.Frame()
@@ -80,7 +77,7 @@ class CardSlot(Gtk.Box):
         limit_break_box.set_visible(True)
         
         self.limit_break_adjustment = Gtk.Adjustment(
-            value=self.limit_break, lower=CardConstants.MIN_LIMIT_BREAK, upper=CardConstants.MAX_LIMIT_BREAK, step_increment=1, page_increment=1
+            value=self.limit_break, lower=Card.MIN_LIMIT_BREAK, upper=Card.MAX_LIMIT_BREAK, step_increment=1, page_increment=1
         )
         self.limit_break_scale = Gtk.Scale(
             orientation=Gtk.Orientation.HORIZONTAL, 
@@ -92,7 +89,7 @@ class CardSlot(Gtk.Box):
         self.limit_break_scale.set_hexpand(True)
         
         # Add limit break marks
-        for i in range(CardConstants.MAX_LIMIT_BREAK + 1):
+        for i in range(Card.MAX_LIMIT_BREAK + 1):
             self.limit_break_scale.add_mark(i, Gtk.PositionType.BOTTOM, str(i))
         
         limit_break_box.append(self.limit_break_scale)
@@ -129,13 +126,13 @@ class CardSlot(Gtk.Box):
     @property
     def limit_break(self) -> int:
         if not hasattr(self, '_limit_break'):
-            self._limit_break = CardConstants.MIN_LIMIT_BREAK
+            self._limit_break = Card.MIN_LIMIT_BREAK
         return self._limit_break
     
     @limit_break.setter
     def limit_break(self, limit_break: int) -> None:
-        if not CardConstants.MIN_LIMIT_BREAK <= limit_break <= CardConstants.MAX_LIMIT_BREAK:
-            raise ValueError(f"{limit_break=} is not in range [{CardConstants.MIN_LIMIT_BREAK}, {CardConstants.MAX_LIMIT_BREAK}]")
+        if not Card.MIN_LIMIT_BREAK <= limit_break <= Card.MAX_LIMIT_BREAK:
+            raise ValueError(f"{limit_break=} is not in range [{Card.MIN_LIMIT_BREAK}, {Card.MAX_LIMIT_BREAK}]")
         self._limit_break = limit_break
         # Block signal to prevent triggering callback during programmatic updates
         if self._limit_break_handler_id is not None:
@@ -158,7 +155,8 @@ class CardSlot(Gtk.Box):
         self.spinner.stop()
         
         if pixbuf:
-            texture = Gdk.Texture.new_for_pixbuf(pixbuf)
+            #texture = Gdk.Texture.new_for_pixbuf(pixbuf)
+            texture = texture_from_pixbuf(pixbuf)
             self.artwork.set_paintable(texture)
             self.artwork.add_css_class("card")
             self.stack.set_visible_child_name("artwork")

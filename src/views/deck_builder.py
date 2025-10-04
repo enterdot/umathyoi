@@ -2,32 +2,25 @@ import logging
 logger = logging.getLogger(__name__)
 
 import gi
-gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
-from gi.repository import Gtk, Adw
-from typing import TYPE_CHECKING
+from gi.repository import Adw
 
-from modules import Card
 from widgets import CardSelection, DeckCarousel
 from utils import auto_title_from_instance, auto_tag_from_instance
-
-if TYPE_CHECKING:
-    from application import MainApplication
-    from windows.main_window import MainWindow
 
 
 class DeckBuilderView(Adw.Bin):
     """Main deck builder view with card selection sidebar and deck carousel."""
     
-    def __init__(self, window: 'MainWindow'):
+    def __init__(self, window):
         """Initialize deck builder view.
         
         Args:
             window: Parent window reference
         """
         super().__init__()
-        self.app: MainApplication = window.app
-        self.window: MainWindow = window
+        self.app = window.app
+        self.window = window
 
         logger.debug(f"Setting up {auto_title_from_instance(self)} with navigation split view")
         self.setup_ui()

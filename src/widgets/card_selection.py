@@ -8,7 +8,7 @@ from gi.repository import Gtk, Adw
 
 from modules import Card, CardInspector
 from .card_artwork import CardArtwork
-from utils import auto_tag_from_instance, auto_title_from_instance, UIConstants, CardConstants
+from utils import auto_title_from_instance, UIConstants
 
 
 class CardSelection(Adw.Bin):
@@ -235,8 +235,8 @@ class CardSelection(Adw.Bin):
         current_value = self.app.card_inspector.limit_break
         slider_adjustment = Gtk.Adjustment(
             value=current_value, 
-            lower=CardConstants.MIN_LIMIT_BREAK, 
-            upper=CardConstants.MAX_LIMIT_BREAK, 
+            lower=Card.MIN_LIMIT_BREAK, 
+            upper=Card.MAX_LIMIT_BREAK, 
             step_increment=1, 
             page_increment=1
         )
@@ -248,7 +248,7 @@ class CardSelection(Adw.Bin):
         slider_scale.set_round_digits(0)
         
         # Add marks for each limit break level
-        for i in range(CardConstants.MAX_LIMIT_BREAK + 1):
+        for i in range(Card.MAX_LIMIT_BREAK + 1):
             slider_scale.add_mark(i, Gtk.PositionType.BOTTOM, str(i))
 
         slider_scale.connect("value-changed", self._on_stats_info_view_slider_changed)
@@ -334,7 +334,7 @@ class CardSelection(Adw.Bin):
         """
         active_deck = self.app.deck_list.active_deck
         if not active_deck:
-            logger.error(f"No active deck")
+            logger.error("No active deck")
             return
 
         logger.debug(f"Try adding card {row.card.id} to active deck from row '{row.get_title()}'")

@@ -1,0 +1,178 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    CARD IMAGE LOADING ARCHITECTURE                           ║
+║                          (Threading Model)                                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           GTK MAIN THREAD                                   │
+│                        (UI & Event Handling)                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+        │
+        │  User opens window with cards
+        │
+        ▼
+┌──────────────────────┐
+│  CardArtwork.__init__│  ◄─── Creates widget for each card
+│                      │
+│  self.show_loading() │  ◄─── Shows spinner immediately
+│                      │
+│  self.load_card_     │
+│       artwork()      │
+└──────┬───────────────┘
+       │
+       │  Calls database with callback
+       │
+       ▼
+┌──────────────────────────────────────────────────────────────────┐
+│  CardDatabase.load_card_image_async(card_id, width, height,      │
+│                                      callback=on_image_loaded)   │
+│                                                                  │
+│  • Returns immediately (non-blocking)                            │
+│  • Spawns background thread                                      │
+└──────┬───────────────────────────────────────────────────────────┘
+       │
+       │  threading.Thread(target=load_in_thread).start()
+       │
+       ├─────────────────────────────────────────────────────────────┐
+       │                                                             │
+       │  GTK main thread continues                                  │  Background thread starts
+       │  (UI stays responsive)                                      │
+       │                                                             │
+       ▼                                                             ▼
+┌──────────────────────┐                              ┌─────────────────────────────┐
+│  User can interact   │                              │  BACKGROUND THREAD          │
+│  with UI while       │                              │  (I/O Operations)           │
+│  downloads happen    │                              │                             │
+│                      │                              │  load_in_thread():          │
+│  • Click buttons     │                              │    ├─> _load_card_image_    │
+│  • Scroll lists      │                              │    │   sync()               │
+│  • Type text         │                              │    │                        │
+│  • Window redraws    │                              │    ├─> Check memory cache   │
+└──────────────────────┘                              │    │   (with _cache_lock)   │
+                                                      │    │                        │
+                                                      │    ├─> _load_from_disk_     │
+                                                      │    │   cache()              │
+                                                      │    │   • Read PNG file      │
+                                                      │    │                        │
+                                                      │    └─> _download_and_cache_ │
+                                                      │        image()              │
+                                                      │        • HTTP GET request   │
+                                                      │        • Save to disk       │
+                                                      │        • Create pixbuf      │
+                                                      │                             │
+                                                      │  pixbuf = result            │
+                                                      │  callback(pixbuf) ──────────┼───┐
+                                                      └─────────────────────────────┘   │
+                                                                                        │
+                                                                                        │
+       ┌────────────────────────────────────────────────────────────────────────────────┘
+       │  Callback is invoked from background thread
+       │
+       ▼
+┌─────────────────────────────────────┐
+│  CardArtwork.on_image_loaded(pixbuf)│  ◄─── Called from background thread
+│                                     │
+│  GLib.idle_add(update_ui)           │  ◄─── Schedules UI update safely
+└─────┬───────────────────────────────┘
+      │
+      │  GLib schedules update_ui() to run on main thread
+      │
+      ▼
+┌─────────────────────────────┐
+│  GTK MAIN THREAD            │
+│                             │
+│  update_ui():               │
+│    └─> self.show_artwork()  │  ◄─── Spinner stops, image displays
+│        • Stop spinner       │
+│        • Create texture     │
+│        • Update widget      │
+└─────────────────────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                            KEY CONCEPTS                                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+1. NON-BLOCKING: load_card_image_async() returns immediately
+   └─> GTK main thread never waits for I/O
+
+2. THREAD SAFETY: GLib.idle_add() ensures UI updates happen on main thread
+   └─> Never modify GTK widgets from background threads directly
+
+3. PARALLELISM: Each image loads in its own thread
+   └─> 10 cards = 10 concurrent downloads (limited by requests.Session pool)
+
+4. CACHING: Three-level cache hierarchy
+   └─> Memory cache (instant) → Disk cache (fast) → Network (slow)
+
+5. CLEANUP: Simple and automatic
+   └─> Daemon threads exit when app closes
+   └─> requests.Session closes in __del__()
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         EXECUTION TIMELINE                                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Time  GTK Main Thread                    Background Thread(s)
+────  ─────────────────────────────────  ──────────────────────────────────────
+0ms   CardArtwork created
+      show_loading() → spinner visible
+      load_card_image_async() called
+      → Returns immediately                Thread spawned
+                                          
+1ms   User scrolls window                 Check memory cache (miss)
+                                          
+5ms   User clicks button                  Check disk cache (miss)
+                                          
+10ms  Window redraws                      HTTP GET started...
+                                          
+50ms  User types in search                ... downloading ...
+                                          
+200ms Animation frame updates            ... downloading ...
+                                          
+500ms Button hover effect                Download complete!
+                                          Save to disk cache
+                                          Create pixbuf
+                                          callback(pixbuf) invoked
+                                          
+501ms GLib.idle_add() scheduled          Thread exits
+      
+502ms update_ui() runs
+      show_artwork() called
+      Image appears!
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                           FILE LOCATIONS                                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+card_db.py:
+  • CardDatabase.load_card_image_async()  ← Public API
+  • CardDatabase._load_card_image_sync()  ← Thread worker
+  • CardDatabase._load_from_disk_cache()  ← I/O operation
+  • CardDatabase._download_and_cache_image()  ← Network operation
+
+card_artwork.py:
+  • CardArtwork.load_card_artwork()  ← Initiates load
+  • CardArtwork.on_image_loaded()    ← Callback handler
+  • CardArtwork.show_artwork()       ← UI update
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                        THREAD SAFETY RULES                                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+✓ SAFE from any thread:
+  • Read-only operations on Card objects
+  • File I/O (reading/writing cache files)
+  • Network requests
+  • Creating GdkPixbuf objects
+
+✓ SAFE with lock (self._cache_lock):
+  • Reading/writing self.image_cache
+  
+✗ NEVER from background thread:
+  • Modifying GTK widgets directly
+  • Calling GTK methods
+  └─> ALWAYS use GLib.idle_add() to schedule UI updates

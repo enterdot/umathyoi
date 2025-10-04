@@ -2,31 +2,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 import gi
-gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
-from gi.repository import Gtk, Adw
-from typing import TYPE_CHECKING
+from gi.repository import Adw
 
 from widgets import Placeholder
-from utils import auto_title_from_instance, auto_tag_from_instance
-
-if TYPE_CHECKING:
-    from application import MainApplication
-    from windows.main_window import MainWindow
+from utils import auto_title_from_instance
 
 
 class LegacyManagerView(Adw.Bin):
     """Legacy manager view (placeholder for future implementation)."""
     
-    def __init__(self, window: 'MainWindow'):
-        """Initialize legacy manager view.
-        
-        Args:
-            window: Parent window reference
-        """
+    def __init__(self, window):
+        """Initialize legacy manager view."""
         super().__init__()
-        self.app: MainApplication = window.app
-        self.window: MainWindow = window
+        self.app = window.app
+        self.window = window
 
         logger.debug(f"Setting up {auto_title_from_instance(self)} placeholder")
         self.setup_ui()

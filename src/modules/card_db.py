@@ -13,7 +13,7 @@ from pathlib import Path
 from platformdirs import user_cache_dir
 
 from .card import CardRarity, CardType, Card
-from utils import ApplicationConstants, CardConstants, NetworkConstants, auto_title_from_instance, stopwatch
+from utils import ApplicationConstants, NetworkConstants, auto_title_from_instance, stopwatch
 
 
 class CardDatabase:
@@ -137,7 +137,7 @@ class CardDatabase:
         """Load card ownership data from persistent storage."""
         # TODO: Load serialized ownership data from file
         for card_id in self.cards:
-            self.owned_copies[card_id] = CardConstants.DEFAULT_OWNED_COPIES
+            self.owned_copies[card_id] = 3 # TEMP VALUE FOR TESTING
 
     def get_card_by_id(self, card_id: int) -> Card | None:
         """Get card by ID."""
@@ -211,7 +211,6 @@ class CardDatabase:
         thread = threading.Thread(target=load_in_thread, daemon=True)
         thread.start()
 
-    @stopwatch(show_args=False)
     def _load_card_image_sync(self, card_id: int, width: int, height: int) -> GdkPixbuf.Pixbuf | None:
         """Synchronous internal method to load card image.
         

@@ -1,8 +1,7 @@
 import gi
 gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
+from gi.repository import Gtk
 
-from gi.repository import Gtk, Adw
 from utils import auto_title_from_instance
 
 

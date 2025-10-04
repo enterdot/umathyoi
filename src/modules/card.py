@@ -3,10 +3,9 @@ logger = logging.getLogger(__name__)
 
 from enum import Enum
 from dataclasses import dataclass
-from typing import Iterator
-from .scenario import FacilityType
+from typing import ClassVar
 
-from utils import CardConstants, memoize
+from .scenario import FacilityType
 
 class CardRarity(Enum):
     R = 1
@@ -102,31 +101,39 @@ class CardUniqueEffect(Enum):
 
 # TODO: Freeze and remove lru_cache (memoize decorator)
 # TODO: Save all results per each level or just recalculate every time
-@dataclass(frozen=False)
+@dataclass(frozen=True)
 class Card:
+
+    NO_LIMIT_BREAK_MAX_LEVEL: ClassVar[dict[CardRarity, int]] = {
+        CardRarity.R: 20,
+        CardRarity.SR: 25,
+        CardRarity.SSR: 30
+    }
+    LEVELS_PER_LIMIT_BREAK: ClassVar[int] = 5
+    MIN_LEVEL: ClassVar[int] = 1    
+    FRIENDSHIP_BOND_THRESHOLD: ClassVar[int] = 80
+    DYNAMIC_UNIQUE_EFFECT_ID_THRESHOLD: ClassVar[int] = 100
+    MILESTONE_LEVELS: ClassVar[list[int]] = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+    MIN_LIMIT_BREAK: ClassVar[int] = 0
+    MAX_LIMIT_BREAK: ClassVar[int] = 4
+
     id: int
     name: str
     view_name: str
     rarity: CardRarity
     type: CardType
-    effects: list[list[int]] # [type, value_at_level_1, value_at_level_5, value_at_level_10, ...]
-    unique_effects: list[list[int]] # [[type, value1], [type, value1, value2]]
-    unique_effects_unlock_level: int # unique effects unlock at this level
+    effects: list[list[int]]            # [type, value_at_lvl1, value_at_lvl5, value_at_lvl10, ...]
+    unique_effects: list[list[int]]     # [[type, value1], [type, value1, value2]]
+    unique_effects_unlock_level: int    # unique effects unlock at this level
+
     
     @property
     def min_level(self) -> int:
-        return CardConstants.MIN_LEVEL
+        return Card.MIN_LEVEL
 
     @property
     def max_level(self) -> int:
-        if self.rarity == CardRarity.R:
-            return CardConstants.R_MAX_LEVEL
-        elif self.rarity == CardRarity.SR:
-            return CardConstants.SR_MAX_LEVEL
-        elif self.rarity == CardRarity.SSR:
-            return CardConstants.SSR_MAX_LEVEL
-        else:
-            raise RuntimeError(f"Invalid state for {self}, {rarity=}")
+        return Card.NO_LIMIT_BREAK_MAX_LEVEL[self.rarity] + Card.LEVELS_PER_LIMIT_BREAK * Card.MAX_LIMIT_BREAK
 
     @property
     def preferred_facility(self) -> FacilityType:
@@ -134,7 +141,7 @@ class Card:
             return None
         return FacilityType(self.type.value)
 
-    @memoize(maxsize=256)
+    # @memoize(maxsize=256) #TODO: pre-cache during init instead so dataclass can stay frozen
     def _interpolate_effect_value(self, effect_type: CardEffect, level: int) -> int:
         """Calculate effect value at specific level using interpolation between milestones"""
 
@@ -150,13 +157,13 @@ class Card:
                 break
         
         # Valid effect should have values for all milestone levels plus the effect type ID
-        if not effect or len(effect) < len(CardConstants.MILESTONE_LEVELS) + 1:
+        if not effect or len(effect) < len(Card.MILESTONE_LEVELS) + 1:
             logger.debug(f"Card {self.id} does not have effect type {effect_type} ({effect_type.name})")
             return 0
 
         # Find milestone values
         milestones = []
-        for i, target_level in enumerate(CardConstants.MILESTONE_LEVELS):
+        for i, target_level in enumerate(Card.MILESTONE_LEVELS):
             array_index = i + 1  # +1 because index 0 is effect_type
             if array_index < len(effect):
                 value = effect[array_index]
@@ -208,19 +215,10 @@ class Card:
         """
         Get maximum level at the specified limit break.
         """        
-        if not CardConstants.MIN_LIMIT_BREAK <= limit_break <= CardConstants.MAX_LIMIT_BREAK:
-            raise RuntimeError(f"{limit_break=} is not in valid range [{CardConstants.MIN_LIMIT_BREAK}, {CardConstants.MAX_LIMIT_BREAK}]")
+        if not Card.MIN_LIMIT_BREAK <= limit_break <= Card.MAX_LIMIT_BREAK:
+            raise ValueError(f"{limit_break=} is not in valid range [{Card.MIN_LIMIT_BREAK}, {Card.MAX_LIMIT_BREAK}]")
 
-        if rarity == CardRarity.R:
-            base_level = CardConstants.R_MAX_LEVEL_AT_MIN_LIMIT_BREAK
-        elif rarity == CardRarity.SR:
-            base_level = CardConstants.SR_MAX_LEVEL_AT_MIN_LIMIT_BREAK
-        elif rarity == CardRarity.SSR:
-            base_level = CardConstants.SSR_MAX_LEVEL_AT_MIN_LIMIT_BREAK
-        else:
-            raise RuntimeError(f"Invalid state for {self}, {rarity=}")
-
-        return base_level + CardConstants.LEVELS_PER_LIMIT_BREAK * limit_break
+        return Card.NO_LIMIT_BREAK_MAX_LEVEL[self.rarity] + Card.LEVELS_PER_LIMIT_BREAK * limit_break
 
     def get_effect_at_level(self, effect: CardEffect, level: int) -> int:
         """Get effect value at specified level."""
@@ -241,11 +239,11 @@ class Card:
 
     def get_effect_at_min_limit_break(self, effect: CardEffect) -> int:
         """Get effect value at maximum level for minimum limit break."""
-        return self.get_effect_at_limit_break(CardConstants.MIN_LIMIT_BREAK)
+        return self.get_effect_at_limit_break(Card.MIN_LIMIT_BREAK)
 
     def get_effect_at_max_limit_break(self, effect: CardEffect) -> int:
         """Get effect value at maximum level for maximum limit break."""
-        return self.get_effect_at_limit_break(CardConstants.MAX_LIMIT_BREAK)
+        return self.get_effect_at_limit_break(Card.MAX_LIMIT_BREAK)
 
     def get_all_effects_at_level(self, level: int) -> dict[CardEffect, int]:
         """Get all effects for this card at the specified level."""

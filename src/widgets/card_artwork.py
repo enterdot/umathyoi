@@ -1,10 +1,9 @@
 import gi
 gi.require_version('Gtk', '4.0')
-gi.require_version('Gdk', '4.0')
-from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Gtk, GLib
 
 from modules import Card
-from utils import auto_title_from_instance
+from utils import auto_title_from_instance, texture_from_pixbuf
 
 
 class CardArtwork(Gtk.Box):
@@ -85,7 +84,7 @@ class CardArtwork(Gtk.Box):
         self.spinner.stop()
         
         if pixbuf:
-            texture = Gdk.Texture.new_for_pixbuf(pixbuf)
+            texture = texture_from_pixbuf(pixbuf)
             self.artwork.set_paintable(texture)
             self.artwork.add_css_class("card")
             

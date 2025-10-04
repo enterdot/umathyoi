@@ -27,7 +27,7 @@ class MainApplication(Adw.Application):
         
         self._init_data()
         self._setup_actions()
-        logger.info(f"Main application setup completed")
+        logger.info("Main application setup completed")
 
         logger.debug(f"{auto_title_from_instance(self)} initialized")
     

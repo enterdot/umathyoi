@@ -1,15 +1,15 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from enum import Enum
-from dataclasses import dataclass
-from .skill import Skill, SkillType
-from .card import Card, CardType, CardEffect, CardUniqueEffect
+import random
+
+from .skill import Skill
+from .card import Card, CardEffect, CardUniqueEffect
 from .deck import Deck
-from .scenario import Scenario, Facility, FacilityType
+from .scenario import Scenario, FacilityType
 from .character import GenericCharacter, StatType, Mood
 from .event import Event
-from utils import GameplayConstants, CardConstants, debounce, auto_title_from_instance, stopwatch
+from utils import debounce, auto_title_from_instance
 
 class EfficiencyCalculator:
     """Calculator that pre-computes static effects, calculates dynamic ones on-demand."""
@@ -36,6 +36,8 @@ class EfficiencyCalculator:
         
         # Pre-calculate static card data once
         self._precalculate_static_effects()
+        
+        logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     @property
     def deck(self) -> Deck:
@@ -147,7 +149,7 @@ class EfficiencyCalculator:
         self.recalculate()
 
     def _precalculate_static_effects(self):
-        """Pre-calculate the static parts (normal + simple unique effects)."""
+        """Pre-calculate the static effects (normal + simple unique effects)."""
         self._static_effects = {}
         self._dynamic_unique_effects = {}
         self._card_stat_bonuses = {}
@@ -163,7 +165,7 @@ class EfficiencyCalculator:
                 if unique:
                     dynamic_effects = {}
                     for eff_type, values in unique.items():
-                        if eff_type.value < CardConstants.COMPLEX_UNIQUE_EFFECTS_ID_THRESHOLD:
+                        if eff_type.value < Card.DYNAMIC_UNIQUE_EFFECT_ID_THRESHOLD:
                             mapped = CardEffect(eff_type.value)
                             effects[mapped] = effects.get(mapped, 0) + values[0]
                         else:
@@ -216,9 +218,11 @@ class EfficiencyCalculator:
                 'total_weight': total_weight
             }
 
+
+    #TODO: re-add events and deleted empty dynamic unique effects
+
     
-    def _calculate_dynamic_effects(self, card: Card, facility_type: FacilityType, 
-                                   combined_bond: int) -> dict[CardEffect, int]:
+    def _calculate_dynamic_effects(self, card: Card, facility_type: FacilityType, combined_bond: int) -> dict[CardEffect, int]:
         """Calculate dynamic unique effects based on turn state."""
         if card not in self._dynamic_unique_effects:
             return {}
@@ -250,11 +254,8 @@ class EfficiencyCalculator:
         self._recalculate_sync()
     
     def _recalculate_sync(self):
-        """Monte Carlo simulation with minimal object creation."""
-        import random
-        import time
-        
-        start = time.perf_counter()
+        """Monte Carlo simulation."""
+    
         self.calculation_started.trigger(self)
         
         # Store minimal turn data with profiling
@@ -291,7 +292,6 @@ class EfficiencyCalculator:
 
         for card_facilities in turn_data:
             # Group cards by facility
-            group_start = time.perf_counter()
             by_facility = {f: [] for f in FacilityType}
             for card, facility in card_facilities.items():
                 by_facility[facility].append(card)
@@ -301,14 +301,12 @@ class EfficiencyCalculator:
                     continue
                 
                 # Get facility data
-                effect_start = time.perf_counter()
                 facility = self._scenario.facilities[facility_type]
                 level = self._facility_levels[facility_type]
                 base_stats = facility.get_all_stat_gains_at_level(level)
                 base_skill_points = facility.get_skill_points_gain_at_level(level)
                 
                 # Accumulate effects from all cards
-                accum_start = time.perf_counter()
                 stat_bonuses = {s: 0 for s in StatType}
                 skill_bonus = 0
                 friendship_mult = 1.0
@@ -316,7 +314,7 @@ class EfficiencyCalculator:
                 mood_eff = 0
                 
                 for card in cards_on_facility:
-                    # Get pre-calculated bonuses (no dict copy, no .get() calls)
+                    # Get pre-calculated bonuses
                     bonuses = self._card_stat_bonuses[card]
                     
                     # Add static bonuses
@@ -392,13 +390,11 @@ class EfficiencyCalculator:
                     
             
                 # Calculate multipliers
-                mult_start = time.perf_counter()
                 mood_mult = 1 + (self._mood.multiplier - 1) * (1 + mood_eff / 100)
                 training_mult = 1 + training_eff / 100
                 support_mult = 1 + len(cards_on_facility) * 0.05
                 
                 # Calculate final gains
-                final_start = time.perf_counter()
                 for stat in StatType:
                     base = base_stats.get(stat, 0)
                     if base == 0:

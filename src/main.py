@@ -3,7 +3,6 @@
 import warnings
 warnings.filterwarnings('error')
 
-import logging
 from utils import setup_logging, get_logger
 setup_logging("debug")
 logger = get_logger(__name__)

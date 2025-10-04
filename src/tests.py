@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test script."""
+"""Tests script."""
 
 # TODO: turn into a more comprehensive set of tests
 
@@ -15,10 +15,7 @@ from modules import (
     CardRarity,
     Deck,
     EfficiencyCalculator,
-    Mood,
-    GenericCharacter,
-    StatType,
-    Aptitude
+    Mood
 )
 
 from utils import stopwatch

@@ -15,7 +15,6 @@ Usage:
     python tools/scrape_gametora.py --all
 """
 
-import logging
 from utils import setup_logging, get_logger
 setup_logging("DEBUG")
 logger = get_logger(__name__)

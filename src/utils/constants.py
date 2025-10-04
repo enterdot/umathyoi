@@ -25,27 +25,9 @@ class CharacterConstants:
     """Constants related to characters."""
     MAX_TOTAL_STAT_GROWTH = 30 # 30%
     
-class CardConstants:
-    """Constants related to cards."""
-    MAX_LIMIT_BREAK = 4
-    MIN_LIMIT_BREAK = 0
-    LEVELS_PER_LIMIT_BREAK = 5
-    R_MAX_LEVEL_AT_MIN_LIMIT_BREAK = 20
-    SR_MAX_LEVEL_AT_MIN_LIMIT_BREAK = 25
-    SSR_MAX_LEVEL_AT_MIN_LIMIT_BREAK = 30
-    MIN_LEVEL = 1
-    R_MAX_LEVEL = R_MAX_LEVEL_AT_MIN_LIMIT_BREAK + LEVELS_PER_LIMIT_BREAK * MAX_LIMIT_BREAK
-    SR_MAX_LEVEL = SR_MAX_LEVEL_AT_MIN_LIMIT_BREAK + LEVELS_PER_LIMIT_BREAK * MAX_LIMIT_BREAK
-    SSR_MAX_LEVEL = SSR_MAX_LEVEL_AT_MIN_LIMIT_BREAK + LEVELS_PER_LIMIT_BREAK * MAX_LIMIT_BREAK
-    MILESTONE_LEVELS = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
-    COMPLEX_UNIQUE_EFFECTS_ID_THRESHOLD = 100
-    FRIENDSHIP_BOND_THRESHOLD = 80
-    DEFAULT_OWNED_COPIES = 3  # TODO: For testing
-
 class DeckConstants:
     """Constants related to deck management."""
-    DEFAULT_DECK_SIZE = 6
-    DEFAULT_DECK_LIST_SIZE = 5
+    DEFAULT_DECK_SIZE_ = 6
     MIN_DECK_SIZE = 1
 
 
@@ -85,3 +67,52 @@ class NetworkConstants:
     IMAGE_TIMEOUT_SECONDS = 10
     IMAGE_BASE_URL = "https://gametora.com/images/umamusume/supports/tex_support_card_{card_id}.png"
     MAX_CONCURRENT_CONNECTIONS = 10
+
+
+# TODO: New approach for constants
+
+"""
+from dataclasses import dataclass
+constants
+    app
+        cache
+            artwork
+        data
+            json
+                cards
+                characters
+                skills
+                scenarios
+            user
+    network
+    game
+"""
+
+"""
+@dataclass(frozen=True)
+class Constants:
+    app: ApplicationConstants = ApplicationConstants()
+    json: JSONDataConstants = JSONDataConstants()
+
+@dataclass(frozen=True)
+class ApplicationConstants:
+    name: str = "Umathyoi"
+    version: int = 0
+    reverse_dns: str = "org.example.umathyoi"
+    cache: CacheConstants = CacheConstants()
+
+@dataclass(frozen=True)
+class CacheConstants:
+    root: str = "umathyoi"
+    artwork: str = "card_artwork"
+
+@dataclass(frozen=True)
+class JSONDataConstants:
+    cards: str = "data/cards.json"
+    characters: str = "data/characters.json"
+    skills: str = "data/skills.json"
+    scenarios: str = "data/scenarios.json"
+
+
+constants = Constants()
+"""

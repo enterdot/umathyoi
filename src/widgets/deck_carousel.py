@@ -9,11 +9,7 @@ from gi.repository import Gtk, Adw
 from modules import Card, Deck
 from .card_slot import CardSlot
 from .placeholder import Placeholder
-from utils import (
-    auto_tag_from_instance,
-    auto_title_from_instance,
-    throttle, debounce,
-    UIConstants, DeckConstants, CardConstants)
+from utils import auto_title_from_instance, UIConstants
 
 
 class DeckCarousel(Adw.Bin):
@@ -112,26 +108,24 @@ class DeckCarousel(Adw.Bin):
         """Create a carousel page for a deck."""
         deck_grid = self._create_deck_grid(deck)
         logger.debug(f"Created grid for {deck=}")
-        return Adw.NavigationPage.new_with_tag(
-            deck_grid, 
-            f"Deck {deck_slot}", 
-            f"deck_carousel_{deck_slot}"
-        )
+        return Adw.NavigationPage.new_with_tag(deck_grid, f"Deck {deck_slot}", f"deck_carousel_{deck_slot}")
 
     def _create_deck_grid(self, deck: Deck) -> Gtk.Grid:
         """Create the grid widget for a deck."""
+
         deck_grid = Gtk.Grid()
         deck_grid.set_row_spacing(UIConstants.DECK_GRID_SPACING)
         deck_grid.set_column_spacing(UIConstants.DECK_GRID_SPACING)
 
         for slot, card, limit_break in deck:
             card_slot_widget = self._create_card_slot(slot, card, limit_break)
-            row, col = divmod(slot, DeckConstants.DEFAULT_DECK_SIZE // 2)
+            row, col = divmod(slot, deck.size // 2)
             deck_grid.attach(card_slot_widget, col, row, 1, 1)
         
+        deck_grid.deck = deck
         return deck_grid
 
-    def _create_card_slot(self, slot: int, card: Card | None, limit_break: int = CardConstants.MIN_LIMIT_BREAK) -> CardSlot:
+    def _create_card_slot(self, slot: int, card: Card | None, limit_break: int = Card.MIN_LIMIT_BREAK) -> CardSlot:
         """Create a card slot widget for the deck grid."""
         card_slot_widget = CardSlot(self.window, UIConstants.CARD_SLOT_WIDTH, UIConstants.CARD_SLOT_HEIGHT)
         card_slot_widget.card = card
@@ -146,14 +140,14 @@ class DeckCarousel(Adw.Bin):
         
         return card_slot_widget
 
-    def _update_card_slot(self, deck_slot: int, slot: int, card: Card | None, limit_break: int) -> None:
+    def _update_card_slot(self, deck_page: int, slot: int, card: Card | None, limit_break: int) -> None:
         """Update a single card slot in the carousel using in-place updates."""
-        if 0 <= deck_slot < self.carousel.get_n_pages():
-            nav_page = self.carousel.get_nth_page(deck_slot)
+        if 0 <= deck_page < self.carousel.get_n_pages():
+            nav_page = self.carousel.get_nth_page(deck_page)
             deck_grid = nav_page.get_child()
             
             # Find the specific card slot widget using grid position
-            row, col = divmod(slot, DeckConstants.DEFAULT_DECK_SIZE // 2)
+            row, col = divmod(slot, deck_grid.deck.size // 2)
             card_slot_widget = deck_grid.get_child_at(col, row)
             
             if card_slot_widget and isinstance(card_slot_widget, CardSlot):
@@ -208,13 +202,13 @@ class DeckCarousel(Adw.Bin):
         card = kwargs.get('card')
         slot = kwargs.get('slot')
         if card is not None and slot is not None:
-            self._update_card_slot(self.app.deck_list.active_slot, slot, card, CardConstants.MIN_LIMIT_BREAK)
+            self._update_card_slot(self.app.deck_list.active_slot, slot, card, Card.MIN_LIMIT_BREAK)
 
     def _on_card_removed_from_active_deck(self, deck_list, **kwargs) -> None:
         """Handle when a card is removed from the active deck."""
         slot = kwargs.get('slot')
         if slot is not None:
-            self._update_card_slot(self.app.deck_list.active_slot, slot, None, CardConstants.MIN_LIMIT_BREAK)
+            self._update_card_slot(self.app.deck_list.active_slot, slot, None, Card.MIN_LIMIT_BREAK)
 
     def _on_limit_break_changed_in_active_deck(self, deck_list, **kwargs) -> None:
         """Handle when a limit break level changes in the active deck."""

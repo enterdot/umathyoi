@@ -2,7 +2,6 @@ from enum import Enum
 from dataclasses import dataclass
 from datetime import date
 from .character import StatType
-from utils import GameplayConstants
 
 class FacilityType(Enum):
     speed = 1

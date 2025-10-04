@@ -3,7 +3,7 @@ logger = logging.getLogger(__name__)
 
 from .card import Card
 from .event import Event
-from utils import CardConstants, auto_title_from_instance
+from utils import auto_title_from_instance
 
 
 class CardInspector:
@@ -53,8 +53,8 @@ class CardInspector:
         Args:
             limit_break: Limit break level
         """
-        if not (CardConstants.MIN_LIMIT_BREAKS <= limit_break <= CardConstants.MAX_LIMIT_BREAKS):
-            raise ValueError(f"Limit break must be {CardConstants.MIN_LIMIT_BREAKS}-{CardConstants.MAX_LIMIT_BREAKS}, got {limit_break}.")
+        if not (Card.MIN_LIMIT_BREAK <= limit_break <= Card.MAX_LIMIT_BREAK):
+            raise ValueError(f"{limit_break=} is not in range [{Card.MIN_LIMIT_BREAK}, {Card.MAX_LIMIT_BREAK}]")
         
         if limit_break != self._limit_break:
             prev_limit_break = self._limit_break

@@ -1,8 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
-from typing import Iterator
-from .character import Character, StatType
+from .character import Character
 from utils import auto_title_from_instance, ApplicationConstants, stopwatch
 
 class CharacterDatabase:
