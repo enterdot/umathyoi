@@ -29,14 +29,6 @@ class CardSlot(Gtk.Box):
     
     def setup_ui(self) -> None:
 
-        #TODO: see if we can remove set_size_request and set_hexpand/set_vexpand
-        # wobble might be gone now that we use a stack for the various card slot states
-
-        # Lock size to prevent wobble
-        self.set_size_request(self.width, self.height)
-        self.set_hexpand(False)
-        self.set_vexpand(False)
-
         # Stack holds all possible states
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.NONE)
@@ -46,33 +38,26 @@ class CardSlot(Gtk.Box):
         empty_frame = Gtk.Frame()
         empty_frame.set_size_request(self.width, self.height)
         empty_frame.add_css_class("empty-card-slot")
-        
         empty_label = Gtk.Label()
         empty_label.set_text("+")
         empty_label.add_css_class("empty-slot-indicator")
-        empty_label.set_halign(Gtk.Align.CENTER)
-        empty_label.set_valign(Gtk.Align.CENTER)
         empty_frame.set_child(empty_label)
         
         # Loading state
         loading_frame = Gtk.Frame()
         loading_frame.set_size_request(self.width, self.height)
-        
         self.spinner = Gtk.Spinner()
-        self.spinner.set_size_request(self.width, self.height)
         self.spinner.set_halign(Gtk.Align.CENTER)
         self.spinner.set_valign(Gtk.Align.CENTER)
         loading_frame.set_child(self.spinner)
         
         # Artwork state
         self.artwork = Gtk.Picture()
-        self.artwork.set_size_request(self.width, self.height)
         
         # Error state
         error_frame = Gtk.Frame()
         error_frame.set_size_request(self.width, self.height)
         error_frame.add_css_class("error-card-slot")
-        
         error_icon = Gtk.Image()
         error_icon.set_from_icon_name("dialog-error-symbolic")
         error_icon.set_pixel_size(24)
