@@ -330,82 +330,82 @@ class EfficiencyCalculator:
                 training_eff = 0
                 mood_eff = 0
                 
-            for card in cards_on_facility:
-                # Get pre-calculated bonuses (no dict copy, no .get() calls)
-                bonuses = self._card_stat_bonuses[card]
-                
-                # Add static bonuses
-                stat_bonuses[StatType.speed] += bonuses['speed']
-                stat_bonuses[StatType.stamina] += bonuses['stamina']
-                stat_bonuses[StatType.power] += bonuses['power']
-                stat_bonuses[StatType.guts] += bonuses['guts']
-                stat_bonuses[StatType.wit] += bonuses['wit']
-                skill_bonus += bonuses['skill']
-                training_eff += bonuses['training']
-                mood_eff += bonuses['mood']
-                
-                # Handle dynamic unique effects inline (if any)
-                if card in self._dynamic_unique_effects:
-                    for eff_type, values in self._dynamic_unique_effects[card].items():
-                        if eff_type == CardUniqueEffect.effect_bonus_if_min_bond:
-                            if self._card_bonds[card] >= values[0]:
-                                effect_id = CardEffect(values[1])
-                                bonus = values[2]
-                                if effect_id == CardEffect.speed_stat_bonus:
-                                    stat_bonuses[StatType.speed] += bonus
-                                elif effect_id == CardEffect.stamina_stat_bonus:
-                                    stat_bonuses[StatType.stamina] += bonus
-                                elif effect_id == CardEffect.power_stat_bonus:
-                                    stat_bonuses[StatType.power] += bonus
-                                elif effect_id == CardEffect.guts_stat_bonus:
-                                    stat_bonuses[StatType.guts] += bonus
-                                elif effect_id == CardEffect.wit_stat_bonus:
-                                    stat_bonuses[StatType.wit] += bonus
-                                elif effect_id == CardEffect.skill_points_bonus:
-                                    skill_bonus += bonus
-                                elif effect_id == CardEffect.training_effectiveness:
-                                    training_eff += bonus
-                                elif effect_id == CardEffect.mood_effect_increase:
-                                    mood_eff += bonus
-                        
-                        elif eff_type == CardUniqueEffect.effect_bonus_per_combined_bond:
-                            effect_id = CardEffect(values[0])
-                            bonus = 20 + combined_bond // values[1]
-                            if effect_id == CardEffect.training_effectiveness:
-                                training_eff += bonus
-                            # Add other effect types as needed
-                        
-                        elif eff_type == CardUniqueEffect.effect_bonus_per_facility_level:
-                            effect_id = CardEffect(values[0])
-                            bonus = self._facility_levels[facility_type] * values[1]
-                            if effect_id == CardEffect.training_effectiveness:
-                                training_eff += bonus
-                        
-                        elif eff_type == CardUniqueEffect.effect_bonus_if_friendship_training:
-                            if card.is_preferred_facility(facility_type):
+                for card in cards_on_facility:
+                    # Get pre-calculated bonuses (no dict copy, no .get() calls)
+                    bonuses = self._card_stat_bonuses[card]
+                    
+                    # Add static bonuses
+                    stat_bonuses[StatType.speed] += bonuses['speed']
+                    stat_bonuses[StatType.stamina] += bonuses['stamina']
+                    stat_bonuses[StatType.power] += bonuses['power']
+                    stat_bonuses[StatType.guts] += bonuses['guts']
+                    stat_bonuses[StatType.wit] += bonuses['wit']
+                    skill_bonus += bonuses['skill']
+                    training_eff += bonuses['training']
+                    mood_eff += bonuses['mood']
+                    
+                    # Handle dynamic unique effects inline (if any)
+                    if card in self._dynamic_unique_effects:
+                        for eff_type, values in self._dynamic_unique_effects[card].items():
+                            if eff_type == CardUniqueEffect.effect_bonus_if_min_bond:
+                                if self._card_bonds[card] >= values[0]:
+                                    effect_id = CardEffect(values[1])
+                                    bonus = values[2]
+                                    if effect_id == CardEffect.speed_stat_bonus:
+                                        stat_bonuses[StatType.speed] += bonus
+                                    elif effect_id == CardEffect.stamina_stat_bonus:
+                                        stat_bonuses[StatType.stamina] += bonus
+                                    elif effect_id == CardEffect.power_stat_bonus:
+                                        stat_bonuses[StatType.power] += bonus
+                                    elif effect_id == CardEffect.guts_stat_bonus:
+                                        stat_bonuses[StatType.guts] += bonus
+                                    elif effect_id == CardEffect.wit_stat_bonus:
+                                        stat_bonuses[StatType.wit] += bonus
+                                    elif effect_id == CardEffect.skill_points_bonus:
+                                        skill_bonus += bonus
+                                    elif effect_id == CardEffect.training_effectiveness:
+                                        training_eff += bonus
+                                    elif effect_id == CardEffect.mood_effect_increase:
+                                        mood_eff += bonus
+                            
+                            elif eff_type == CardUniqueEffect.effect_bonus_per_combined_bond:
                                 effect_id = CardEffect(values[0])
-                                bonus = values[1]
+                                bonus = 20 + combined_bond // values[1]
                                 if effect_id == CardEffect.training_effectiveness:
                                     training_eff += bonus
-                        
-                        elif eff_type == CardUniqueEffect.effect_bonus_on_more_energy:
-                            effect_id = CardEffect(values[0])
-                            bonus = min(self._energy // values[1], values[2])
-                            if effect_id == CardEffect.training_effectiveness:
-                                training_eff += bonus
-                        
-                        elif eff_type == CardUniqueEffect.effect_bonus_on_less_energy:
-                            if self._energy <= 100:
+                                # Add other effect types as needed
+                            
+                            elif eff_type == CardUniqueEffect.effect_bonus_per_facility_level:
                                 effect_id = CardEffect(values[0])
-                                bonus = min(values[3], values[4] + (self._max_energy - max(self._energy, values[2])) // values[1])
+                                bonus = self._facility_levels[facility_type] * values[1]
                                 if effect_id == CardEffect.training_effectiveness:
                                     training_eff += bonus
-                
-                # Friendship multiplier
-                if card.is_preferred_facility(facility_type):
-                    friendship_mult *= (1 + bonuses['friendship'] / 100)
-                
-                accumulation_time += time.perf_counter() - accum_start
+                            
+                            elif eff_type == CardUniqueEffect.effect_bonus_if_friendship_training:
+                                if card.is_preferred_facility(facility_type):
+                                    effect_id = CardEffect(values[0])
+                                    bonus = values[1]
+                                    if effect_id == CardEffect.training_effectiveness:
+                                        training_eff += bonus
+                            
+                            elif eff_type == CardUniqueEffect.effect_bonus_on_more_energy:
+                                effect_id = CardEffect(values[0])
+                                bonus = min(self._energy // values[1], values[2])
+                                if effect_id == CardEffect.training_effectiveness:
+                                    training_eff += bonus
+                            
+                            elif eff_type == CardUniqueEffect.effect_bonus_on_less_energy:
+                                if self._energy <= 100:
+                                    effect_id = CardEffect(values[0])
+                                    bonus = min(values[3], values[4] + (self._max_energy - max(self._energy, values[2])) // values[1])
+                                    if effect_id == CardEffect.training_effectiveness:
+                                        training_eff += bonus
+                    
+                    # Friendship multiplier
+                    if card.is_preferred_facility(facility_type):
+                        friendship_mult *= (1 + bonuses['friendship'] / 100)
+                    
+                    accumulation_time += time.perf_counter() - accum_start
                 
                 # Calculate multipliers
                 mult_start = time.perf_counter()
