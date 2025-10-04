@@ -260,10 +260,6 @@ class EfficiencyCalculator:
         # Store minimal turn data with profiling
         turn_data = []
 
-        specialty_lookup_time = 0
-        random_selection_time = 0
-        dict_building_time = 0
-
         for i in range(self.turn_count):
             card_facilities = {}
             
@@ -272,7 +268,8 @@ class EfficiencyCalculator:
                 dist_data = self._card_distribution[card]
                 rand_val = random.random() * dist_data['total_weight']
                 
-                # Binary search would be fastest, but for 6 outcomes linear search is fine
+                # Find which range the random value falls into
+                chosen = dist_data['outcomes'][-1]  # Default to last outcome (None)
                 for idx, threshold in enumerate(dist_data['cumulative']):
                     if rand_val < threshold:
                         chosen = dist_data['outcomes'][idx]
@@ -286,21 +283,11 @@ class EfficiencyCalculator:
             if (i + 1) % max(1, self.turn_count // 100) == 0:
                 self.calculation_progress.trigger(self, current=i+1, total=self.turn_count)
 
-        turn_time = time.perf_counter() - start
-        agg_start = time.perf_counter()
-        
         # Aggregation with detailed profiling
         aggregated_gains = {f: {s: [] for s in StatType} for f in FacilityType}
         aggregated_skill_points = {f: [] for f in FacilityType}
 
         combined_bond = sum(self._card_bonds.values())
-
-        # Profile timers
-        grouping_time = 0
-        effect_calc_time = 0
-        accumulation_time = 0
-        multiplier_time = 0
-        final_calc_time = 0
 
         for card_facilities in turn_data:
             # Group cards by facility
@@ -308,7 +295,6 @@ class EfficiencyCalculator:
             by_facility = {f: [] for f in FacilityType}
             for card, facility in card_facilities.items():
                 by_facility[facility].append(card)
-            grouping_time += time.perf_counter() - group_start
             
             for facility_type, cards_on_facility in by_facility.items():
                 if not cards_on_facility:
@@ -320,7 +306,6 @@ class EfficiencyCalculator:
                 level = self._facility_levels[facility_type]
                 base_stats = facility.get_all_stat_gains_at_level(level)
                 base_skill_points = facility.get_skill_points_gain_at_level(level)
-                effect_calc_time += time.perf_counter() - effect_start
                 
                 # Accumulate effects from all cards
                 accum_start = time.perf_counter()
@@ -405,14 +390,12 @@ class EfficiencyCalculator:
                     if card.is_preferred_facility(facility_type):
                         friendship_mult *= (1 + bonuses['friendship'] / 100)
                     
-                    accumulation_time += time.perf_counter() - accum_start
-                
+            
                 # Calculate multipliers
                 mult_start = time.perf_counter()
                 mood_mult = 1 + (self._mood.multiplier - 1) * (1 + mood_eff / 100)
                 training_mult = 1 + training_eff / 100
                 support_mult = 1 + len(cards_on_facility) * 0.05
-                multiplier_time += time.perf_counter() - mult_start
                 
                 # Calculate final gains
                 final_start = time.perf_counter()
@@ -428,30 +411,10 @@ class EfficiencyCalculator:
                     aggregated_gains[facility_type][stat].append(int(final))
                 
                 aggregated_skill_points[facility_type].append(base_skill_points + skill_bonus)
-                final_calc_time += time.perf_counter() - final_start
 
-        agg_time = time.perf_counter() - agg_start
-        total = time.perf_counter() - start
 
         self._aggregated_stat_gains = aggregated_gains
         self._aggregated_skill_points = aggregated_skill_points
-
-        print(f"\n{'='*60}")
-        print(f"Performance Profile ({self.turn_count} turns)")
-        print(f"{'='*60}")
-        print(f"Turn generation:   {turn_time*1000:7.2f}ms ({turn_time/total*100:5.1f}%)")
-        print(f"  Specialty lookup: {specialty_lookup_time*1000:7.2f}ms ({specialty_lookup_time/turn_time*100:5.1f}%)")
-        print(f"  Random selection: {random_selection_time*1000:7.2f}ms ({random_selection_time/turn_time*100:5.1f}%)")
-        print(f"  Dict building:    {dict_building_time*1000:7.2f}ms ({dict_building_time/turn_time*100:5.1f}%)")
-        print(f"Aggregation:       {agg_time*1000:7.2f}ms ({agg_time/total*100:5.1f}%)")
-        print(f"  Grouping:        {grouping_time*1000:7.2f}ms ({grouping_time/agg_time*100:5.1f}%)")
-        print(f"  Effect lookup:   {effect_calc_time*1000:7.2f}ms ({effect_calc_time/agg_time*100:5.1f}%)")
-        print(f"  Accumulation:    {accumulation_time*1000:7.2f}ms ({accumulation_time/agg_time*100:5.1f}%)")
-        print(f"  Multipliers:     {multiplier_time*1000:7.2f}ms ({multiplier_time/agg_time*100:5.1f}%)")
-        print(f"  Final calc:      {final_calc_time*1000:7.2f}ms ({final_calc_time/agg_time*100:5.1f}%)")
-        print(f"Total:             {total*1000:7.2f}ms")
-        print(f"{'='*60}\n")
-
         self.calculation_finished.trigger(self, results=self._aggregated_stat_gains)
 
     def get_results(self) -> dict | None:

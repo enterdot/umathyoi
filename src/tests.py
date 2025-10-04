@@ -83,7 +83,7 @@ def test_card_effects():
     print(f"Second 1000 calls (cache hit): {second_time:.4f}s")
     print(f"Speedup: {first_time / second_time:.1f}x")
 
-
+@stopwatch(log_func=print)
 def test_efficiency_calculator():
     print("\n" + "="*80)
     print("Testing Efficiency Calculator")
@@ -166,10 +166,7 @@ def test_efficiency_calculator():
     print("\nRunning calculation...")
 
     calculator._recalculate_sync()
-
-    import time
-    time.sleep(0.5)    
-    
+  
     # Print results
     calculator.print_results()
 
