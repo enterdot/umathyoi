@@ -23,10 +23,12 @@
    - **Windows:** Main application window with responsive breakpoints
 
 **TODOs:**
-- Deck Efficiency Calculation - Display the data, core application feature
-- Data Persistence - Save/load decks and card ownership via `dconf`
-- Card Inspector - Detailed card information view activated from info button on action rows
-- Search/Filter System - Essential for browsing hundreds of cards
-- Responsive Header Button - Show the sidebar when collaped, critical for mobile/narrow screen usability
-- Consistent Errors - Use `errno` module and `strerror` from `os` module for consistent error messages
+1. `deck_carousel.py` to multiple files - Split content view, deck carousel, turn settings and plots (right sidebar)
+2. Deck efficiency calculation - Display the data, core application feature
+3. Data persistence - Save/load decks and card ownership via `dconf`
+4. Card Inspector - Detailed card information view activated from info button on action rows
+5. Search/Filter system - Essential for browsing hundreds of cards
+6. Responsive Header Button - Show the sidebar when collaped, critical for mobile/narrow screen usability
+7. Consistent Errors - Use `errno` module and `strerror` from `os` module for consistent error messages
+8. Complete the remaining `TODO`s left in the code
 
