@@ -8,7 +8,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gdk, Adw
 
-from views import DeckBuilderView, LegacyManagerView
+from views import DeckBuilder, LegacyManager, BannerPlanner, PullChance, RaceSimulator
 from common import auto_title_from_instance
 
 
@@ -20,6 +20,7 @@ class MainWindow(Adw.ApplicationWindow):
     MIN_WINDOW_HEIGHT: int = 720
     DEFAULT_WINDOW_WIDTH: int = 1024
     DEFAULT_WINDOW_HEIGHT: int = 720
+    CSS_TRANSITION_DURATION: int = 200
 
     def __init__(self, app, app_name: str):
         """Initialize main window."""
@@ -66,11 +67,17 @@ class MainWindow(Adw.ApplicationWindow):
         view_switcher = Adw.ViewSwitcher()
         view_switcher.set_stack(view_stack)
 
-        deck_builder_view = DeckBuilderView(self)
-        legacy_manager_view = LegacyManagerView(self)
+        deck_builder_view = DeckBuilder(self)
+        legacy_manager_view = LegacyManager(self)
+        banner_planner_view = BannerPlanner(self)
+        pull_chance_view = PullChance(self)
+        race_simulator_view = RaceSimulator(self)
 
-        view_stack.add_titled(deck_builder_view, "deck_builder_view", "Deck Builder")
-        view_stack.add_titled(legacy_manager_view, "legacy_manager_view", "Legacy Manager")
+        view_stack.add_titled(deck_builder_view, "deck_builder", "Deck Builder")
+        view_stack.add_titled(legacy_manager_view, "legacy_manager", "Legacy Manager")
+        view_stack.add_titled(banner_planner_view, "banner_planner", "Banner Planner")
+        view_stack.add_titled(pull_chance_view, "pull_chance", "Pull Chance")
+        view_stack.add_titled(race_simulator_view, "race_simulator", "Race Simulator")
 
         header_bar.set_title_widget(view_switcher)
         main_box.append(header_bar)

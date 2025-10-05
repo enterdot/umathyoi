@@ -11,8 +11,8 @@ from widgets import Placeholder
 from common import auto_title_from_instance
 
 
-class LegacyManager(Adw.Bin):
-    """Legacy Manager (placeholder for future implementation)."""
+class RaceSimulator(Adw.Bin):
+    """Race Simulator (placeholder for future implementation)."""
 
     def __init__(self, window):
         """Initialize legacy manager view."""
@@ -29,7 +29,7 @@ class LegacyManager(Adw.Bin):
 
     def setup_ui(self) -> None:
         """Set up placeholder UI."""
-        self.set_child(Placeholder("Legacy Manager", "Coming soon..."))
+        self.set_child(Placeholder("Race Simulator (plus Stamina Target)", "Coming soon..."))
 
     def setup_responsive_ui(self) -> None:
         """Set up responsive behavior (none needed for placeholder)."""

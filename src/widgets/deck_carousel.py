@@ -14,8 +14,12 @@ from .placeholder import Placeholder
 from common import auto_title_from_instance, UIConstants
 
 
+#TODO: rename to deck inspector and split carousel, efficiency_calc and violin_plots into separate files
+
 class DeckCarousel(Adw.Bin):
     """Carousel widget displaying multiple decks with visual scaling animations."""
+
+    CALCULATOR_SETTINGS_MARGIN: int = 40
 
     def __init__(self, window):
         """Initialize deck carousel."""
@@ -49,14 +53,14 @@ class DeckCarousel(Adw.Bin):
 
         self.update_carousel_hints(self.carousel)
 
-        # Deck efficiency placeholder
-        deck_efficiency = Placeholder("Deck Efficiency Box")
-        deck_efficiency.set_vexpand(False)
-        deck_efficiency.set_valign(Gtk.Align.END)
-        deck_efficiency.set_margin_bottom(UIConstants.DECK_EFFICIENCY_MARGIN_BOTTOM)
+        # Deck efficiency calculator settings placeholder
+        efficiency_calc = Placeholder("Deck Efficiency Calculator settings")
+        efficiency_calc.set_vexpand(False)
+        efficiency_calc.set_valign(Gtk.Align.END)
+        efficiency_calc.set_margin_bottom(DeckCarousel.CALCULATOR_SETTINGS_MARGIN)
 
         container.append(self.carousel)
-        container.append(deck_efficiency)
+        container.append(efficiency_calc)
         self.set_child(container)
 
     def connect_signals(self) -> None:

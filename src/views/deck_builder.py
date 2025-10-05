@@ -11,8 +11,8 @@ from widgets import CardSelection, DeckCarousel
 from common import auto_title_from_instance, auto_tag_from_instance
 
 
-class DeckBuilderView(Adw.Bin):
-    """Main deck builder view with card selection sidebar and deck carousel."""
+class DeckBuilder(Adw.Bin):
+    """Deck builder with card selection sidebar, deck carousel and efficiency plots."""
 
     def __init__(self, window):
         """Initialize deck builder view.

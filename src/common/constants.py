@@ -1,6 +1,6 @@
 """Application-wide constants and configuration values."""
 
-#TODO: Keep moving constants to relevant modules
+#TODO: Keep moving constants to relevant modules as class attributes
 
 class ApplicationConstants:
     """Constants related to the application itself."""
@@ -49,7 +49,6 @@ class UIConstants:
     CAROUSEL_MIN_SPACING = 30
     CAROUSEL_SPACING = 20
     CAROUSEL_MARGIN = 30
-    DECK_EFFICIENCY_MARGIN_BOTTOM = 40
 
     # Animation durations (in milliseconds)
     CAROUSEL_REVEAL_DURATION = 200
