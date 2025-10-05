@@ -7,6 +7,7 @@ import random
 from .skill import Skill
 from .card import Card, CardEffect, CardUniqueEffect
 from .deck import Deck
+from .deck_list import DeckList
 from .scenario import Scenario, FacilityType
 from .character import GenericCharacter, StatType, Mood
 from .event import Event
@@ -22,8 +23,8 @@ class EfficiencyCalculator:
     MIN_FANS: int = 1
     MAX_FANS: int = 350000
 
-    def __init__(self, deck: Deck, scenario: Scenario, character: GenericCharacter):
-        self._deck = deck
+    def __init__(self, deck_list, scenario: Scenario, character: GenericCharacter):
+        self._deck_list = deck_list
         self._scenario = scenario
         self._character = character
         self._fan_count = 100000
@@ -31,8 +32,8 @@ class EfficiencyCalculator:
         self._energy = 80
         self._max_energy = 120
         self._facility_levels = {facility: 3 for facility in FacilityType}
-        self._card_levels = {card: card.max_level for card in deck.cards}
-        self._card_bonds = {card: 80 for card in deck.cards}
+        self._card_levels = {card: card.max_level for card in deck_list.active_deck.cards}
+        self._card_bonds = {card: 80 for card in deck_list.active_deck.cards}
         self._skills = []
 
         self.turn_count = 1000
@@ -42,19 +43,28 @@ class EfficiencyCalculator:
         self.calculation_progress = Event()
         self.calculation_finished = Event()
 
+        # Subscribe to deck list events
+        self._subscribe_to_deck_events()
+
         # Pre-calculate static card data once
         self._precalculate_static_effects()
 
         logger.debug(f"{auto_title_from_instance(self)} initialized")
 
     @property
-    def deck(self) -> Deck:
-        return self._deck
+    def deck_list(self):
+        return self._deck_list
 
-    @deck.setter
-    def deck(self, value: Deck) -> None:
-        self._deck = value
+    @deck_list.setter
+    def deck_list(self, value) -> None:
+        self._deck_list = value
+        self._subscribe_to_deck_events()
+        self._precalculate_static_effects()
         self.recalculate()
+
+    @property
+    def deck(self) -> Deck:
+        return self._deck_list.active_deck
 
     # Scenario property
     @property
@@ -156,35 +166,80 @@ class EfficiencyCalculator:
         self._skills = value
         self.recalculate()
 
+    def _subscribe_to_deck_events(self):
+        """Subscribe to deck list events to detect when deck changes."""
+        # Active deck content changed
+        self._deck_list.card_added_to_active_deck_at_slot.subscribe(self._on_deck_changed)
+        self._deck_list.card_removed_from_active_deck_at_slot.subscribe(self._on_deck_changed)
+        self._deck_list.limit_break_set_for_active_deck_at_slot.subscribe(self._on_deck_changed)
+        self._deck_list.active_deck_was_cleared.subscribe(self._on_deck_changed)
+        
+        # Active deck swapped
+        self._deck_list.slot_activated.subscribe(self._on_deck_swapped)
+
+    def _on_deck_changed(self, source, **kwargs):
+        """Called when the active deck's contents change."""
+        # Sync card levels and bonds with current deck
+        current_cards = set(self.deck.cards)
+        
+        # Remove cards no longer in deck
+        self._card_levels = {card: level for card, level in self._card_levels.items() if card in current_cards}
+        self._card_bonds = {card: bond for card, bond in self._card_bonds.items() if card in current_cards}
+        
+        # Add new cards with default values
+        for card in current_cards:
+            if card not in self._card_levels:
+                self._card_levels[card] = card.max_level
+            if card not in self._card_bonds:
+                self._card_bonds[card] = 80
+        
+        self._precalculate_static_effects()
+        self.recalculate()
+
+    def _on_deck_swapped(self, source, **kwargs):
+        """Called when a different deck becomes active."""
+        # Reset card levels and bonds for new deck
+        self._card_levels = {card: card.max_level for card in self.deck.cards}
+        self._card_bonds = {card: 80 for card in self.deck.cards}
+        self._precalculate_static_effects()
+        self.recalculate()
+
     def _precalculate_static_effects(self):
         """Pre-calculate the static effects (normal + simple unique effects)."""
+        logger.debug("Pre-calculating normal effects and static unique effects")
         self._static_effects = {}
+        self._static_unique_effects = {}
         self._dynamic_unique_effects = {}
         self._card_stat_bonuses = {}
         self._card_distribution = {}
 
-        for card in self._deck.cards:
+        for card in self.deck.cards:
             level = self._card_levels[card]
             effects = card.get_all_effects_at_level(level)
 
             # Handle unique effects
+            unique_static = {}
             if level >= card.unique_effects_unlock_level:
                 unique = card.get_all_unique_effects()
                 if unique:
                     dynamic_effects = {}
                     for eff_type, values in unique.items():
                         if eff_type.value < Card.DYNAMIC_UNIQUE_EFFECT_ID_THRESHOLD:
+                            # Static unique effect - map to CardEffect and store separately
                             mapped = CardEffect(eff_type.value)
-                            effects[mapped] = effects.get(mapped, 0) + values[0]
+                            unique_static[mapped] = values[0]
                         else:
+                            # Dynamic unique effect - store for runtime calculation
                             dynamic_effects[eff_type] = values
 
                     if dynamic_effects:
                         self._dynamic_unique_effects[card] = dynamic_effects
 
             self._static_effects[card] = effects
+            self._static_unique_effects[card] = unique_static
 
             # Pre-extract stat bonuses to avoid dict lookups in hot loop
+            # Note: normal and unique static effects are kept separate for friendship handling
             self._card_stat_bonuses[card] = {
                 "speed": effects.get(CardEffect.speed_stat_bonus, 0),
                 "stamina": effects.get(CardEffect.stamina_stat_bonus, 0),
@@ -195,13 +250,22 @@ class EfficiencyCalculator:
                 "training": effects.get(CardEffect.training_effectiveness, 0),
                 "mood": effects.get(CardEffect.mood_effect_increase, 0),
                 "friendship": effects.get(CardEffect.friendship_effectiveness, 0),
+                # Unique static effects (kept separate for friendship calculation)
+                "unique_speed": unique_static.get(CardEffect.speed_stat_bonus, 0),
+                "unique_stamina": unique_static.get(CardEffect.stamina_stat_bonus, 0),
+                "unique_power": unique_static.get(CardEffect.power_stat_bonus, 0),
+                "unique_guts": unique_static.get(CardEffect.guts_stat_bonus, 0),
+                "unique_wit": unique_static.get(CardEffect.wit_stat_bonus, 0),
+                "unique_skill": unique_static.get(CardEffect.skill_points_bonus, 0),
+                "unique_training": unique_static.get(CardEffect.training_effectiveness, 0),
+                "unique_mood": unique_static.get(CardEffect.mood_effect_increase, 0),
+                "unique_friendship": unique_static.get(CardEffect.friendship_effectiveness, 0),
             }
 
             specialty = card.get_effect_at_level(CardEffect.specialty_priority, self._card_levels[card])
             preferred = card.preferred_facility
 
             # Build cumulative probability ranges for fast selection
-            # Instead of random.choices(), we'll use random.random() and check ranges
             total_weight = 500 + specialty + 50
 
             # Create cumulative ranges: [0, facility1_end, facility2_end, ..., total_weight]
@@ -222,35 +286,6 @@ class EfficiencyCalculator:
 
             self._card_distribution[card] = {"cumulative": cumulative, "outcomes": outcomes, "total_weight": total_weight}
 
-    # TODO: re-add events and deleted empty dynamic unique effects
-
-    def _calculate_dynamic_effects(self, card: Card, facility_type: FacilityType, combined_bond: int) -> dict[CardEffect, int]:
-        """Calculate dynamic unique effects based on turn state."""
-        if card not in self._dynamic_unique_effects:
-            return {}
-
-        effects = {}
-        for eff_type, values in self._dynamic_unique_effects[card].items():
-            if eff_type == CardUniqueEffect.effect_bonus_if_min_bond:
-                effects[CardEffect(values[1])] = values[2] * (self._card_bonds[card] >= values[0])
-
-            elif eff_type == CardUniqueEffect.effect_bonus_per_combined_bond:
-                effects[CardEffect(values[0])] = 20 + combined_bond // values[1]
-
-            elif eff_type == CardUniqueEffect.effect_bonus_per_facility_level:
-                effects[CardEffect(values[0])] = self._facility_levels[facility_type] * values[1]
-
-            elif eff_type == CardUniqueEffect.effect_bonus_if_friendship_training:
-                effects[CardEffect(values[0])] = values[1] * card.is_preferred_facility(facility_type)
-
-            elif eff_type == CardUniqueEffect.effect_bonus_on_more_energy:
-                effects[CardEffect(values[0])] = min(self._energy // values[1], values[2])
-
-            elif eff_type == CardUniqueEffect.effect_bonus_on_less_energy:
-                effects[CardEffect(values[0])] = min(values[3], values[4] + (self._max_energy - max(self._energy, values[2])) // values[1]) * (self._energy <= 100)
-
-        return effects
-
     @debounce(wait_ms=350)
     def recalculate(self):
         self._recalculate_sync()
@@ -260,13 +295,13 @@ class EfficiencyCalculator:
 
         self.calculation_started.trigger(self)
 
-        # Store minimal turn data with profiling
+        # Store minimal turn data
         turn_data = []
 
         for i in range(self.turn_count):
             card_facilities = {}
 
-            for card in self._deck.cards:
+            for card in self.deck.cards:
                 # Fast random selection using pre-calculated cumulative probabilities
                 dist_data = self._card_distribution[card]
                 rand_val = random.random() * dist_data["total_weight"]
@@ -286,7 +321,7 @@ class EfficiencyCalculator:
             if (i + 1) % max(1, self.turn_count // 100) == 0:
                 self.calculation_progress.trigger(self, current=i + 1, total=self.turn_count)
 
-        # Aggregation with detailed profiling
+        # Aggregation
         aggregated_gains = {f: {s: [] for s in StatType} for f in FacilityType}
         aggregated_skill_points = {f: [] for f in FacilityType}
 
@@ -311,15 +346,14 @@ class EfficiencyCalculator:
                 # Accumulate effects from all cards
                 stat_bonuses = {s: 0 for s in StatType}
                 skill_bonus = 0
-                friendship_mult = 1.0
                 training_eff = 0
                 mood_eff = 0
+                friendship_mult = 1.0
 
                 for card in cards_on_facility:
-                    # Get pre-calculated bonuses
                     bonuses = self._card_stat_bonuses[card]
 
-                    # Add static bonuses
+                    # Add normal static bonuses
                     stat_bonuses[StatType.speed] += bonuses["speed"]
                     stat_bonuses[StatType.stamina] += bonuses["stamina"]
                     stat_bonuses[StatType.power] += bonuses["power"]
@@ -329,7 +363,19 @@ class EfficiencyCalculator:
                     training_eff += bonuses["training"]
                     mood_eff += bonuses["mood"]
 
-                    # Handle dynamic unique effects inline (if any)
+                    # Add unique static bonuses
+                    stat_bonuses[StatType.speed] += bonuses["unique_speed"]
+                    stat_bonuses[StatType.stamina] += bonuses["unique_stamina"]
+                    stat_bonuses[StatType.power] += bonuses["unique_power"]
+                    stat_bonuses[StatType.guts] += bonuses["unique_guts"]
+                    stat_bonuses[StatType.wit] += bonuses["unique_wit"]
+                    skill_bonus += bonuses["unique_skill"]
+                    training_eff += bonuses["unique_training"]
+                    mood_eff += bonuses["unique_mood"]
+
+                    # Handle dynamic unique effects
+                    dynamic_friendship = 0  # Accumulate dynamic friendship for this card
+                    
                     if card in self._dynamic_unique_effects:
                         for eff_type, values in self._dynamic_unique_effects[card].items():
                             if eff_type == CardUniqueEffect.effect_bonus_if_min_bond:
@@ -352,19 +398,24 @@ class EfficiencyCalculator:
                                         training_eff += bonus
                                     elif effect_id == CardEffect.mood_effect_increase:
                                         mood_eff += bonus
+                                    elif effect_id == CardEffect.friendship_effectiveness:
+                                        dynamic_friendship += bonus
 
                             elif eff_type == CardUniqueEffect.effect_bonus_per_combined_bond:
                                 effect_id = CardEffect(values[0])
                                 bonus = 20 + combined_bond // values[1]
                                 if effect_id == CardEffect.training_effectiveness:
                                     training_eff += bonus
-                                # Add other effect types as needed
+                                elif effect_id == CardEffect.friendship_effectiveness:
+                                    dynamic_friendship += bonus
 
                             elif eff_type == CardUniqueEffect.effect_bonus_per_facility_level:
                                 effect_id = CardEffect(values[0])
                                 bonus = self._facility_levels[facility_type] * values[1]
                                 if effect_id == CardEffect.training_effectiveness:
                                     training_eff += bonus
+                                elif effect_id == CardEffect.friendship_effectiveness:
+                                    dynamic_friendship += bonus
 
                             elif eff_type == CardUniqueEffect.effect_bonus_if_friendship_training:
                                 if card.is_preferred_facility(facility_type):
@@ -372,12 +423,16 @@ class EfficiencyCalculator:
                                     bonus = values[1]
                                     if effect_id == CardEffect.training_effectiveness:
                                         training_eff += bonus
+                                    elif effect_id == CardEffect.friendship_effectiveness:
+                                        dynamic_friendship += bonus
 
                             elif eff_type == CardUniqueEffect.effect_bonus_on_more_energy:
                                 effect_id = CardEffect(values[0])
                                 bonus = min(self._energy // values[1], values[2])
                                 if effect_id == CardEffect.training_effectiveness:
                                     training_eff += bonus
+                                elif effect_id == CardEffect.friendship_effectiveness:
+                                    dynamic_friendship += bonus
 
                             elif eff_type == CardUniqueEffect.effect_bonus_on_less_energy:
                                 if self._energy <= 100:
@@ -385,10 +440,20 @@ class EfficiencyCalculator:
                                     bonus = min(values[3], values[4] + (self._max_energy - max(self._energy, values[2])) // values[1])
                                     if effect_id == CardEffect.training_effectiveness:
                                         training_eff += bonus
+                                    elif effect_id == CardEffect.friendship_effectiveness:
+                                        dynamic_friendship += bonus
 
-                    # Friendship multiplier
+                    # Friendship calculation (special multiplicative rules)
                     if card.is_preferred_facility(facility_type):
-                        friendship_mult *= 1 + bonuses["friendship"] / 100
+                        # Rule 3a: Add dynamic + static unique friendship
+                        unique_friendship_total = bonuses["unique_friendship"] + dynamic_friendship
+                        
+                        # Rule 3b: Multiply unique with normal friendship
+                        # (1 + unique/100) * (1 + normal/100)
+                        card_friendship_mult = (1 + unique_friendship_total / 100) * (1 + bonuses["friendship"] / 100)
+                        
+                        # Rule 3c: Multiply with other cards' friendship
+                        friendship_mult *= card_friendship_mult
 
                 # Calculate multipliers
                 mood_mult = 1 + (self._mood.multiplier - 1) * (1 + mood_eff / 100)
@@ -412,6 +477,7 @@ class EfficiencyCalculator:
         self._aggregated_stat_gains = aggregated_gains
         self._aggregated_skill_points = aggregated_skill_points
         self.calculation_finished.trigger(self, results=self._aggregated_stat_gains)
+        logger.debug("Deck efficiency calculation completed")
 
     def get_results(self) -> dict | None:
         """Get aggregated calculation results.

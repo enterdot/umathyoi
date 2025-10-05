@@ -53,7 +53,7 @@ class MainApplication(Adw.Application):
         # TODO: load from dconf for session persistence
         character = GenericCharacter({StatType.speed: 20, StatType.power: 10}, Aptitude.A, Aptitude.A, Aptitude.A)
         scenario = self.scenario_db.scenarios[0]
-        self.efficiency_calculator = EfficiencyCalculator(self.deck_list.active_deck, scenario, character)
+        self.efficiency_calculator = EfficiencyCalculator(self.deck_list, scenario, character)
 
     def _create_test_decks(self) -> list[Deck]:
         """Create test decks for development and testing."""

@@ -8,7 +8,7 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
-from modules import CardDatabase, ScenarioDatabase, FacilityType, CardEffect, CardRarity, Deck, EfficiencyCalculator, Mood
+from modules import CardDatabase, ScenarioDatabase, FacilityType, CardEffect, CardRarity, Deck, DeckList, EfficiencyCalculator, Mood
 
 from common import stopwatch
 
@@ -92,8 +92,10 @@ def test_efficiency_calculator():
         # Fallback: just use first 6 cards
         cards = list(card_db.cards.values())[:6]
 
-    deck = Deck(name="Test Deck", cards=cards)
+    deck = Deck(cards=cards)
     print(f"Deck created with cards: {[c.name for c in cards]}")
+
+    deck_list = DeckList([deck])
 
     # Get first scenario
     scenario = scenario_db.scenarios[0]
@@ -118,7 +120,7 @@ def test_efficiency_calculator():
 
     # Create calculator
     print("\nInitializing calculator...")
-    calculator = EfficiencyCalculator(deck=deck, scenario=scenario, character=character)
+    calculator = EfficiencyCalculator(deck_list=deck_list, scenario=scenario, character=character)
 
     # Set test parameters
     calculator.energy = 80
