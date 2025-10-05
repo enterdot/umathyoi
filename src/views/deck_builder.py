@@ -7,7 +7,7 @@ import gi
 gi.require_version("Adw", "1")
 from gi.repository import Adw
 
-from widgets import CardSelection, DeckCarousel
+from widgets import CardSelection, DeckInspector
 from common import auto_title_from_instance, auto_tag_from_instance
 
 
@@ -15,11 +15,7 @@ class DeckBuilder(Adw.Bin):
     """Deck builder with card selection sidebar, deck carousel and efficiency plots."""
 
     def __init__(self, window):
-        """Initialize deck builder view.
-
-        Args:
-            window: Parent window reference
-        """
+        """Initialize deck builder view."""
         super().__init__()
         self.app = window.app
         self.window = window
@@ -46,7 +42,7 @@ class DeckBuilder(Adw.Bin):
         sidebar_page.set_title(f"{auto_tag_from_instance(sidebar_child)} Navigation Page")
 
         content_page = Adw.NavigationPage()
-        content_child = DeckCarousel(self.window)
+        content_child = DeckInspector(self.window)
         content_page.set_child(content_child)
         content_page.set_tag(f"{auto_tag_from_instance(content_child)}-nav-page")
         content_page.set_title(f"{auto_tag_from_instance(content_child)} Navigation Page")

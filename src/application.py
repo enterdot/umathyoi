@@ -8,7 +8,8 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gio, Adw
 
-from modules import CardDatabase, Deck, CardInspector, DeckList
+from modules import CardDatabase, ScenarioDatabase, CharacterDatabase
+from modules import Deck, CardView, DeckList, EfficiencyCalculator, GenericCharacter, StatType, Aptitude
 from windows import MainWindow
 from common import auto_title_from_instance
 
@@ -36,14 +37,23 @@ class MainApplication(Adw.Application):
     def _init_data(self) -> None:
         """Initialize application data (card database and decks)."""
 
-        logger.info("Loading card database and initializing decks")
+        logger.info("Loading databases and user configurations")
         self.card_db = CardDatabase()
-        self.card_inspector = CardInspector()
+        self.scenario_db = ScenarioDatabase()
+        self.character_db = CharacterDatabase()
+
+        self.card_view = CardView()
 
         # Initialize deck list with test data
-        # TODO: Replace with session persistence when implemented
+        # TODO: load from dconf for session persistence
         test_decks = self._create_test_decks()
         self.deck_list = DeckList(decks=test_decks)
+
+        # Initialize with first scenario and a generic character
+        # TODO: load from dconf for session persistence
+        character = GenericCharacter({StatType.speed: 20, StatType.power: 10}, Aptitude.A, Aptitude.A, Aptitude.A)
+        scenario = self.scenario_db.scenarios[0]
+        self.efficiency_calculator = EfficiencyCalculator(self.deck_list.active_deck, scenario, character)
 
     def _create_test_decks(self) -> list[Deck]:
         """Create test decks for development and testing."""

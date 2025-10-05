@@ -9,7 +9,7 @@ from .scenario import Scenario, Facility, FacilityType
 from .scenario_db import ScenarioDatabase
 from .deck import Deck
 from .deck_list import DeckList
-from .card_inspector import CardInspector
+from .card_view import CardView
 from .efficiency_calculator import EfficiencyCalculator
 
 
@@ -36,6 +36,6 @@ __all__ = [
     "ScenarioDatabase",
     "Deck",
     "DeckList",
-    "CardInspector",
+    "CardView",
     "EfficiencyCalculator",
 ]

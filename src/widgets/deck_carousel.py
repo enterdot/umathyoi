@@ -10,17 +10,17 @@ from gi.repository import Gtk, Adw
 
 from modules import Card, Deck
 from .card_slot import CardSlot
-from .placeholder import Placeholder
-from common import auto_title_from_instance, UIConstants
-
-
-# TODO: rename to deck inspector and split carousel, efficiency_calc and violin_plots into separate files
+from common import auto_title_from_instance
 
 
 class DeckCarousel(Adw.Bin):
     """Carousel widget displaying multiple decks with visual scaling animations."""
 
-    CALCULATOR_SETTINGS_MARGIN: int = 40
+    HINTS_SPACING: int = 60
+    REVEAL_DURATION: int = 200
+    GRID_SPACING: int = 30
+    CARD_SLOT_WIDTH: int = 150
+    CARD_SLOT_HEIGHT: int = 200
 
     def __init__(self, window):
         """Initialize deck carousel."""
@@ -34,35 +34,19 @@ class DeckCarousel(Adw.Bin):
 
     def setup_ui(self) -> None:
         """Set up the carousel UI components."""
-        container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        container.set_spacing(UIConstants.CAROUSEL_SPACING)
-        container.set_margin_bottom(UIConstants.CAROUSEL_MARGIN)
-        container.set_margin_top(UIConstants.CAROUSEL_MARGIN)
-
         self.carousel = Adw.Carousel()
         self.carousel.set_allow_mouse_drag(True)
         self.carousel.set_allow_scroll_wheel(True)
         self.carousel.set_allow_long_swipes(True)
-        self.carousel.set_reveal_duration(UIConstants.CAROUSEL_REVEAL_DURATION)
-        self.carousel.set_spacing(UIConstants.CAROUSEL_MIN_SPACING)
-        self.carousel.set_vexpand(True)
-        self.carousel.set_valign(Gtk.Align.CENTER)
+        self.carousel.set_reveal_duration(DeckCarousel.REVEAL_DURATION)
+        self.carousel.set_spacing(DeckCarousel.HINTS_SPACING)
 
         # Create pages for all decks in deck list
         for deck_slot, deck in self.app.deck_list:
             self.carousel.append(self.create_carousel_page(deck_slot, deck))
 
         self.update_carousel_hints(self.carousel)
-
-        # Deck efficiency calculator settings placeholder
-        efficiency_calc = Placeholder("Deck Efficiency Calculator settings")
-        efficiency_calc.set_vexpand(False)
-        efficiency_calc.set_valign(Gtk.Align.END)
-        efficiency_calc.set_margin_bottom(DeckCarousel.CALCULATOR_SETTINGS_MARGIN)
-
-        container.append(self.carousel)
-        container.append(efficiency_calc)
-        self.set_child(container)
+        self.set_child(self.carousel)
 
     def connect_signals(self) -> None:
         """Connect carousel and deck event signals."""
@@ -91,7 +75,7 @@ class DeckCarousel(Adw.Bin):
             if not hasattr(carousel, "target_spacing"):
                 carousel.target_spacing = float(carousel.get_spacing())
             carousel.target_spacing += (nav_page_width - self.last_nav_page_width) / 2
-            carousel.set_spacing(round(max(UIConstants.CAROUSEL_MIN_SPACING, carousel.target_spacing)))
+            carousel.set_spacing(round(max(DeckCarousel.HINTS_SPACING, carousel.target_spacing)))
 
         self.last_nav_page_width = float(nav_page_width)
 
@@ -119,10 +103,9 @@ class DeckCarousel(Adw.Bin):
 
     def _create_deck_grid(self, deck: Deck) -> Gtk.Grid:
         """Create the grid widget for a deck."""
-
         deck_grid = Gtk.Grid()
-        deck_grid.set_row_spacing(UIConstants.DECK_GRID_SPACING)
-        deck_grid.set_column_spacing(UIConstants.DECK_GRID_SPACING)
+        deck_grid.set_row_spacing(DeckCarousel.GRID_SPACING)
+        deck_grid.set_column_spacing(DeckCarousel.GRID_SPACING)
 
         for slot, card, limit_break in deck:
             card_slot_widget = self._create_card_slot(slot, card, limit_break)
@@ -134,7 +117,7 @@ class DeckCarousel(Adw.Bin):
 
     def _create_card_slot(self, slot: int, card: Card | None, limit_break: int = Card.MIN_LIMIT_BREAK) -> CardSlot:
         """Create a card slot widget for the deck grid."""
-        card_slot_widget = CardSlot(self.window, UIConstants.CARD_SLOT_WIDTH, UIConstants.CARD_SLOT_HEIGHT)
+        card_slot_widget = CardSlot(self.window, DeckCarousel.CARD_SLOT_WIDTH, DeckCarousel.CARD_SLOT_HEIGHT)
         card_slot_widget.card = card
         card_slot_widget.limit_break = limit_break
 

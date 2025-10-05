@@ -33,28 +33,6 @@ class CharacterConstants:
     MAX_TOTAL_STAT_GROWTH = 30  # 30%
 
 
-class UIConstants:
-    """Constants for UI dimensions and spacing."""
-
-    # Card artwork dimensions
-    CARD_THUMBNAIL_WIDTH = 45
-    CARD_THUMBNAIL_HEIGHT = 60
-    CARD_SLOT_WIDTH = 150
-    CARD_SLOT_HEIGHT = 200
-    STATS_ARTWORK_SCALE = 3  # Multiplier for stats view artwork
-
-    # Spacing and margins
-    CARD_LIST_MARGIN = 18
-    CARD_LIST_PADDING_VERTICAL = 12
-    DECK_GRID_SPACING = 24
-    CAROUSEL_MIN_SPACING = 30
-    CAROUSEL_SPACING = 20
-    CAROUSEL_MARGIN = 30
-
-    # Animation durations (in milliseconds)
-    CAROUSEL_REVEAL_DURATION = 200
-
-
 class NetworkConstants:
     """Constants for network operations."""
 

@@ -8,13 +8,20 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw
 
-from modules import Card, CardInspector
+from modules import Card, CardView
 from .card_artwork import CardArtwork
-from common import auto_title_from_instance, UIConstants
+from common import auto_title_from_instance
 
 
 class CardSelection(Adw.Bin):
     """Card selection sidebar with card list and detailed stats view."""
+
+    LIST_MARGIN = 18
+    LIST_PADDING_VERTICAL = 12
+    CARD_THUMBNAIL_WIDTH = 45
+    CARD_THUMBNAIL_HEIGHT = 60
+    CARD_ARTWORK_WIDTH = 150
+    CARD_ARTWORK_HEIGHT = 200
 
     def __init__(self, window):
         """Initialize card selection widget.
@@ -67,8 +74,8 @@ class CardSelection(Adw.Bin):
         self.app.deck_list.card_added_to_active_deck_at_slot.subscribe(self._on_active_deck_card_added)
         self.app.deck_list.card_removed_from_active_deck_at_slot.subscribe(self._on_active_deck_card_removed)
 
-        # Card inspector events
-        self.app.card_inspector.card_changed.subscribe(self._on_card_inspector_changed)
+        # Card view events
+        self.app.card_view.card_changed.subscribe(self._on_card_view_changed)
 
     def refresh_all_action_rows(self) -> None:
         """Refresh visibility of all action rows based on current active deck state."""
@@ -112,10 +119,10 @@ class CardSelection(Adw.Bin):
         self._populate_card_list(list_box)
 
         # Set margins
-        list_box.set_margin_start(UIConstants.CARD_LIST_MARGIN)
-        list_box.set_margin_end(UIConstants.CARD_LIST_MARGIN)
-        list_box.set_margin_top(UIConstants.CARD_LIST_PADDING_VERTICAL)
-        list_box.set_margin_bottom(UIConstants.CARD_LIST_PADDING_VERTICAL)
+        list_box.set_margin_start(CardSelection.LIST_MARGIN)
+        list_box.set_margin_end(CardSelection.LIST_MARGIN)
+        list_box.set_margin_top(CardSelection.LIST_PADDING_VERTICAL)
+        list_box.set_margin_bottom(CardSelection.LIST_PADDING_VERTICAL)
 
         # Wrap in scrolled window
         scrolled_window = Gtk.ScrolledWindow()
@@ -151,7 +158,7 @@ class CardSelection(Adw.Bin):
         row.set_activatable(True)
 
         # Add card thumbnail
-        thumbnail = CardArtwork(self.window, card, UIConstants.CARD_THUMBNAIL_WIDTH, UIConstants.CARD_THUMBNAIL_HEIGHT)
+        thumbnail = CardArtwork(self.window, card, CardSelection.CARD_THUMBNAIL_WIDTH, CardSelection.CARD_THUMBNAIL_HEIGHT)
         row.add_prefix(thumbnail)
 
         # Add info button
@@ -189,7 +196,7 @@ class CardSelection(Adw.Bin):
         content.append(header_bar)
 
         # Large card artwork display
-        card_artwork = CardArtwork(self.window, None, UIConstants.CARD_THUMBNAIL_WIDTH * UIConstants.STATS_ARTWORK_SCALE, UIConstants.CARD_THUMBNAIL_HEIGHT * UIConstants.STATS_ARTWORK_SCALE)
+        card_artwork = CardArtwork(self.window, None, CardSelection.CARD_ARTWORK_WIDTH, CardSelection.CARD_ARTWORK_HEIGHT)
         card_artwork.set_halign(Gtk.Align.CENTER)
         content.append(card_artwork)
 
@@ -234,7 +241,7 @@ class CardSelection(Adw.Bin):
         limit_break_selector.set_halign(Gtk.Align.CENTER)
 
         # Limit break slider
-        current_value = self.app.card_inspector.limit_break
+        current_value = self.app.card_view.limit_break
         slider_adjustment = Gtk.Adjustment(value=current_value, lower=Card.MIN_LIMIT_BREAK, upper=Card.MAX_LIMIT_BREAK, step_increment=1, page_increment=1)
         slider_scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=slider_adjustment)
         slider_scale.set_draw_value(False)
@@ -304,13 +311,8 @@ class CardSelection(Adw.Bin):
         self.refresh_all_action_rows()
         self.list_box.set_visible(True)
 
-    def _on_card_inspector_changed(self, card_inspector: CardInspector, **kwargs) -> None:
-        """Handle when card stats selection changes.
-
-        Args:
-            card_inspector: CardInspector instance that changed
-            **kwargs: Event parameters including 'card' and 'prev_card'
-        """
+    def _on_card_view_changed(self, card_view: CardView, **kwargs) -> None:
+        """Handle when card stats selection changes."""
         # TODO: Update the large artwork display when card changes
         # This would be implemented when stats view is fully developed
         to_card_id = kwargs.get("card").id
@@ -354,7 +356,7 @@ class CardSelection(Adw.Bin):
             info_button: Info button that was clicked
             card: Card to show info for
         """
-        self.app.card_inspector.card = card
+        self.app.card_view.card = card
         view_stack = info_button.get_ancestor(Adw.ViewStack)
         if view_stack:
             view_stack.set_visible_child_name("stats_info_view")
@@ -376,7 +378,7 @@ class CardSelection(Adw.Bin):
             slider: Scale widget that changed
         """
         limit_break = int(slider.get_value())
-        self.app.card_inspector.limit_break = limit_break
+        self.app.card_view.limit_break = limit_break
 
     def _on_stats_info_view_add_button_clicked(self, button: Gtk.Button) -> None:
         """Handle clicking the add button in stats info view.
@@ -384,7 +386,7 @@ class CardSelection(Adw.Bin):
         Args:
             button: Add button that was clicked
         """
-        card_inspector = self.app.card_inspector
+        card_view = self.app.card_view
         active_deck = self.app.deck_list.active_deck
-        logger.debug(f"Try adding card {card_inspector.card.id} at limit break {card_inspector.limit_break} to active deck from info panel")
-        active_deck.add_card(card_inspector.card, card_inspector.limit_break)
+        logger.debug(f"Try adding card {card_view.card.id} at limit break {card_view.limit_break} to active deck from info panel")
+        active_deck.add_card(card_view.card, card_view.limit_break)
