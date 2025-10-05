@@ -16,6 +16,12 @@ from common import debounce, auto_title_from_instance
 class EfficiencyCalculator:
     """Calculator that pre-computes static effects, calculates dynamic ones on-demand."""
 
+    MIN_ENERGY: int = 0
+    MAX_ENERGY: int = 120
+    MIN_MAX_ENERGY: int = 100
+    MIN_FANS: int = 1
+    MAX_FANS: int = 350000
+
     def __init__(self, deck: Deck, scenario: Scenario, character: GenericCharacter):
         self._deck = deck
         self._scenario = scenario
