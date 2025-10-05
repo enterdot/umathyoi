@@ -17,9 +17,9 @@ class MainWindow(Adw.ApplicationWindow):
 
     DEFAULT_BREAKPOINT_WIDTH: int = 848
     MIN_WINDOW_WIDTH: int = 560
-    MIN_WINDOW_HEIGHT: int = 760
+    MIN_WINDOW_HEIGHT: int = 1240
     DEFAULT_WINDOW_WIDTH: int = 1200
-    DEFAULT_WINDOW_HEIGHT: int = 800
+    DEFAULT_WINDOW_HEIGHT: int = 1240
     CSS_TRANSITION_DURATION: int = 200
 
     def __init__(self, app, app_name: str):
