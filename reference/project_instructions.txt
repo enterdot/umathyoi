@@ -5,9 +5,11 @@ In addition to all code, 3 markdown files are provided for additional informatio
 
 When you think an update requires writing a lot of code or when the changes span many different files, give me the option to choose between you writing the code or you giving me detailed instructions on how to do the update myself.
 
-Always add type hints whenever possible. If the hints are obvious and would require a `if TYPE_CHECKING:` check, propose a removal.
+Always add type hints whenever possible. If the hints are obvious and would require a `if TYPE_CHECKING:` check, propose a removal. In general, strive for a Pythonic approach while still following a consistent style with the rest of t he codebase for the naming of methods, variables and classes.
 
-Try and use modern Python features whenever possible. For example, prefer:
+The application is developed in a Linux environment (ArchLinux).
+
+Try and use modern Python features whenever possible (version 3.13, or 3.10+ at worst). For example, prefer:
 - `Type | None` rather than `Optional[type]`
 - `var: list[Type]` rather than `from typing import List; var: List[Type]`
 - `var: dict[Type]` rather than `from typing import Dict; var: Dict[Type]`

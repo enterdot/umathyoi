@@ -5,62 +5,28 @@
 **Architecture Pattern:** Event-driven MVC with reactive UI updates
 - **Flow:** User Interaction → Module State Change → Event Trigger → Widget Updates
 - **Example:** Button click → `deck.add_card()` → `deck.card_added` event → Button grays out
-- **Flexibility:** Pattern can be broken for simpler code when it makes sense
 
 **Key Components:**
 
-1. **Data Layer (modules/):**
+1. **Data Layer:**
    - `Card`: Individual card with stats per limit break level
    - `Deck`: Collection of 6 cards with limit break levels
    - `DeckList`: Container of 5 decks with active deck tracking
-   - `CardDatabase`: Card data management with async image loading
-   - `CardStats`: Currently inspected card state for info view
+   - `CardInspector`: Currently inspected card state for info view
    - `Event`: Custom event system for loose coupling
+   - **Databases:**: For managing data extracted from JSON files
+   - ... and more, all located in `src/modules`
 
 2. **UI Layer:**
-   - **Views:** High-level page containers (DeckBuilder, LegacyManager)
+   - **Views:** High-level page containers (DeckBuilder, LegacyManager, etc.)
    - **Widgets:** Reusable components (CardArtwork, CardSlot, CardSelection, etc.)
    - **Windows:** Main application window with responsive breakpoints
 
-3. **Navigation:**
-   - Main app has ViewStack with DeckBuilder/LegacyManager tabs
-   - DeckBuilder has NavigationSplitView: CardSelection sidebar + DeckCarousel content
-   - CardSelection has ViewStack: card list ↔ card stats info view
-
-**Data Flow Examples:**
-- Card selection → deck updates → carousel refreshes
-- Deck switching → sidebar updates card visibility
-- Info button → CardStats updates → stats view shows details
-
-**Current State:**
-- Core architecture implemented
-- Basic UI structure complete
-- Image loading working
-- Event system in place
-- Logging system in place
-- Type hints everywhere
-
 **TODOs:**
-- Add deck efficiency calculation and display (currently a placeholder). This should be done asynchronously because the calculation is not smart, it's brute-forced via continuous iterations until it converges.
-- Data persistence: serialise decks to save and load them
-- Info panel in sidebar viewstaack to display stats of cards at different limit breaks
-- Preference dialogue to let user select level of precision for deck efficiency calculation as well as game scenario and level of training facility. Both are necessary for the efficiency calculation of decks
-- Add button to the header bar when the view is collapsed and only the carousel is visible, otherwise the user is not able to add cards anymore
-- Stats display: utilise CardStats class which holds information on the currently inspected card. It is used by the secondary view in the sidebar of the Deck Builder. It gets activated when clicking the info button on one of the action rows
-- Maybe add the info button also on the cards added to decks in the carousel
-- There needs to be a way to filter cards in the selection list sidebar because eventually there'll be hundreds of cards. This might be achieved via filter buttons but I would prefer a fuzzy search solution with a search box in a Revealer widget controlled by a search button.
-- **Low priority** `src/views/legacy_manager.py` implementation
-
-
-**Summary of Major Missing Features:**
-- Deck Efficiency Calculation - Core gameplay feature
-- Data Persistence - Save/load decks and card ownership
-- Card Stats Display - Detailed card information view
+- Deck Efficiency Calculation - Display the data, core application feature
+- Data Persistence - Save/load decks and card ownership via `dconf`
+- Card Inspector - Detailed card information view activated from info button on action rows
 - Search/Filter System - Essential for browsing hundreds of cards
-- Responsive Header Button - Critical for mobile/narrow screen usability
-- Legacy Manager - Entire secondary application feature (Low Priority)
+- Responsive Header Button - Show the sidebar when collaped, critical for mobile/narrow screen usability
+- Consistent Errors - Use `errno` module and `strerror` from `os` module for consistent error messages
 
-
-**Development Questions:**
-- Data serialization strategy needed, what options are there? Preferably built-in in Python library.
-- Drag and drop to move a card already in the deck to different slot should be considered. How hard would it be to implement?
