@@ -1,6 +1,7 @@
 """Application-wide constants and configuration values."""
 
-#TODO: Keep moving constants to relevant modules as class attributes
+# TODO: Keep moving constants to relevant modules as class attributes
+
 
 class ApplicationConstants:
     """Constants related to the application itself."""

@@ -14,7 +14,8 @@ from .placeholder import Placeholder
 from common import auto_title_from_instance, UIConstants
 
 
-#TODO: rename to deck inspector and split carousel, efficiency_calc and violin_plots into separate files
+# TODO: rename to deck inspector and split carousel, efficiency_calc and violin_plots into separate files
+
 
 class DeckCarousel(Adw.Bin):
     """Carousel widget displaying multiple decks with visual scaling animations."""

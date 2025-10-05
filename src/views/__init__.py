@@ -4,10 +4,4 @@ from .banner_planner import BannerPlanner
 from .pull_chance import PullChance
 from .race_simulator import RaceSimulator
 
-__all__ = [
-    "DeckBuilder",
-    "LegacyManager",
-    "BannerPlanner",
-    "PullChance",
-    "RaceSimulator"    
-]
+__all__ = ["DeckBuilder", "LegacyManager", "BannerPlanner", "PullChance", "RaceSimulator"]
