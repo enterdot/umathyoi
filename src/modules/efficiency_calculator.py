@@ -24,24 +24,26 @@ class EfficiencyCalculator:
     MAX_FANS: int = 350000
 
     def __init__(self, deck_list, scenario: Scenario, character: GenericCharacter):
-        self._deck_list = deck_list
-        self._scenario = scenario
-        self._character = character
-        self._fan_count = 100000
-        self._mood = Mood.good
-        self._energy = 80
-        self._max_energy = 120
-        self._facility_levels = {facility: 3 for facility in FacilityType}
-        self._card_levels = {card: card.max_level for card in deck_list.active_deck.cards}
-        self._card_bonds = {card: 80 for card in deck_list.active_deck.cards}
-        self._skills = []
 
-        self.turn_count = 1000
+        self._deck_list: DeckList = deck_list
+
+        self._scenario: Scenario = scenario
+        self._character: GenericCharacter = character
+        self._fan_count: int = 150000
+        self._mood: Mood = Mood.good
+        self._energy: int = 60
+        self._max_energy: int = 100
+        self._facility_levels: dict[FacilityType, int] = {facility: 3 for facility in FacilityType}
+        self._card_levels: dict[Card, int] = {card: card.max_level for card in deck_list.active_deck.cards}
+        self._card_bonds: dict[Card, int] = {card: 80 for card in deck_list.active_deck.cards}
+        self._skills: list[Skill] = []
+
+        self.turn_count: int = 10000
 
         # Events
-        self.calculation_started = Event()
-        self.calculation_progress = Event()
-        self.calculation_finished = Event()
+        self.calculation_started: Event = Event()
+        self.calculation_progress: Event = Event()
+        self.calculation_finished: Event = Event()
 
         # Subscribe to deck list events
         self._subscribe_to_deck_events()
@@ -173,7 +175,7 @@ class EfficiencyCalculator:
         self._deck_list.card_removed_from_active_deck_at_slot.subscribe(self._on_deck_changed)
         self._deck_list.limit_break_set_for_active_deck_at_slot.subscribe(self._on_deck_changed)
         self._deck_list.active_deck_was_cleared.subscribe(self._on_deck_changed)
-        
+
         # Active deck swapped
         self._deck_list.slot_activated.subscribe(self._on_deck_swapped)
 
@@ -181,18 +183,18 @@ class EfficiencyCalculator:
         """Called when the active deck's contents change."""
         # Sync card levels and bonds with current deck
         current_cards = set(self.deck.cards)
-        
+
         # Remove cards no longer in deck
         self._card_levels = {card: level for card, level in self._card_levels.items() if card in current_cards}
         self._card_bonds = {card: bond for card, bond in self._card_bonds.items() if card in current_cards}
-        
+
         # Add new cards with default values
         for card in current_cards:
             if card not in self._card_levels:
                 self._card_levels[card] = card.max_level
             if card not in self._card_bonds:
                 self._card_bonds[card] = 80
-        
+
         self._precalculate_static_effects()
         self.recalculate()
 
@@ -334,15 +336,15 @@ class EfficiencyCalculator:
 
             # Calculate turn-level state (computed once per turn, not per card)
             combined_facility_levels = sum(self._facility_levels.values())
-            
+
             # Count card types in deck
             card_types_in_deck = len(set(card.type for card in self.deck.cards if card.type != CardType.pal))
-            
+
             # Count cards by type in deck
             card_count_by_type = {}
             for card_type in CardType:
                 card_count_by_type[card_type] = sum(1 for card in self.deck.cards if card.type == card_type)
-            
+
             # Count skills by type
             skill_count_by_type = {}
             for skill_type in SkillType:
@@ -390,7 +392,7 @@ class EfficiencyCalculator:
 
                     # Handle dynamic unique effects
                     dynamic_friendship = 0  # Accumulate dynamic friendship for this card
-                    
+
                     if card in self._dynamic_unique_effects:
                         for eff_type, values in self._dynamic_unique_effects[card].items():
                             # Effect 101: Bonus if minimum bond reached
@@ -634,11 +636,11 @@ class EfficiencyCalculator:
                     if card.is_preferred_facility(facility_type):
                         # Rule 3a: Add dynamic + static unique friendship
                         unique_friendship_total = bonuses["unique_friendship"] + dynamic_friendship
-                        
+
                         # Rule 3b: Multiply unique with normal friendship
                         # (1 + unique/100) * (1 + normal/100)
                         card_friendship_mult = (1 + unique_friendship_total / 100) * (1 + bonuses["friendship"] / 100)
-                        
+
                         # Rule 3c: Multiply with other cards' friendship
                         friendship_mult *= card_friendship_mult
 

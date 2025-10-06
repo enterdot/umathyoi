@@ -1,0 +1,396 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                   EFFICIENCY CALCULATOR ARCHITECTURE                         ║
+║                     (Monte Carlo Simulation Engine)                          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+PURPOSE:
+  Simulates thousands of training turns to calculate expected stat gains and
+  skill points from a deck of support cards in various training facilities.
+  Uses Monte Carlo simulation to account for randomness in card appearances.
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                           HIGH-LEVEL FLOW                                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  INITIALIZATION                                                             │
+│  • Create calculator with deck_list, scenario, character                    │
+│  • Subscribe to deck mutation events                                        │
+│  • Pre-calculate static card effects                                        │
+│  • Build card appearance probability distributions                          │
+└─────┬───────────────────────────────────────────────────────────────────────┘
+      │
+      │ User changes settings (facility levels, energy, mood, etc.)
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  DEBOUNCED RECALCULATION (350ms wait)                                       │
+│  • Waits for user to stop making changes                                    │
+│  • Cancels pending calculations if new changes come in                      │
+│  • Triggers calculation_started event                                       │
+└─────┬───────────────────────────────────────────────────────────────────────┘
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  PHASE 1: GENERATE TURN DATA (Monte Carlo Simulation)                       │
+│                                                                             │
+│  For each of N turns (default 1000):                                        │
+│    For each card in deck:                                                   │
+│      Roll random number against card's appearance distribution              │
+│      Determine which facility card appears at (or None)                     │
+│    Store card→facility mapping for this turn                                │
+│                                                                             │
+│  Progress events fired every 1% (10 turns)                                  │
+└─────┬───────────────────────────────────────────────────────────────────────┘
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  PHASE 2: CALCULATE GAINS PER TURN                                          │
+│                                                                             │
+│  For each simulated turn:                                                   │
+│    ┌────────────────────────────────────────────────────────────┐           │
+│    │ A. Calculate turn-level state (once per turn)              │           │
+│    │    • combined_bond = sum of all card bonds                 │           │
+│    │    • combined_facility_levels = sum of facility levels     │           │
+│    │    • card_types_in_deck = count unique card types          │           │
+│    │    • card_count_by_type = count per CardType               │           │
+│    │    • skill_count_by_type = count per SkillType             │           │
+│    └────────────────────────────────────────────────────────────┘           │
+│                                                                             │
+│    For each facility with cards on it:                                      │
+│      ┌──────────────────────────────────────────────────────────┐           │
+│      │ B. Accumulate bonuses from all cards                     │           │
+│      │    For each card on facility:                            │           │
+│      │      • Add normal static effects                         │           │
+│      │      • Add unique static effects                         │           │
+│      │      • Calculate dynamic unique effects (22 types)       │           │
+│      │      • Accumulate friendship multiplier (special rules)  │           │
+│      └──────────────────────────────────────────────────────────┘           │
+│                                                                             │
+│      ┌──────────────────────────────────────────────────────────┐           │
+│      │ C. Calculate multipliers                                 │           │
+│      │    • mood_mult = f(mood, mood_eff)                       │           │
+│      │    • training_mult = f(training_eff)                     │           │
+│      │    • support_mult = 1 + cards_count * 0.05               │           │
+│      │    • friendship_mult = product of card friendships       │           │
+│      └──────────────────────────────────────────────────────────┘           │
+│                                                                             │
+│      ┌──────────────────────────────────────────────────────────┐           │
+│      │ D. Calculate final gains                                 │           │
+│      │    For each stat:                                        │           │
+│      │      final = (base + bonus) × friendship × mood ×        │           │
+│      │              training × support × character_growth       │           │
+│      │                                                          │           │
+│      │    skill_points = base + skill_bonus (no multipliers)    │           │
+│      └──────────────────────────────────────────────────────────┘           │
+│                                                                             │
+│    Store gains for this turn in aggregation arrays                          │
+└─────┬───────────────────────────────────────────────────────────────────────┘
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  PHASE 3: AGGREGATE RESULTS                                                 │
+│  • Calculate mean/min/max per facility per stat                             │
+│  • Calculate totals across all facilities                                   │
+│  • Trigger calculation_finished event with results                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                        CARD EFFECT ARCHITECTURE                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+EFFECT TYPES:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  1. NORMAL STATIC EFFECTS                                                   │
+│     • Pre-calculated once in _precalculate_static_effects()                 │
+│     • Stored in self._card_stat_bonuses[card]                               │
+│     • Examples: speed_stat_bonus, training_effectiveness                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  2. UNIQUE STATIC EFFECTS (< threshold 100)                                 │
+│     • Pre-calculated once in _precalculate_static_effects()                 │
+│     • Stored separately in self._card_stat_bonuses[card]["unique_*"]        │
+│     • Kept separate for friendship multiplication rules                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  3. DYNAMIC UNIQUE EFFECTS (>= threshold 100)                               │
+│     • Calculated per-turn in _recalculate_sync()                            │
+│     • Depend on turn state (energy, bonds, facility levels, etc.)           │
+│     • 22 effect types (101-122)                                             │
+│     • See DYNAMIC UNIQUE EFFECTS section below                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+EFFECT COMBINATION RULES:
+
+  For all effects EXCEPT friendship:
+    total = normal_static + unique_static + dynamic_unique
+    (simple addition)
+
+  For friendship specifically:
+    1. Add: dynamic_unique + unique_static → unique_total
+    2. Multiply: (1 + unique_total/100) × (1 + normal_static/100) → card_mult
+    3. Multiply across cards: friendship_mult *= card_mult
+    4. Only applies if card is at preferred facility
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                      DYNAMIC UNIQUE EFFECTS (22 types)                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+IMPLEMENTED (produces bonuses):
+  101 - effect_bonus_if_min_bond
+        Bonus if card bond >= threshold
+        
+  102 - training_effectiveness_if_min_bond_and_not_preferred_facility
+        Training bonus if bond >= threshold AND not at preferred facility
+        
+  103 - training_effectiveness_if_min_card_types
+        Training bonus if deck has >= min unique card types
+        
+  104 - training_effectiveness_for_fans
+        Training bonus based on fan count (capped)
+        
+  106 - effect_bonus_per_friendship_trainings
+        Bonus assuming max friendship trainings if bond >= 80
+        
+  107 - effect_bonus_on_less_energy
+        Bonus when energy <= 100, scales with missing energy
+        
+  108 - effect_bonus_on_more_max_energy
+        Bonus based on max energy (formula unclear, returns max_bonus)
+        
+  109 - effect_bonus_per_combined_bond
+        Bonus based on sum of all card bonds
+        
+  110 - effect_bonus_per_card_on_facility
+        Bonus per other card on same facility
+        
+  111 - effect_bonus_per_facility_level
+        Bonus based on current facility level
+        
+  113 - effect_bonus_if_friendship_training
+        Bonus only if card is at preferred facility
+        
+  114 - effect_bonus_on_more_energy
+        Bonus based on current energy (capped)
+        
+  116 - effect_bonus_per_skill_type
+        Bonus based on count of specific skill type (capped)
+        
+  117 - effect_bonus_per_combined_facility_level
+        Bonus based on sum of all facility levels
+        
+  120 - stat_or_skill_points_bonus_per_card_based_on_type
+        Complex: gives stat bonuses per card type + skill points per pal
+
+NOT APPLICABLE (don't affect training calculations):
+  112 - chance_for_no_failure
+  115 - all_cards_gain_effect_bonus (affects other cards)
+  118 - extra_appearance_if_min_bond
+  119 - cards_appear_more_if_min_bond
+  121 - all_cards_gain_bond_bonus_per_training (affects other cards)
+  122 - cards_gain_effect_bonus_next_turn (requires turn tracking)
+  105 - stat_up_per_card_based_on_type (only affects starting stats)
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                           EVENT SYSTEM                                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+SUBSCRIBES TO (from DeckList):
+  • card_added_to_active_deck_at_slot
+  • card_removed_from_active_deck_at_slot
+  • limit_break_set_for_active_deck_at_slot
+  • active_deck_was_cleared
+  • slot_activated (when different deck becomes active)
+  
+  → All trigger: sync card_levels/card_bonds → _precalculate_static_effects()
+
+EMITS:
+  • calculation_started
+      Fired when recalculation begins
+      
+  • calculation_progress (current, total)
+      Fired every 1% during Monte Carlo simulation
+      
+  • calculation_finished (results)
+      Fired when calculation completes with aggregated results
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                     CARD APPEARANCE PROBABILITY                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Each card has a probability distribution for appearing at facilities:
+
+  specialty = card's specialty_priority effect value
+  preferred = card's preferred facility (based on card type)
+  
+  Weights:
+    • Preferred facility: 100 + specialty
+    • Other facilities:    100
+    • No appearance:       50
+    
+  Total weight = 5 facilities × 100 + specialty + 50
+
+Pre-calculated as cumulative ranges for O(1) random selection:
+  
+  Example (specialty = 20, preferred = speed):
+    [0─────120)    → speed facility
+    [120───220)    → stamina facility
+    [220───320)    → power facility
+    [320───420)    → guts facility
+    [420───520)    → wit facility
+    [520───570)    → no appearance
+    
+  Random value in [0, 570) determines outcome via binary search
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                        FINAL CALCULATION FORMULA                             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+FOR STATS (speed, stamina, power, guts, wit):
+
+  final_stat = (base_stat + stat_bonuses) × 
+               friendship_mult × 
+               mood_mult × 
+               training_mult × 
+               support_mult × 
+               character_growth_mult
+
+  Where:
+    base_stat           = facility's base stat gain at level
+    stat_bonuses        = sum of all card bonuses for that stat
+    friendship_mult     = product of card friendship multipliers
+    mood_mult           = 1 + (mood.multiplier - 1) × (1 + mood_eff/100)
+    training_mult       = 1 + training_eff/100
+    support_mult        = 1 + card_count × 0.05
+    character_growth    = character's growth rate for that stat
+
+FOR SKILL POINTS:
+
+  skill_points = base_skill_points + skill_bonus
+  
+  (No multipliers applied to skill points)
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                          PERFORMANCE NOTES                                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+OPTIMIZATIONS:
+  • Pre-calculate static effects once, not per turn
+  • Pre-extract stat bonuses into flat dict (avoid nested lookups)
+  • Pre-calculate cumulative probability distributions
+  • Calculate turn-level state once per turn (not per card)
+  • Use debouncing to avoid redundant calculations
+
+TYPICAL PERFORMANCE:
+  • 1000 turns with 6 cards: ~325ms
+  • Debounce window: 350ms (prevents UI lag)
+  • ~20% performance cost from dynamic effects 103, 110, 116, 117, 120
+
+BOTTLENECKS:
+  • Monte Carlo loop (1000 turns × 6 cards × 5 facilities)
+  • Dynamic unique effect calculations (22 effect types per card)
+  • Friendship multiplier calculations (per card per facility)
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                          FILE LOCATIONS                                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+modules/efficiency_calculator.py:
+  • EfficiencyCalculator.__init__()              ← Initialization
+  • EfficiencyCalculator._precalculate_static_effects() ← Pre-processing
+  • EfficiencyCalculator._recalculate_sync()     ← Main simulation
+  • EfficiencyCalculator.get_results()           ← Results aggregation
+  • EfficiencyCalculator._on_deck_changed()      ← Event handler
+  • EfficiencyCalculator._on_deck_swapped()      ← Event handler
+
+modules/deck_list.py:
+  • DeckList events that trigger recalculation
+
+modules/card.py:
+  • Card.get_all_effects_at_level()              ← Effect lookup
+  • Card.get_all_unique_effects()                ← Unique effect lookup
+  • Card.is_preferred_facility()                 ← Facility check
+
+modules/scenario.py:
+  • Facility.get_all_stat_gains_at_level()       ← Base stat gains
+  • Facility.get_skill_points_gain_at_level()    ← Base skill points
+
+modules/character.py:
+  • GenericCharacter.get_stat_growth_multipler() ← Growth rates
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                            STATE MANAGEMENT                                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+MUTABLE STATE (triggers recalculation when changed):
+  • deck_list (reference to active deck)
+  • scenario
+  • character
+  • fan_count
+  • mood
+  • energy / max_energy
+  • facility_levels (dict per FacilityType)
+  • card_levels (dict per Card)
+  • card_bonds (dict per Card)
+  • skills (list of Skill)
+
+PRE-CALCULATED STATE (rebuilt on deck/card changes):
+  • _static_effects (dict per Card)
+  • _static_unique_effects (dict per Card)
+  • _dynamic_unique_effects (dict per Card)
+  • _card_stat_bonuses (dict per Card, flattened for speed)
+  • _card_distribution (dict per Card, cumulative probabilities)
+
+AGGREGATED RESULTS (output of calculation):
+  • _aggregated_stat_gains (per facility, per stat, list of values)
+  • _aggregated_skill_points (per facility, list of values)
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                           THREAD SAFETY                                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+✓ SAFE:
+  • All calculations run on GTK main thread (via debounced recalculate())
+  • No background threads used
+  • No concurrent access to mutable state
+
+✗ NOT THREAD-SAFE:
+  • Do not call recalculate() from background threads
+  • Event subscriptions assume single-threaded GTK event loop
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                          USAGE EXAMPLE                                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+# Initialize
+calculator = EfficiencyCalculator(deck_list, scenario, character)
+
+# Subscribe to events
+calculator.calculation_finished.subscribe(on_results_ready)
+
+# Change settings (triggers debounced recalculation)
+calculator.energy = 60
+calculator.facility_levels[FacilityType.speed] = 5
+
+# Wait for calculation to complete (via events)
+
+# Get results
+results = calculator.get_results()
+speed_gains = results["per_facility"][FacilityType.speed]["stats"][StatType.speed]
+print(f"Speed mean: {speed_gains['mean']:.2f}")
+print(f"Speed range: {speed_gains['min']}-{speed_gains['max']}")

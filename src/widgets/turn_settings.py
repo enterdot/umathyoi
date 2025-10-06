@@ -24,7 +24,7 @@ class TurnSettings(Adw.Bin):
         self.app = window.app
         self.window = window
         self.calculator: EfficiencyCalculator = self.app.efficiency_calculator
-        
+
         self.setup_ui()
         self.connect_signals()
 
@@ -58,13 +58,7 @@ class TurnSettings(Adw.Bin):
         # Max Energy spin button
         self.max_energy_row = Adw.ActionRow(title="Max Energy")
         self.max_energy_spin = Gtk.SpinButton(
-            adjustment=Gtk.Adjustment(
-                value=self.calculator.max_energy,
-                lower=EfficiencyCalculator.MIN_MAX_ENERGY,
-                upper=EfficiencyCalculator.MAX_ENERGY,
-                step_increment=4,
-                page_increment=4
-            )
+            adjustment=Gtk.Adjustment(value=self.calculator.max_energy, lower=EfficiencyCalculator.MIN_MAX_ENERGY, upper=EfficiencyCalculator.MAX_ENERGY, step_increment=4, page_increment=4)
         )
         self.max_energy_spin.set_digits(0)
         self.max_energy_row.add_suffix(self.max_energy_spin)
@@ -72,17 +66,8 @@ class TurnSettings(Adw.Bin):
 
         # Energy slider
         self.energy_row = Adw.ActionRow(title="Energy")
-        self.energy_adjustment = Gtk.Adjustment(
-            value=self.calculator.energy,
-            lower=EfficiencyCalculator.MIN_ENERGY,
-            upper=self.calculator.max_energy,
-            step_increment=5,
-            page_increment=10
-        )
-        self.energy_scale = Gtk.Scale(
-            orientation=Gtk.Orientation.HORIZONTAL,
-            adjustment=self.energy_adjustment
-        )
+        self.energy_adjustment = Gtk.Adjustment(value=self.calculator.energy, lower=EfficiencyCalculator.MIN_ENERGY, upper=self.calculator.max_energy, step_increment=5, page_increment=10)
+        self.energy_scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=self.energy_adjustment)
         self.energy_scale.set_hexpand(True)
         self.energy_scale.set_value_pos(Gtk.PositionType.RIGHT)
         self.energy_scale.set_digits(0)
@@ -92,13 +77,7 @@ class TurnSettings(Adw.Bin):
         # Fan count spin button
         self.fan_count_row = Adw.ActionRow(title="Fan Count")
         self.fan_count_spin = Gtk.SpinButton(
-            adjustment=Gtk.Adjustment(
-                value=self.calculator.fan_count,
-                lower=EfficiencyCalculator.MIN_FANS,
-                upper=EfficiencyCalculator.MAX_FANS,
-                step_increment=10000,
-                page_increment=100000
-            )
+            adjustment=Gtk.Adjustment(value=self.calculator.fan_count, lower=EfficiencyCalculator.MIN_FANS, upper=EfficiencyCalculator.MAX_FANS, step_increment=10000, page_increment=100000)
         )
         self.fan_count_spin.set_digits(0)
         self.fan_count_row.add_suffix(self.fan_count_spin)
@@ -117,10 +96,7 @@ class TurnSettings(Adw.Bin):
             row = Adw.ActionRow(title=f"{facility_type.name.title()} Facility")
             spin = Gtk.SpinButton(
                 adjustment=Gtk.Adjustment(
-                    value=self.calculator.facility_levels[facility_type],
-                    lower=GameplayConstants.MIN_FACILITY_LEVEL,
-                    upper=GameplayConstants.MAX_FACILITY_LEVEL,
-                    step_increment=1
+                    value=self.calculator.facility_levels[facility_type], lower=GameplayConstants.MIN_FACILITY_LEVEL, upper=GameplayConstants.MAX_FACILITY_LEVEL, step_increment=1
                 )
             )
             spin.set_digits(0)
@@ -159,13 +135,13 @@ class TurnSettings(Adw.Bin):
         """Handle max energy change."""
         max_energy = int(spin_button.get_value())
         logger.debug(f"Max energy changed to: {max_energy}")
-        
+
         # Update calculator
         self.calculator.max_energy = max_energy
-        
+
         # Update energy slider's upper bound
         self.energy_adjustment.set_upper(max_energy)
-        
+
         # If current energy exceeds new max, clamp it
         if self.energy_adjustment.get_value() > max_energy:
             self.energy_adjustment.set_value(max_energy)
@@ -180,7 +156,7 @@ class TurnSettings(Adw.Bin):
         """Handle facility level change."""
         level = int(spin_button.get_value())
         logger.debug(f"{facility_type.name} facility level changed to: {level}")
-        
+
         # Update the specific facility level in the calculator
         facility_levels = self.calculator.facility_levels.copy()
         facility_levels[facility_type] = level
