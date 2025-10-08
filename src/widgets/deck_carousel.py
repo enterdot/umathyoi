@@ -65,6 +65,7 @@ class DeckCarousel(Adw.Bin):
         self.app.deck_list.card_added_to_active_deck_at_slot.subscribe(self._on_card_added_to_active_deck)
         self.app.deck_list.card_removed_from_active_deck_at_slot.subscribe(self._on_card_removed_from_active_deck)
         self.app.deck_list.limit_break_set_for_active_deck_at_slot.subscribe(self._on_limit_break_changed_in_active_deck)
+        self.app.deck_list.mute_toggled_for_active_deck_at_slot.subscribe(self._on_mute_toggled_in_active_deck)
 
     def update_carousel_spacing(self, carousel: Adw.Carousel) -> None:
         """Update carousel spacing based on window width for responsive design."""
@@ -107,19 +108,20 @@ class DeckCarousel(Adw.Bin):
         deck_grid.set_row_spacing(DeckCarousel.GRID_SPACING)
         deck_grid.set_column_spacing(DeckCarousel.GRID_SPACING)
 
-        for slot, card, limit_break in deck:
-            card_slot_widget = self._create_card_slot(slot, card, limit_break)
+        for slot, card, limit_break, muted in deck:
+            card_slot_widget = self._create_card_slot(slot, card, limit_break, muted)
             row, col = divmod(slot, deck.size // 2)
             deck_grid.attach(card_slot_widget, col, row, 1, 1)
 
         deck_grid.deck = deck
         return deck_grid
 
-    def _create_card_slot(self, slot: int, card: Card | None, limit_break: int = Card.MIN_LIMIT_BREAK) -> CardSlot:
+    def _create_card_slot(self, slot: int, card: Card | None, limit_break: int = Card.MIN_LIMIT_BREAK, muted: bool = False) -> CardSlot:
         """Create a card slot widget for the deck grid."""
         card_slot_widget = CardSlot(self.window, DeckCarousel.CARD_SLOT_WIDTH, DeckCarousel.CARD_SLOT_HEIGHT)
         card_slot_widget.card = card
         card_slot_widget.limit_break = limit_break
+        card_slot_widget.muted = muted
 
         # Add click handler only if card is present
         if card is not None:
@@ -127,10 +129,13 @@ class DeckCarousel(Adw.Bin):
 
         # Add limit break change handler
         card_slot_widget.set_limit_break_changed_handler(self._on_limit_break_changed, slot)
+        
+        # Add mute change handler
+        card_slot_widget.set_mute_changed_handler(self._on_mute_changed, slot)
 
         return card_slot_widget
 
-    def _update_card_slot(self, deck_page: int, slot: int, card: Card | None, limit_break: int) -> None:
+    def _update_card_slot(self, deck_page: int, slot: int, card: Card | None, limit_break: int, muted: bool = False) -> None:
         """Update a single card slot in the carousel using in-place updates."""
         if 0 <= deck_page < self.carousel.get_n_pages():
             nav_page = self.carousel.get_nth_page(deck_page)
@@ -144,6 +149,7 @@ class DeckCarousel(Adw.Bin):
                 # Update existing widget in-place
                 card_slot_widget.card = card
                 card_slot_widget.limit_break = limit_break
+                card_slot_widget.muted = muted
 
                 # Update click handler based on whether card is present
                 if card is not None:
@@ -164,6 +170,13 @@ class DeckCarousel(Adw.Bin):
         if active_deck:
             logger.debug(f"Setting limit break to {new_limit_break} for slot={slot} in active deck")
             active_deck.set_limit_break_at_slot(slot, new_limit_break)
+
+    def _on_mute_changed(self, muted: bool, slot: int) -> None:
+        """Handle mute toggle from card slot button."""
+        active_deck = self.app.deck_list.active_deck
+        if active_deck:
+            logger.debug(f"Setting mute to {muted} for slot={slot} in active deck")
+            active_deck.set_mute_at_slot(slot, muted)
 
     # UI events
     def _on_window_width_changed(self, window: Gtk.Window, param) -> None:
@@ -192,20 +205,34 @@ class DeckCarousel(Adw.Bin):
         card = kwargs.get("card")
         slot = kwargs.get("slot")
         if card is not None and slot is not None:
-            self._update_card_slot(self.app.deck_list.active_slot, slot, card, Card.MIN_LIMIT_BREAK)
+            self._update_card_slot(self.app.deck_list.active_slot, slot, card, Card.MIN_LIMIT_BREAK, False)
 
     def _on_card_removed_from_active_deck(self, deck_list, **kwargs) -> None:
         """Handle when a card is removed from the active deck."""
         slot = kwargs.get("slot")
         if slot is not None:
-            self._update_card_slot(self.app.deck_list.active_slot, slot, None, Card.MIN_LIMIT_BREAK)
+            self._update_card_slot(self.app.deck_list.active_slot, slot, None, Card.MIN_LIMIT_BREAK, False)
 
     def _on_limit_break_changed_in_active_deck(self, deck_list, **kwargs) -> None:
         """Handle when a limit break level changes in the active deck."""
         slot = kwargs.get("slot")
         limit_break = kwargs.get("limit_break")
         if slot is not None and limit_break is not None:
-            # Get current card at that slot
+            # Get current card and mute state at that slot
             active_deck = self.app.deck_list.active_deck
-            card = active_deck.get_card_at_slot(slot) if active_deck else None
-            self._update_card_slot(self.app.deck_list.active_slot, slot, card, limit_break)
+            if active_deck:
+                card = active_deck.get_card_at_slot(slot)
+                muted = active_deck.is_muted_at_slot(slot)
+                self._update_card_slot(self.app.deck_list.active_slot, slot, card, limit_break, muted)
+
+    def _on_mute_toggled_in_active_deck(self, deck_list, **kwargs) -> None:
+        """Handle when mute state changes in the active deck."""
+        slot = kwargs.get("slot")
+        muted = kwargs.get("muted")
+        if slot is not None and muted is not None:
+            # Get current card and limit break at that slot
+            active_deck = self.app.deck_list.active_deck
+            if active_deck:
+                card = active_deck.get_card_at_slot(slot)
+                limit_break = active_deck.get_limit_break_at_slot(slot)
+                self._update_card_slot(self.app.deck_list.active_slot, slot, card, limit_break, muted)

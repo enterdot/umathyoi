@@ -34,8 +34,8 @@ class EfficiencyCalculator:
         self._energy: int = 60
         self._max_energy: int = 100
         self._facility_levels: dict[FacilityType, int] = {facility: 3 for facility in FacilityType}
-        self._card_levels: dict[Card, int] = {card: card.max_level for card in deck_list.active_deck.cards}
-        self._card_bonds: dict[Card, int] = {card: 80 for card in deck_list.active_deck.cards}
+        self._card_levels: dict[Card, int] = {card: card.max_level for card in deck_list.active_deck.active_cards}
+        self._card_bonds: dict[Card, int] = {card: 80 for card in deck_list.active_deck.active_cards}
         self._skills: list[Skill] = []
 
         self.turn_count: int = 1000
@@ -182,7 +182,7 @@ class EfficiencyCalculator:
     def _on_deck_changed(self, source, **kwargs):
         """Called when the active deck's contents change."""
         # Sync card levels and bonds with current deck
-        current_cards = set(self.deck.cards)
+        current_cards = set(self.deck.active_cards)
 
         # Remove cards no longer in deck
         self._card_levels = {card: level for card, level in self._card_levels.items() if card in current_cards}
@@ -201,8 +201,8 @@ class EfficiencyCalculator:
     def _on_deck_swapped(self, source, **kwargs):
         """Called when a different deck becomes active."""
         # Reset card levels and bonds for new deck
-        self._card_levels = {card: card.max_level for card in self.deck.cards}
-        self._card_bonds = {card: 80 for card in self.deck.cards}
+        self._card_levels = {card: card.max_level for card in self.deck.active_cards}
+        self._card_bonds = {card: 80 for card in self.deck.active_cards}
         self._precalculate_static_effects()
         self.recalculate()
 
@@ -214,7 +214,7 @@ class EfficiencyCalculator:
         self._card_stat_bonuses = {}
         self._card_distribution = {}
 
-        for card in self.deck.cards:
+        for card in self.deck.active_cards:
             level = self._card_levels[card]
             effects = card.get_all_effects_at_level(level)
 
@@ -303,7 +303,7 @@ class EfficiencyCalculator:
         for i in range(self.turn_count):
             card_facilities = {}
 
-            for card in self.deck.cards:
+            for card in self.deck.active_cards:
                 # Fast random selection using pre-calculated cumulative probabilities
                 dist_data = self._card_distribution[card]
                 rand_val = random.random() * dist_data["total_weight"]
@@ -339,12 +339,12 @@ class EfficiencyCalculator:
             combined_facility_levels = sum(self._facility_levels.values())
 
             # Count card types in deck
-            card_types_in_deck = len(set(card.type for card in self.deck.cards if card.type != CardType.pal))
+            card_types_in_deck = len(set(card.type for card in self.deck.active_cards if card.type != CardType.pal))
 
             # Count cards by type in deck
             card_count_by_type = {}
             for card_type in CardType:
-                card_count_by_type[card_type] = sum(1 for card in self.deck.cards if card.type == card_type)
+                card_count_by_type[card_type] = sum(1 for card in self.deck.active_cards if card.type == card_type)
 
             # Count skills by type
             skill_count_by_type = {}

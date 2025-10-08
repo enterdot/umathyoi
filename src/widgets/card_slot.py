@@ -12,7 +12,7 @@ from common import auto_title_from_instance, texture_from_pixbuf
 
 
 class CardSlot(Gtk.Box):
-    """Widget representing a single card slot in a deck with artwork and limit break selector."""
+    """Widget representing a single card slot in a deck with artwork, mute button, and limit break selector."""
 
     def __init__(self, window, width: int, height: int):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
@@ -73,13 +73,30 @@ class CardSlot(Gtk.Box):
 
         self.append(self.stack)
 
-        # Limit break selector
-        limit_break_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        limit_break_box.set_halign(Gtk.Align.FILL)
-        limit_break_box.set_visible(True)
+        # Controls box: mute button + limit break selector
+        controls_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        controls_box.set_spacing(4)
+        controls_box.set_halign(Gtk.Align.FILL)
+        controls_box.set_visible(True)
 
-        self.limit_break_adjustment = Gtk.Adjustment(value=self.limit_break, lower=Card.MIN_LIMIT_BREAK, upper=Card.MAX_LIMIT_BREAK, step_increment=1, page_increment=1)
-        self.limit_break_scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=self.limit_break_adjustment)
+        # Mute toggle button
+        self.mute_button = Gtk.ToggleButton()
+        self.mute_button.set_icon_name("audio-volume-muted-symbolic")
+        self.mute_button.add_css_class("flat")
+        controls_box.append(self.mute_button)
+
+        # Limit break scale
+        self.limit_break_adjustment = Gtk.Adjustment(
+            value=self.limit_break,
+            lower=Card.MIN_LIMIT_BREAK,
+            upper=Card.MAX_LIMIT_BREAK,
+            step_increment=1,
+            page_increment=1
+        )
+        self.limit_break_scale = Gtk.Scale(
+            orientation=Gtk.Orientation.HORIZONTAL,
+            adjustment=self.limit_break_adjustment
+        )
         self.limit_break_scale.set_draw_value(False)
         self.limit_break_scale.set_round_digits(0)
         self.limit_break_scale.set_digits(0)
@@ -89,8 +106,8 @@ class CardSlot(Gtk.Box):
         for i in range(Card.MAX_LIMIT_BREAK + 1):
             self.limit_break_scale.add_mark(i, Gtk.PositionType.BOTTOM, str(i))
 
-        limit_break_box.append(self.limit_break_scale)
-        self.append(limit_break_box)
+        controls_box.append(self.limit_break_scale)
+        self.append(controls_box)
 
         # Initialize click controller as None
         self._click_controller = None
@@ -100,8 +117,9 @@ class CardSlot(Gtk.Box):
 
     def connect_signals(self) -> None:
         """Connect widget signals."""
-        # Limit break handler is set externally via set_limit_break_changed_handler()
+        # Limit break and mute handlers are set externally
         self._limit_break_handler_id = None
+        self._mute_handler_id = None
 
     @property
     def card(self) -> Card | None:
@@ -115,10 +133,13 @@ class CardSlot(Gtk.Box):
             self._card = card
             self.load_card_artwork(self._card)
             self.limit_break_scale.set_sensitive(True)
+            self.mute_button.set_sensitive(True)
         elif not card:
             self._card = None
             self.show_empty()
             self.limit_break_scale.set_sensitive(False)
+            self.mute_button.set_sensitive(False)
+            self.mute_button.set_active(False)
 
     @property
     def limit_break(self) -> int:
@@ -138,6 +159,39 @@ class CardSlot(Gtk.Box):
         if self._limit_break_handler_id is not None:
             self.limit_break_scale.handler_unblock(self._limit_break_handler_id)
 
+    @property
+    def muted(self) -> bool:
+        if not hasattr(self, "_muted"):
+            self._muted = False
+        return self._muted
+
+    @muted.setter
+    def muted(self, muted: bool) -> None:
+        self._muted = muted
+        # Block signal to prevent triggering callback during programmatic updates
+        if self._mute_handler_id is not None:
+            self.mute_button.handler_block(self._mute_handler_id)
+        self.mute_button.set_active(muted)
+        if self._mute_handler_id is not None:
+            self.mute_button.handler_unblock(self._mute_handler_id)
+        
+        # Update visual state
+        self._update_mute_visuals(muted)
+
+    def _update_mute_visuals(self, muted: bool) -> None:
+        """Update visual appearance based on mute state."""
+        if muted:
+            # Disable limit break slider
+            self.limit_break_scale.set_sensitive(False)
+            # Reduce artwork opacity
+            self.artwork.set_opacity(0.4)
+        else:
+            # Enable limit break slider (if card is present)
+            if self.card is not None:
+                self.limit_break_scale.set_sensitive(True)
+            # Full artwork opacity
+            self.artwork.set_opacity(1.0)
+
     def show_empty(self):
         """Show empty slot indicator."""
         self.stack.set_visible_child_name("empty")
@@ -152,11 +206,11 @@ class CardSlot(Gtk.Box):
         self.spinner.stop()
 
         if pixbuf:
-            # texture = Gdk.Texture.new_for_pixbuf(pixbuf)
             texture = texture_from_pixbuf(pixbuf)
             self.artwork.set_paintable(texture)
             self.artwork.add_css_class("card")
             self.stack.set_visible_child_name("artwork")
+            self._update_mute_visuals(self.muted)
         else:
             self.show_error()
 
@@ -179,12 +233,7 @@ class CardSlot(Gtk.Box):
         self.app.card_db.load_card_image_async(card.id, self.width, self.height, on_image_loaded)
 
     def set_click_handler(self, callback: callable, *args) -> None:
-        """Set click handler for this card slot.
-
-        Args:
-            callback: Function to call when clicked
-            *args: Additional arguments to pass to callback
-        """
+        """Set click handler for this card slot."""
         self.remove_click_handler()
 
         if callback:
@@ -200,19 +249,33 @@ class CardSlot(Gtk.Box):
             self._click_controller = None
 
     def set_limit_break_changed_handler(self, callback: callable, *args) -> None:
-        """Set handler for limit break scale changes.
-
-        Args:
-            callback: Function to call when limit break changes
-            *args: Additional arguments to pass to callback
-        """
+        """Set handler for limit break scale changes."""
         self.remove_limit_break_changed_handler()
 
         if callback:
-            self._limit_break_handler_id = self.limit_break_scale.connect("value-changed", lambda scale: callback(int(scale.get_value()), *args))
+            self._limit_break_handler_id = self.limit_break_scale.connect(
+                "value-changed",
+                lambda scale: callback(int(scale.get_value()), *args)
+            )
 
     def remove_limit_break_changed_handler(self) -> None:
         """Remove the current limit break change handler if one exists."""
         if self._limit_break_handler_id is not None:
             self.limit_break_scale.disconnect(self._limit_break_handler_id)
             self._limit_break_handler_id = None
+
+    def set_mute_changed_handler(self, callback: callable, *args) -> None:
+        """Set handler for mute button toggles."""
+        self.remove_mute_changed_handler()
+
+        if callback:
+            self._mute_handler_id = self.mute_button.connect(
+                "toggled",
+                lambda button: callback(button.get_active(), *args)
+            )
+
+    def remove_mute_changed_handler(self) -> None:
+        """Remove the current mute change handler if one exists."""
+        if self._mute_handler_id is not None:
+            self.mute_button.disconnect(self._mute_handler_id)
+            self._mute_handler_id = None

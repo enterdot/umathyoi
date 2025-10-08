@@ -2,17 +2,18 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from typing import Iterator
 from .deck import Deck
 from .event import Event
 from common import auto_title_from_instance
 
 
 class DeckList:
+    """Container managing multiple decks with an active deck concept."""
 
     SIZE: int = 5
 
-    def __init__(self, decks: list[Deck | None] | None = None) -> None:
-
+    def __init__(self, decks: list[Deck] | None = None) -> None:
         logger.info(f"Initializing deck list with {DeckList.SIZE} slots")
 
         if decks is not None:
@@ -32,21 +33,22 @@ class DeckList:
 
         self._active_slot: int = 0
 
-        # Existing deck list events
+        # Events for deck list operations
         self.slot_activated: Event = Event()
         self.slot_deactivated: Event = Event()
 
-        # Active deck events to match all Deck events
+        # Events forwarded from active deck
         self.card_added_to_active_deck_at_slot: Event = Event()
         self.card_removed_from_active_deck_at_slot: Event = Event()
         self.limit_break_set_for_active_deck_at_slot: Event = Event()
         self.active_deck_was_cleared: Event = Event()
         self.active_deck_pushed_past_capacity: Event = Event()
+        self.mute_toggled_for_active_deck_at_slot: Event = Event()
 
         # Set up event forwarding for all decks
         self._setup_deck_event_forwarding()
 
-        logger.debug(f"{auto_title_from_instance(self)} initialized")
+        logger.info(f"{auto_title_from_instance(self)} initialized with {DeckList.SIZE} decks")
 
     def _setup_deck_event_forwarding(self):
         """Subscribe to all deck events and forward active deck events."""
@@ -57,6 +59,7 @@ class DeckList:
             "limit_break_set_at_slot": self.limit_break_set_for_active_deck_at_slot,
             "deck_was_cleared": self.active_deck_was_cleared,
             "deck_pushed_past_capacity": self.active_deck_pushed_past_capacity,
+            "mute_toggled_at_slot": self.mute_toggled_for_active_deck_at_slot
         }
 
         # Ensure that we have a mapping for every Deck event
