@@ -27,4 +27,28 @@ An application written in Python using GTK4/libadwaita widgets. It's designed us
 
 ---
 
+### Legacy Manager
 
+1. To be defined
+
+---
+
+### Banner Planner
+
+1. To be defined
+
+---
+
+### Pull Chance
+
+1. The user selects a number of trials (pulls) and a probability value from a set of predefined values
+2. The values are: 0.5%, 0.75%, 3%, 12.5%
+3. An histogram show the chances to get 0, 1+, 2+, 3+, 4+, 5+ successes
+
+---
+
+### Race Simulator
+
+1. To be defined, but the repository found at https://github.com/alpha123/uma-skill-tools can be refrenced
+2. The main function is to show the endurance (HP) consumption
+3. It should also provide a list of the best 10 skills to reduce time taken to complete the track

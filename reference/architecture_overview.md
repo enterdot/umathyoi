@@ -23,12 +23,11 @@
    - **Windows:** Main application window with responsive breakpoints
 
 **TODOs:**
-1. `deck_carousel.py` to multiple files - Split content view, deck carousel, turn settings and plots (right sidebar)
-2. Deck efficiency calculation - Display the data, core application feature
-3. Data persistence - Save/load decks and card ownership via `dconf`
-4. Card Inspector - Detailed card information view activated from info button on action rows
-5. Search/Filter system - Essential for browsing hundreds of cards
-6. Responsive Header Button - Show the sidebar when collaped, critical for mobile/narrow screen usability
-7. Consistent Errors - Use `errno` module and `strerror` from `os` module for consistent error messages
-8. Complete the remaining `TODO`s left in the code
+1. Refine Deck Builder UI and fix bugs with muted cards and carousel hints not showing
+2. Data persistence - Save/load decks and card ownership via `dconf`
+3. Card Inspector - Detailed card information view activated from info button on action rows
+4. Search/Filter system - Essential for browsing hundreds of cards
+5. Responsive Header Button - Show the sidebar when collaped, critical for mobile/narrow screen usability
+6. Consistent Errors - Use `errno` module and `strerror` from `os` module for consistent error messages
+7. Complete the remaining `TODO`s left in the code
 
