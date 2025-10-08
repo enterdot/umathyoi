@@ -22,7 +22,6 @@ class EfficiencyCalculator:
     MIN_MAX_ENERGY: int = 100
     MIN_FANS: int = 1
     MAX_FANS: int = 350000
-    
     TURNS: int = 1000
 
     def __init__(self, deck_list, scenario: Scenario, character: GenericCharacter):
@@ -32,7 +31,7 @@ class EfficiencyCalculator:
         self._scenario: Scenario = scenario
         self._character: GenericCharacter = character
         self._fan_count: int = 150000
-        self._mood: Mood = Mood.good
+        self._mood: Mood = Mood.great
         self._energy: int = 60
         self._max_energy: int = 100
         self._facility_levels: dict[FacilityType, int] = {facility: 3 for facility in FacilityType}
@@ -289,7 +288,7 @@ class EfficiencyCalculator:
 
             self._card_distribution[card] = {"cumulative": cumulative, "outcomes": outcomes, "total_weight": total_weight}
 
-    @debounce(wait_ms=180)
+    @debounce(wait_ms=150)
     def recalculate(self):
         self._recalculate_sync()
 
@@ -396,9 +395,13 @@ class EfficiencyCalculator:
                     # Handle dynamic unique effects
                     dynamic_friendship = 0  # Accumulate dynamic friendship for this card
 
+                    #TODO: Use match/case syntax rather than if/elif
+
                     if card in self._dynamic_unique_effects:
                         for eff_type, values in self._dynamic_unique_effects[card].items():
                             # Effect 101: Bonus if minimum bond reached
+                            # Sample card: 30189-kitasan-black
+                            # value = min_bond, value_1 = effect_id, value_2 = bonus_amount
                             if eff_type == CardUniqueEffect.effect_bonus_if_min_bond:
                                 if self._card_bonds[card] >= values[0]:
                                     effect_id = CardEffect(values[1])
@@ -423,21 +426,37 @@ class EfficiencyCalculator:
                                         dynamic_friendship += bonus
 
                             # Effect 102: Training effectiveness if min bond and NOT preferred facility
+                            # Sample card: 30083-sakura-bakushin-o
+                            # value = min_bond, value_1 = bonus_amount
                             elif eff_type == CardUniqueEffect.training_effectiveness_if_min_bond_and_not_preferred_facility:
                                 if self._card_bonds[card] >= values[0] and not card.is_preferred_facility(facility_type):
                                     training_eff += values[1]
 
                             # Effect 103: Training effectiveness if min card types in deck
+                            # Sample card: 30250-buena-vista
+                            # value = min_card_types, value_1 = bonus_amount
                             elif eff_type == CardUniqueEffect.training_effectiveness_if_min_card_types:
                                 if card_types_in_deck >= values[0]:
                                     training_eff += values[1]
 
                             # Effect 104: Training effectiveness based on fan count
+                            # Sample card: 30086-narita-top-road
+                            # value = fans_per_bonus, value_1 = max_bonus_amount
                             elif eff_type == CardUniqueEffect.training_effectiveness_for_fans:
                                 bonus = min(values[1], self._fan_count // values[0])
                                 training_eff += bonus
 
+                            # Effect 105: Provides initial stats at start of run based on deck composition
+                            # Sample card: 30090-symboli-rudolf
+                            # value = stat_amount_per_matching_stat_card, value_1 = all_stats_amount_per_non_stat_card
+                            # Not tracked in training simulator - affects only starting stats
+                            elif eff_type == CardUniqueEffect.stat_up_per_card_based_on_type:
+                                pass
+
                             # Effect 106: Bonus per friendship trainings done
+                            # Sample card: 30112-twin-turbo
+                            # value = max_times, value_1 = effect_id, value_2 = bonus_amount
+                            # Assumes max_times if bond is enough to trigger them
                             elif eff_type == CardUniqueEffect.effect_bonus_per_friendship_trainings:
                                 if self._card_bonds[card] >= Card.FRIENDSHIP_BOND_THRESHOLD:
                                     effect_id = CardEffect(values[1])
@@ -462,6 +481,8 @@ class EfficiencyCalculator:
                                         dynamic_friendship += bonus
 
                             # Effect 107: Bonus on less energy
+                            # Sample card: 30094-bamboo-memory
+                            # value = effect_id, value_1 = energy_per_bonus_point, value_2 = energy_floor, value_3 = max_bonus, value_4 = base_bonus
                             elif eff_type == CardUniqueEffect.effect_bonus_on_less_energy:
                                 if self._energy <= 100:
                                     effect_id = CardEffect(values[0])
@@ -472,7 +493,9 @@ class EfficiencyCalculator:
                                         dynamic_friendship += bonus
 
                             # Effect 108: Bonus on more max energy
+                            # Sample card: 30095-seeking-the-pearl
                             # Formula unclear, returns max_bonus until verified
+                            # value = effect_id, value_1 = ?, value_2 = ?, value_3 = min_bonus?, value_4 = max_bonus?
                             elif eff_type == CardUniqueEffect.effect_bonus_on_more_max_energy:
                                 effect_id = CardEffect(values[0])
                                 bonus = values[4]
@@ -482,6 +505,8 @@ class EfficiencyCalculator:
                                     dynamic_friendship += bonus
 
                             # Effect 109: Bonus per combined bond
+                            # Sample card: 30208-nishino-flower
+                            # value = effect_id, value_1 = max_bonus
                             elif eff_type == CardUniqueEffect.effect_bonus_per_combined_bond:
                                 effect_id = CardEffect(values[0])
                                 bonus = 20 + combined_bond // values[1]
@@ -491,6 +516,8 @@ class EfficiencyCalculator:
                                     dynamic_friendship += bonus
 
                             # Effect 110: Bonus per card on facility
+                            # Sample card: 30102-el-condor-pasa
+                            # value = effect_id, value_1 = bonus_amount
                             elif eff_type == CardUniqueEffect.effect_bonus_per_card_on_facility:
                                 effect_id = CardEffect(values[0])
                                 # Subtract 1 to exclude current card
@@ -515,6 +542,8 @@ class EfficiencyCalculator:
                                     dynamic_friendship += bonus
 
                             # Effect 111: Bonus per facility level
+                            # Sample card: 30107-maruzensky
+                            # value = effect_id, value_1 = bonus_amount
                             elif eff_type == CardUniqueEffect.effect_bonus_per_facility_level:
                                 effect_id = CardEffect(values[0])
                                 bonus = self._facility_levels[facility_type] * values[1]
@@ -524,11 +553,15 @@ class EfficiencyCalculator:
                                     dynamic_friendship += bonus
 
                             # Effect 112: Chance for no failure
+                            # Sample card: 30108-nakayama-festa
                             # Not applicable to simulator
+                            # value = chance
                             elif eff_type == CardUniqueEffect.chance_for_no_failure:
                                 pass
 
                             # Effect 113: Bonus if friendship training
+                            # Sample card: 30256-tamamo-cross
+                            # value = effect_id, value_1 = bonus_amount
                             elif eff_type == CardUniqueEffect.effect_bonus_if_friendship_training:
                                 if card.is_preferred_facility(facility_type):
                                     effect_id = CardEffect(values[0])
@@ -539,6 +572,8 @@ class EfficiencyCalculator:
                                         dynamic_friendship += bonus
 
                             # Effect 114: Bonus on more energy
+                            # Sample card: 30115-mejiro-palmer
+                            # value = effect_id, value_1 = energy_per_bonus_point, value_2 = max_bonus
                             elif eff_type == CardUniqueEffect.effect_bonus_on_more_energy:
                                 effect_id = CardEffect(values[0])
                                 bonus = min(self._energy // values[1], values[2])
@@ -548,11 +583,15 @@ class EfficiencyCalculator:
                                     dynamic_friendship += bonus
 
                             # Effect 115: All cards gain effect bonus
+                            # Sample card: 30146-oguri-cap
                             # Affects other cards - not implemented
+                            # value = effect_id, value_1 = bonus_amount
                             elif eff_type == CardUniqueEffect.all_cards_gain_effect_bonus:
                                 pass
 
                             # Effect 116: Bonus per skill type
+                            # Sample card: 30134-mejiro-ramonu
+                            # value = skill_type, value_1 = effect_id, value_2 = bonus_amount, value_3 = max_skills_count
                             elif eff_type == CardUniqueEffect.effect_bonus_per_skill_type:
                                 effect_id = CardEffect(values[1])
                                 skill_type = SkillType(values[0])
@@ -577,6 +616,8 @@ class EfficiencyCalculator:
                                     dynamic_friendship += bonus
 
                             # Effect 117: Bonus per combined facility level
+                            # Sample card: 30148-daiwa-scarlet
+                            # value = effect_id, value_1 = target_combined_level, value_2 = max_bonus
                             elif eff_type == CardUniqueEffect.effect_bonus_per_combined_facility_level:
                                 effect_id = CardEffect(values[0])
                                 bonus = values[2] * combined_facility_levels // values[1]
@@ -600,16 +641,22 @@ class EfficiencyCalculator:
                                     dynamic_friendship += bonus
 
                             # Effect 118: Extra appearance if min bond
+                            # Sample card: 30160-mei-satake
                             # Not applicable to simulator
+                            # value = extra_appearances, value_1 = min_bond
                             elif eff_type == CardUniqueEffect.extra_appearance_if_min_bond:
                                 pass
 
                             # Effect 119: Cards appear more if min bond
+                            # Sample card: 30188-ryoka-tsurugi
                             # Not applicable to simulator
+                            # value = ?, value_1 = ?, value_2 = min_bond
                             elif eff_type == CardUniqueEffect.cards_appear_more_if_min_bond:
                                 pass
 
                             # Effect 120: Stat or skill points bonus per card based on type
+                            # Sample card: 30187-orfevre
+                            # value = skill_point_bonus_per_pal, value_1 = min_bond, value_2 = stat_bonus_per_stat_type, value_3 = max_cards_per_stat
                             elif eff_type == CardUniqueEffect.stat_or_skill_points_bonus_per_card_based_on_type:
                                 if self._card_bonds[card] >= values[1]:
                                     # Speed bonus (per speed cards)
@@ -626,14 +673,21 @@ class EfficiencyCalculator:
                                     skill_bonus += card_count_by_type[CardType.pal] * values[0]
 
                             # Effect 121: All cards gain bond bonus per training
+                            # Sample card: 30207-yayoi-akikawa
                             # Affects other cards - not implemented
+                            # value = bonus_amount, value_1 = bonus_amount_if_card_on_facility
                             elif eff_type == CardUniqueEffect.all_cards_gain_bond_bonus_per_training:
                                 pass
 
                             # Effect 122: Cards gain effect bonus next turn after trained with
+                            # Sample card: 30257-tucker-bryne
                             # Requires turn-by-turn tracking - not implemented
+                            # value = effect_id, value_1 = bonus_amount
                             elif eff_type == CardUniqueEffect.cards_gain_effect_bonus_next_turn_after_trained_with:
                                 pass
+                                
+                            # Put additional unique effects handlers here as they are added to the game
+                            # Reference: https://umamusu.wiki/Game:List_of_Support_Cards
 
                     # Friendship calculation (special multiplicative rules)
                     if card.is_preferred_facility(facility_type):
