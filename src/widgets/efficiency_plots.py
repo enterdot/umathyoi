@@ -192,12 +192,6 @@ class EfficiencyPlots(Adw.Bin):
         self.main_container.set_margin_top(EfficiencyPlots.MARGIN)
         self.main_container.set_margin_bottom(EfficiencyPlots.MARGIN)
         
-        # Title
-        title = Gtk.Label(label="Efficiency Distribution")
-        title.add_css_class("title-3")
-        title.set_halign(Gtk.Align.START)
-        self.main_container.append(title)
-        
         # Initial empty state
         self._show_empty_state()
         

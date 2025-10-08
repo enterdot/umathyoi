@@ -15,10 +15,10 @@ from common import auto_title_from_instance
 class MainWindow(Adw.ApplicationWindow):
     """Main application window with responsive design and CSS styling."""
 
-    DEFAULT_BREAKPOINT_WIDTH: int = 848
-    MIN_WINDOW_WIDTH: int = 560
+    DEFAULT_BREAKPOINT_WIDTH: int = 1200
+    MIN_WINDOW_WIDTH: int = 928
     MIN_WINDOW_HEIGHT: int = 1280
-    DEFAULT_WINDOW_WIDTH: int = 1200
+    DEFAULT_WINDOW_WIDTH: int = 1280
     DEFAULT_WINDOW_HEIGHT: int = 1280
     CSS_TRANSITION_DURATION: int = 200
 

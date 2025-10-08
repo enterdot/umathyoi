@@ -11,7 +11,7 @@ from .deck_list import DeckList
 from .scenario import Scenario, FacilityType
 from .character import GenericCharacter, StatType, Mood
 from .event import Event
-from common import debounce, auto_title_from_instance
+from common import debounce, stopwatch, auto_title_from_instance
 
 
 class EfficiencyCalculator:
@@ -22,6 +22,8 @@ class EfficiencyCalculator:
     MIN_MAX_ENERGY: int = 100
     MIN_FANS: int = 1
     MAX_FANS: int = 350000
+    
+    TURNS: int = 1000
 
     def __init__(self, deck_list, scenario: Scenario, character: GenericCharacter):
 
@@ -38,7 +40,7 @@ class EfficiencyCalculator:
         self._card_bonds: dict[Card, int] = {card: 80 for card in deck_list.active_deck.active_cards}
         self._skills: list[Skill] = []
 
-        self.turn_count: int = 1000
+        self.turn_count: int = EfficiencyCalculator.TURNS
 
         # Events
         self.calculation_started: Event = Event()
@@ -287,7 +289,7 @@ class EfficiencyCalculator:
 
             self._card_distribution[card] = {"cumulative": cumulative, "outcomes": outcomes, "total_weight": total_weight}
 
-    @debounce(wait_ms=150)
+    @debounce(wait_ms=180)
     def recalculate(self):
         self._recalculate_sync()
 
