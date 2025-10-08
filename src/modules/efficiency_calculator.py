@@ -38,7 +38,7 @@ class EfficiencyCalculator:
         self._card_bonds: dict[Card, int] = {card: 80 for card in deck_list.active_deck.cards}
         self._skills: list[Skill] = []
 
-        self.turn_count: int = 10000
+        self.turn_count: int = 1000
 
         # Events
         self.calculation_started: Event = Event()
@@ -287,13 +287,14 @@ class EfficiencyCalculator:
 
             self._card_distribution[card] = {"cumulative": cumulative, "outcomes": outcomes, "total_weight": total_weight}
 
-    @debounce(wait_ms=350)
+    @debounce(wait_ms=150)
     def recalculate(self):
         self._recalculate_sync()
 
     def _recalculate_sync(self):
         """Monte Carlo simulation."""
 
+        logger.debug(f"Starting Monte Carlo simulation of {self.turn_count} turns")
         self.calculation_started.trigger(self)
 
         # Store minimal turn data

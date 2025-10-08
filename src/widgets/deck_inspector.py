@@ -51,7 +51,6 @@ class DeckInspector(Adw.Bin):
 
         container.append(self.deck_carousel)
         container.append(self.turn_settings)
-        # Plots will be added later when implemented
-        # container.append(self.efficiency_plots)
+        container.append(self.efficiency_plots)
 
         self.set_child(container)
