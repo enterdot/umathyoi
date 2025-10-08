@@ -40,6 +40,7 @@ A Python GTK4/Libadwaita application for Uma Musume support card deck building. 
 - Carousel hints not showing correctly (could be removed to simplify)
 - Missing Scenario selection and Character selection in turn settings
 - Cards can be added to deck when they are of the same character
+- Adding the `stopwatch` decorator to the efficiency recalculation function breaks it
 
 ---
 
