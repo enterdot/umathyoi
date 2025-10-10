@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 import json
 from typing import Iterator
 from datetime import date
-from common import GameplayConstants, ApplicationConstants, stopwatch, auto_title_from_instance
+from common import stopwatch, auto_title_from_instance
 
 from .scenario import Scenario, Facility, FacilityType
 from .character import StatType
@@ -14,9 +14,12 @@ from .character import StatType
 class ScenarioDatabase:
     """Database for managing scenario data."""
 
+    SCENARIOS_JSON = "data/scenarios.json"
+
     @stopwatch(show_args=False)
-    def __init__(self, scenarios_file: str = ApplicationConstants.SCENARIOS_JSON) -> None:
+    def __init__(self, scenarios_file: str = SCENARIOS_JSON) -> None:
         """Initialize scenario database."""
+
         self._scenarios: dict[int, Scenario] = {}
 
         try:
@@ -124,7 +127,7 @@ class ScenarioDatabase:
             stat_gain[level] = level_stat_gains
 
         # Create facility with min level as default
-        return Facility(type=facility_type, level=GameplayConstants.MIN_FACILITY_LEVEL, stat_gain=stat_gain, skill_points_gain=skill_points_gain, energy_gain=energy_gain)
+        return Facility(type=facility_type, level=Facility.MIN_LEVEL, stat_gain=stat_gain, skill_points_gain=skill_points_gain, energy_gain=energy_gain)
 
     def _parse_stat_type(self, stat_name: str) -> StatType | None:
         """Parse stat name string to StatType enum."""

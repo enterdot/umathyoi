@@ -16,6 +16,11 @@ class FacilityType(Enum):
 class Facility:
     """Represents a training facility with level-based gains."""
 
+    MIN_LEVEL = 1
+    MAX_LEVEL = 5
+    PREFERRED_BASE_WEIGHT = 100
+    NON_APPEARANCE_BASE_WEIGHT = 50
+
     type: FacilityType
     level: int
     stat_gain: dict[int, dict[StatType, int]]  # level -> {stat_type: value}

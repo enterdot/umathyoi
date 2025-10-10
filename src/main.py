@@ -16,8 +16,7 @@ gi.require_version("Gdk", "4.0")
 gi.require_version("Adw", "1")
 
 from application import MainApplication
-from common import ApplicationConstants
 
 if __name__ == "__main__":
-    app = MainApplication(ApplicationConstants.NAME, ApplicationConstants.VERSION, ApplicationConstants.REVERSE_DNS)
+    app = MainApplication()
     app.run()

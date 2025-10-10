@@ -129,7 +129,7 @@ class DeckCarousel(Adw.Bin):
 
         # Add limit break change handler
         card_slot_widget.set_limit_break_changed_handler(self._on_limit_break_changed, slot)
-        
+
         # Add mute change handler
         card_slot_widget.set_mute_changed_handler(self._on_mute_changed, slot)
 

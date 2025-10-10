@@ -6,31 +6,7 @@
 class ApplicationConstants:
     """Constants related to the application itself."""
 
-    NAME = "Umathyoi"
-    VERSION = "0.0"
-    REVERSE_DNS = "org.example.umathyoi"
     CACHE_NAME = "umathyoi"
-    CARD_ARTWORK_CACHE_NAME = "card_artwork"
-    CARDS_JSON = "data/cards.json"
-    CHARACTERS_JSON = "data/characters.json"
-    SKILLS_JSON = "data/skills.json"
-    SCENARIOS_JSON = "data/scenarios.json"
-
-
-class GameplayConstants:
-    """Constants related to general gameplay"""
-
-    MIN_FACILITY_LEVEL = 1
-    MAX_FACILITY_LEVEL = 5
-    PREFERRED_FACILITY_BASE_WEIGHT = 100
-    NON_APPEARANCE_BASE_WEIGHT = 50
-    PERCENTAGE_BASE = 100
-
-
-class CharacterConstants:
-    """Constants related to characters."""
-
-    MAX_TOTAL_STAT_GROWTH = 30  # 30%
 
 
 class NetworkConstants:

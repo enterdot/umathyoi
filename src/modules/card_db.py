@@ -21,13 +21,13 @@ from common import ApplicationConstants, NetworkConstants, auto_title_from_insta
 class CardDatabase:
     """Database for managing card data, images, and ownership information."""
 
-    @stopwatch(show_args=False)
-    def __init__(self, cards_file: str = ApplicationConstants.CARDS_JSON) -> None:
-        """Initialize card database.
+    CARDS_JSON = "data/cards.json"
+    CARD_ARTWORK_CACHE_NAME = "card_artwork"
 
-        Args:
-            cards_file: Path to JSON file containing card data
-        """
+    @stopwatch(show_args=False)
+    def __init__(self, cards_file: str = CARDS_JSON) -> None:
+        """Initialize card database."""
+
         self.cards: dict[int, Card] = {}
         self.image_cache: dict[int, GdkPixbuf.Pixbuf] = {}
         self.owned_copies: dict[int, int] = {}
@@ -37,14 +37,14 @@ class CardDatabase:
 
         # Shared requests session for connection pooling
         self._session = requests.Session()
-        self._session.headers.update({"User-Agent": f"{ApplicationConstants.NAME}/{ApplicationConstants.VERSION}"})
+        self._session.headers.update({"User-Agent": f"umathyoi/0.0"})
         # Configure connection pooling
         adapter = requests.adapters.HTTPAdapter(pool_connections=20, pool_maxsize=20, max_retries=3)
         self._session.mount("http://", adapter)
         self._session.mount("https://", adapter)
 
         # Setup disk cache directory
-        self._cache_dir = Path(user_cache_dir(ApplicationConstants.CACHE_NAME)) / ApplicationConstants.CARD_ARTWORK_CACHE_NAME
+        self._cache_dir = Path(user_cache_dir(ApplicationConstants.CACHE_NAME)) / CardDatabase.CARD_ARTWORK_CACHE_NAME
         self._cache_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"Card artwork cache directory: {self._cache_dir}")
 

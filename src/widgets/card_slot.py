@@ -86,17 +86,8 @@ class CardSlot(Gtk.Box):
         controls_box.append(self.mute_button)
 
         # Limit break scale
-        self.limit_break_adjustment = Gtk.Adjustment(
-            value=self.limit_break,
-            lower=Card.MIN_LIMIT_BREAK,
-            upper=Card.MAX_LIMIT_BREAK,
-            step_increment=1,
-            page_increment=1
-        )
-        self.limit_break_scale = Gtk.Scale(
-            orientation=Gtk.Orientation.HORIZONTAL,
-            adjustment=self.limit_break_adjustment
-        )
+        self.limit_break_adjustment = Gtk.Adjustment(value=self.limit_break, lower=Card.MIN_LIMIT_BREAK, upper=Card.MAX_LIMIT_BREAK, step_increment=1, page_increment=1)
+        self.limit_break_scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=self.limit_break_adjustment)
         self.limit_break_scale.set_draw_value(False)
         self.limit_break_scale.set_round_digits(0)
         self.limit_break_scale.set_digits(0)
@@ -174,7 +165,7 @@ class CardSlot(Gtk.Box):
         self.mute_button.set_active(muted)
         if self._mute_handler_id is not None:
             self.mute_button.handler_unblock(self._mute_handler_id)
-        
+
         # Update visual state
         self._update_mute_visuals(muted)
 
@@ -239,13 +230,13 @@ class CardSlot(Gtk.Box):
         if callback:
             click_gesture = Gtk.GestureClick()
             click_gesture.connect("pressed", lambda gesture, n_press, x, y: callback(*args))
-            self.add_controller(click_gesture)
+            self.stack.add_controller(click_gesture)  # ← Add to stack instead of self
             self._click_controller = click_gesture
 
     def remove_click_handler(self) -> None:
         """Remove the current click handler if one exists."""
         if self._click_controller:
-            self.remove_controller(self._click_controller)
+            self.stack.remove_controller(self._click_controller)  # ← Remove from stack
             self._click_controller = None
 
     def set_limit_break_changed_handler(self, callback: callable, *args) -> None:
@@ -253,10 +244,7 @@ class CardSlot(Gtk.Box):
         self.remove_limit_break_changed_handler()
 
         if callback:
-            self._limit_break_handler_id = self.limit_break_scale.connect(
-                "value-changed",
-                lambda scale: callback(int(scale.get_value()), *args)
-            )
+            self._limit_break_handler_id = self.limit_break_scale.connect("value-changed", lambda scale: callback(int(scale.get_value()), *args))
 
     def remove_limit_break_changed_handler(self) -> None:
         """Remove the current limit break change handler if one exists."""
@@ -269,10 +257,7 @@ class CardSlot(Gtk.Box):
         self.remove_mute_changed_handler()
 
         if callback:
-            self._mute_handler_id = self.mute_button.connect(
-                "toggled",
-                lambda button: callback(button.get_active(), *args)
-            )
+            self._mute_handler_id = self.mute_button.connect("toggled", lambda button: callback(button.get_active(), *args))
 
     def remove_mute_changed_handler(self) -> None:
         """Remove the current mute change handler if one exists."""

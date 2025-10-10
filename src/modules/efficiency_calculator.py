@@ -23,6 +23,7 @@ class EfficiencyCalculator:
     MIN_FANS: int = 1
     MAX_FANS: int = 350000
     TURNS: int = 1000
+    DEBOUNCE_WAIT = 150
 
     def __init__(self, deck_list, scenario: Scenario, character: GenericCharacter):
 
@@ -57,13 +58,6 @@ class EfficiencyCalculator:
     @property
     def deck_list(self):
         return self._deck_list
-
-    @deck_list.setter
-    def deck_list(self, value) -> None:
-        self._deck_list = value
-        self._subscribe_to_deck_events()
-        self._precalculate_static_effects()
-        self.recalculate()
 
     @property
     def deck(self) -> Deck:
@@ -175,6 +169,7 @@ class EfficiencyCalculator:
         self._deck_list.card_added_to_active_deck_at_slot.subscribe(self._on_deck_changed)
         self._deck_list.card_removed_from_active_deck_at_slot.subscribe(self._on_deck_changed)
         self._deck_list.limit_break_set_for_active_deck_at_slot.subscribe(self._on_deck_changed)
+        self._deck_list.mute_toggled_for_active_deck_at_slot.subscribe(self._on_deck_changed)
         self._deck_list.active_deck_was_cleared.subscribe(self._on_deck_changed)
 
         # Active deck swapped
@@ -288,7 +283,7 @@ class EfficiencyCalculator:
 
             self._card_distribution[card] = {"cumulative": cumulative, "outcomes": outcomes, "total_weight": total_weight}
 
-    @debounce(wait_ms=150)
+    @debounce(wait_ms=DEBOUNCE_WAIT)
     def recalculate(self):
         self._recalculate_sync()
 
@@ -395,7 +390,7 @@ class EfficiencyCalculator:
                     # Handle dynamic unique effects
                     dynamic_friendship = 0  # Accumulate dynamic friendship for this card
 
-                    #TODO: Use match/case syntax rather than if/elif
+                    # TODO: Use match/case syntax rather than if/elif
 
                     if card in self._dynamic_unique_effects:
                         for eff_type, values in self._dynamic_unique_effects[card].items():
@@ -685,7 +680,7 @@ class EfficiencyCalculator:
                             # value = effect_id, value_1 = bonus_amount
                             elif eff_type == CardUniqueEffect.cards_gain_effect_bonus_next_turn_after_trained_with:
                                 pass
-                                
+
                             # Put additional unique effects handlers here as they are added to the game
                             # Reference: https://umamusu.wiki/Game:List_of_Support_Cards
 

@@ -10,9 +10,13 @@ from common import auto_title_from_instance, stopwatch
 class SkillDatabase:
     """Database for managing skills loaded from Gametora website."""
 
+    SKILLS_JSON = "data/skills.json"
+    SKILL_ICON_CACHE_NAME = "skill_icon"
+
     @stopwatch(show_args=False)
-    def __init__(self) -> None:
+    def __init__(self, skills_file: str = SKILLS_JSON) -> None:
         """Initialize skill database."""
+
         self.skills: dict[int, Skill] = {}
         self._load_skills_from_gametora()
 

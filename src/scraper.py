@@ -1,18 +1,8 @@
 #!/usr/bin/env python
 
 """
-Gametora Data Scraper - Raw Data Approach
-
 This tool fetches data from Gametora's JSON APIs and stores it with minimal
 transformation, preserving the original structure for maximum flexibility.
-
-The philosophy is to keep scraped data as close to the original as possible,
-then use "view classes" in the app to provide clean, typed interfaces to the data.
-
-Usage:
-    python tools/scrape_gametora.py --cards --skills
-    python tools/scrape_gametora.py --cards-only
-    python tools/scrape_gametora.py --all
 """
 
 from common import setup_logging, get_logger
@@ -30,7 +20,12 @@ from typing import Any
 from dataclasses import dataclass
 from datetime import datetime
 
-from common import ApplicationConstants
+from modules import CardDatabase, SkillDatabase, CharacterDatabase
+from application import MainConfiguration
+
+
+CHARACTER_IDS_FILE = "data/character_ids.txt"
+CHARACTER_LIST_URL = "https://gametora.com/umamusume/characters"
 
 
 @dataclass
@@ -46,14 +41,14 @@ class GametoraEndpoint:
 GAMETORA_ENDPOINTS = {
     "cards": GametoraEndpoint(
         name="support_cards",
-        url="https://gametora.com/data/umamusume/support-cards.9da37405.json",
-        output_file=ApplicationConstants.CARDS_JSON,
+        url="https://gametora.com/data/umamusume/support-cards.36dc3929.json",
+        output_file=CardDatabase.CARDS_JSON,
         description="Support cards with stats, effects, and skills",
     ),
     "skills": GametoraEndpoint(
         name="skills",
         url="https://gametora.com/data/umamusume/skills.742ab78e.json",
-        output_file=ApplicationConstants.SKILLS_JSON,
+        output_file=SkillDatabase.SKILLS_JSON,
         description="Skills that can be learned by characters and granted by cards",
     ),
     # Characters will be handled separately due to individual endpoint pattern
@@ -340,7 +335,7 @@ class CharactersScraper:
         """
         self.character_ids = character_ids
         self.base_url_template = base_url_template
-        self.output_file = ApplicationConstants.CHARACTERS_JSON
+        self.output_file = CharacterDatabase.CHARACTERS_JSON
 
     async def fetch_character(self, character_id: str) -> dict[str, Any] | None:
         """Fetch data for a single character"""
@@ -468,6 +463,106 @@ class CharactersScraper:
         return self.save_characters(characters)
 
 
+class CharacterIdListScraper:
+    """Scraper to extract character IDs from Gametora's character list page"""
+
+    def __init__(self):
+        self.url = CHARACTER_LIST_URL
+        self.output_file = CHARACTER_IDS_FILE
+
+    async def fetch_page(self) -> str | None:
+        """Fetch the character list HTML page"""
+        try:
+            logger.info(f"Fetching character list from {self.url}")
+
+            async with aiohttp.ClientSession() as session:
+                async with session.get(self.url) as response:
+                    if response.status == 200:
+                        html = await response.text()
+                        logger.info(f"Successfully fetched character list page ({len(html)} bytes)")
+                        return html
+                    else:
+                        logger.error(f"HTTP {response.status} when fetching character list")
+                        return None
+
+        except Exception as e:
+            logger.error(f"Error fetching character list: {e}")
+            return None
+
+    def extract_character_ids(self, html: str) -> list[str]:
+        """
+        Extract character IDs from the HTML page.
+
+        Looks for <a> tags with hrefs like /umamusume/characters/{character_id}
+        """
+        from bs4 import BeautifulSoup
+
+        soup = BeautifulSoup(html, "html.parser")
+        character_ids = []
+        seen_ids = set()
+
+        # Find all links to character pages
+        # Pattern: /umamusume/characters/{character_id}
+        links = soup.find_all("a", href=True)
+
+        for link in links:
+            href = link["href"]
+
+            # Check if this is a character page link
+            if href.startswith("/umamusume/characters/") and href != "/umamusume/characters":
+                # Extract ID from URL like /umamusume/characters/102802-hishi-akebono
+                char_id = href.replace("/umamusume/characters/", "").rstrip("/")
+
+                # Only add if valid and not already seen
+                if char_id and char_id not in seen_ids:
+                    seen_ids.add(char_id)
+                    character_ids.append(char_id)
+
+        logger.info(f"Found {len(character_ids)} unique character IDs")
+        return character_ids
+
+    def save_character_ids(self, character_ids: list[str]) -> bool:
+        """Save character IDs to file"""
+        try:
+            output_path = Path(self.output_file)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+
+            with open(output_path, "w", encoding="utf-8") as f:
+                for char_id in character_ids:
+                    f.write(f"{char_id}\n")
+
+            logger.info(f"Saved {len(character_ids)} character IDs to {self.output_file}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error saving character IDs: {e}")
+            return False
+
+    async def run(self) -> bool:
+        """Execute character ID list scraping"""
+        logger.info("Starting character ID list scraper")
+
+        # Fetch the page
+        html = await self.fetch_page()
+        if not html:
+            return False
+
+        # Extract character IDs
+        try:
+            character_ids = self.extract_character_ids(html)
+            if not character_ids:
+                logger.error("No character IDs found on page")
+                return False
+
+            logger.info(f"Extracted {len(character_ids)} character IDs")
+        except Exception as e:
+            logger.error(f"Error extracting character IDs: {e}")
+            return False
+
+        # Save to file
+        return self.save_character_ids(character_ids)
+
+
 class GametoraScrapeManager:
     """Main manager for running scrapers with raw data approach"""
 
@@ -475,8 +570,8 @@ class GametoraScrapeManager:
         self.scrapers = {
             "cards": CardsScraper(GAMETORA_ENDPOINTS["cards"]),
             "skills": SkillsScraper(GAMETORA_ENDPOINTS["skills"]),
+            "character_ids": CharacterIdListScraper(),
         }
-
         self.character_scraper = None
 
     def set_character_ids(self, character_ids: list[str], url_template: str):
@@ -537,7 +632,7 @@ class GametoraScrapeManager:
                     endpoint = GAMETORA_ENDPOINTS[name]
                     print(f"  - {endpoint.output_file}")
                 elif name == "characters":
-                    print(f"  - {ApplicationConstants.CHARACTERS_JSON}")
+                    print(f"  - {CharacterDatabase.CHARACTERS_JSON}")
 
         print("\nNote: Data stored with minimal transformation.")
         print("Use view classes in the app to access typed, clean interfaces.")
@@ -550,7 +645,8 @@ async def main():
     # Individual scraper options
     parser.add_argument("--cards", action="store_true", help="Scrape support cards data")
     parser.add_argument("--skills", action="store_true", help="Scrape skills data")
-    parser.add_argument("--characters", action="store_true", help="Scrape characters data (requires --characters-file or --characters-ids)")
+    parser.add_argument("--characters", action="store_true", help="Scrape characters data")
+    parser.add_argument("--fetch-character-ids", action="store_true", help="Fetch and save list of character IDs from Gametora")
 
     # Character-specific options
     parser.add_argument("--characters-file", help="File containing character IDs (one per line)")
@@ -580,7 +676,10 @@ async def main():
             print(f"     → Output: {endpoint.output_file}")
         print("  ✓ characters: Individual endpoints (pattern-based)")
         print(f"     → Pattern: {args.characters_url_template}")
-        print(f"     → Output: {ApplicationConstants.CHARACTERS_JSON}")
+        print(f"     → Output: {CharacterDatabase.CHARACTERS_JSON}")
+        print("  ✓ character_ids: Character list page scraper")
+        print(f"     → URL: {CHARACTER_LIST_URL}")
+        print(f"     → Output: {CHARACTER_IDS_FILE}")
         return
 
     manager = GametoraScrapeManager()
@@ -598,6 +697,19 @@ async def main():
     elif args.characters_ids:
         character_ids = [id.strip() for id in args.characters_ids.split(",") if id.strip()]
         logger.info(f"Using {len(character_ids)} character IDs from command line")
+    elif args.characters:
+        # Auto-load from default file if --characters specified without explicit file
+        try:
+            with open(CHARACTER_IDS_FILE, "r") as f:
+                character_ids = [line.strip() for line in f if line.strip()]
+            logger.info(f"Auto-loaded {len(character_ids)} character IDs from {CHARACTER_IDS_FILE}")
+        except FileNotFoundError:
+            logger.error(f"Character IDs file not found: {CHARACTER_IDS_FILE}")
+            logger.error("Run with --fetch-character-ids first to generate the file")
+            return
+        except Exception as e:
+            logger.error(f"Error reading character IDs file: {e}")
+            return
 
     if character_ids:
         manager.set_character_ids(character_ids, args.characters_url_template)
@@ -616,6 +728,8 @@ async def main():
             selected_scrapers.append("skills")
         if args.characters:
             selected_scrapers.append("characters")
+        if args.fetch_character_ids:
+            selected_scrapers.append("character_ids")
 
     # Default to cards if nothing specified
     if not selected_scrapers:
@@ -630,7 +744,7 @@ async def main():
                 endpoint = GAMETORA_ENDPOINTS[name]
                 print(f"  - {name}: {endpoint.url} → {endpoint.output_file}")
             elif name == "characters":
-                print(f"  - characters: {len(character_ids)} individual endpoints → {ApplicationConstants.CHARACTERS_JSON}")
+                print(f"  - characters: {len(character_ids)} individual endpoints → {CharacterDatabase.CHARACTERS_JSON}")
         return
 
     # Run the scrapers

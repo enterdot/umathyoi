@@ -35,12 +35,12 @@ class DeckInspector(Adw.Bin):
         # Use OverlaySplitView for deck+settings on left, plots on right
         split_view = Adw.OverlaySplitView()
         split_view.set_sidebar_position(Gtk.PackType.END)  # Plots on the right
-        #split_view.set_show_sidebar(True)
-        #split_view.set_enable_hide(True)
-        #split_view.set_enable_show(True)
+        # split_view.set_show_sidebar(True)
+        # split_view.set_enable_hide(True)
+        # split_view.set_enable_show(True)
         split_view.set_min_sidebar_width(DeckInspector.MIN_PLOTS_WIDTH)
         split_view.set_sidebar_width_fraction(0.35)
-        
+
         # Left side: Carousel + Turn Settings
         left_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         left_container.set_spacing(DeckInspector.VERTICAL_SPACING)

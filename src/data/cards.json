@@ -1,10 +1,9 @@
 {
   "metadata": {
     "source": "Gametora",
-    "scraped_at": "2025-09-27T11:09:37.464282",
-    "endpoint": "https://gametora.com/data/umamusume/support-cards.9da37405.json",
-    "record_count": 489,
-    "data_format": "raw_gametora"
+    "scraped_at": "2025-10-10T14:33:19.414255",
+    "endpoint": "https://gametora.com/data/umamusume/support-cards.36dc3929.json",
+    "record_count": 495
   },
   "data": [
     {
@@ -1061,12 +1060,6 @@
         200582
       ],
       "event_skills_en": [
-        200582
-      ],
-      "event_skills_ko": [
-        200582
-      ],
-      "event_skills_zh_tw": [
         200582
       ],
       "hints": {
@@ -8564,12 +8557,6 @@
       "event_skills_en": [
         201591
       ],
-      "event_skills_ko": [
-        201591
-      ],
-      "event_skills_zh_tw": [
-        201591
-      ],
       "hints": {
         "hint_others": [
           {
@@ -9685,7 +9672,7 @@
       "support_id": 10069,
       "type": "intelligence",
       "url_name": "10069-mejiro-ardan",
-      "release": ""
+      "release": "2025-10-02"
     },
     {
       "char_id": 1048,
@@ -10085,7 +10072,7 @@
       "support_id": 10072,
       "type": "speed",
       "url_name": "10072-narita-brian",
-      "release": ""
+      "release": "2025-10-07"
     },
     {
       "char_id": 1038,
@@ -19284,6 +19271,167 @@
       "release": ""
     },
     {
+      "char_id": 1126,
+      "char_name": "Sakura Chitose O",
+      "effects": [
+        [
+          1,
+          5,
+          -1,
+          -1,
+          10,
+          10,
+          -1,
+          -1,
+          15,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          2,
+          10,
+          10,
+          -1,
+          15,
+          15,
+          -1,
+          -1,
+          20,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          8,
+          1,
+          1,
+          -1,
+          5,
+          5,
+          -1,
+          -1,
+          5,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          14,
+          10,
+          10,
+          -1,
+          15,
+          15,
+          -1,
+          -1,
+          20,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          15,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          5,
+          -1,
+          -1
+        ],
+        [
+          16,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          10,
+          -1,
+          -1
+        ],
+        [
+          17,
+          1,
+          1,
+          -1,
+          1,
+          1,
+          -1,
+          -1,
+          2,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          18,
+          5,
+          5,
+          -1,
+          20,
+          20,
+          -1,
+          -1,
+          30,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          19,
+          5,
+          5,
+          -1,
+          20,
+          20,
+          -1,
+          -1,
+          35,
+          -1,
+          -1,
+          -1
+        ]
+      ],
+      "event_skills": [],
+      "hints": {
+        "hint_others": [
+          {
+            "hint_type": 1,
+            "hint_value": 6
+          },
+          {
+            "hint_type": 3,
+            "hint_value": 2
+          }
+        ],
+        "hint_skills": [
+          200222,
+          201112,
+          201142,
+          202532,
+          203142,
+          203172,
+          203242,
+          203312,
+          203432
+        ]
+      },
+      "rarity": 1,
+      "support_id": 10137,
+      "type": "speed",
+      "url_name": "10137-sakura-chitose-o",
+      "release": ""
+    },
+    {
       "char_id": 1005,
       "char_name": "Fuji Kiseki",
       "effects": [
@@ -19465,7 +19613,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20001-fuji-kiseki",
       "release": "2025-06-26"
@@ -19653,7 +19801,7 @@
             "value": 15
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20002-daiwa-scarlet",
       "release": "2025-06-26"
@@ -19812,7 +19960,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20003-hishi-amazon",
       "release": "2025-06-26"
@@ -20004,7 +20152,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20004-air-groove",
       "release": "2025-06-26"
@@ -20193,7 +20341,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20005-agnes-digital",
       "release": "2025-06-26"
@@ -20380,7 +20528,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20006-biwa-hayahide",
       "release": "2025-06-26"
@@ -20540,7 +20688,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20007-mayano-top-gun",
       "release": "2025-06-26"
@@ -20728,7 +20876,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20008-manhattan-cafe",
       "release": "2025-06-26"
@@ -20887,7 +21035,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20009-mihono-bourbon",
       "release": "2025-06-26"
@@ -21059,7 +21207,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20010-mejiro-ryan",
       "release": "2025-06-26"
@@ -21220,7 +21368,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20011-yukino-bijin",
       "release": "2025-06-26"
@@ -21406,7 +21554,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20012-agnes-tachyon",
       "release": "2025-06-26"
@@ -21565,7 +21713,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20013-eishin-flash",
       "release": "2025-06-26"
@@ -21754,7 +21902,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20014-narita-taishin",
       "release": "2025-06-26"
@@ -21954,7 +22102,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20015-marvelous-sunday",
       "release": "2025-06-26"
@@ -22128,7 +22276,7 @@
             "value": 15
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20016-matikanefukukitaru",
       "release": "2025-06-26"
@@ -22293,7 +22441,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20017-meisho-doto",
       "release": "2025-06-26"
@@ -22494,7 +22642,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20018-mejiro-dober",
       "release": "2025-06-26"
@@ -22674,7 +22822,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20019-nice-nature",
       "release": "2025-06-26"
@@ -22833,7 +22981,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20020-king-halo",
       "release": "2025-06-26"
@@ -22966,7 +23114,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20021-aoi-kiryuin",
       "release": "2025-06-26"
@@ -23132,7 +23280,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20022-tamamo-cross",
       "release": ""
@@ -23295,7 +23443,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20023-sweep-tosho",
       "release": "2025-06-26"
@@ -23485,7 +23633,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20024-daitaku-helios",
       "release": "2025-07-02"
@@ -23645,7 +23793,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20025-ikuno-dictus",
       "release": "2025-07-10"
@@ -23807,7 +23955,7 @@
             "value": 20
           }
         ],
-        "level": 35
+        "level": 1
       },
       "url_name": "20026-nice-nature",
       "release": "2025-07-16"
@@ -23994,7 +24142,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20027-nishino-flower",
       "release": "2025-07-27"
@@ -24156,7 +24304,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20028-zenno-rob-roy",
       "release": "2025-08-03"
@@ -24303,16 +24451,6 @@
         201052,
         201591
       ],
-      "event_skills_ko": [
-        201562,
-        201052,
-        201591
-      ],
-      "event_skills_zh_tw": [
-        201562,
-        201052,
-        201591
-      ],
       "hints": {
         "hint_others": [
           {
@@ -24351,7 +24489,7 @@
             "value": 15
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20029-seeking-the-pearl",
       "release": "2025-08-20"
@@ -24527,7 +24665,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20030-ines-fujin",
       "release": ""
@@ -24685,7 +24823,7 @@
             "value": 15
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20031-shinko-windy",
       "release": "2025-09-17"
@@ -24847,7 +24985,7 @@
             "value": 1
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20032-inari-one",
       "release": ""
@@ -25006,7 +25144,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20033-el-condor-pasa",
       "release": ""
@@ -25178,10 +25316,10 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20034-mejiro-ardan",
-      "release": ""
+      "release": "2025-10-02"
     },
     {
       "char_id": 1048,
@@ -25338,7 +25476,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20035-tosen-jordan",
       "release": ""
@@ -25514,7 +25652,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20036-mejiro-palmer",
       "release": ""
@@ -25673,7 +25811,7 @@
             "value": 15
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20037-fine-motion",
       "release": ""
@@ -25835,7 +25973,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20038-sirius-symboli",
       "release": ""
@@ -26012,7 +26150,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20039-vodka",
       "release": ""
@@ -26155,7 +26293,7 @@
             "value": 1
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20040-mejiro-ryan",
       "release": ""
@@ -26318,7 +26456,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20041-admire-vega",
       "release": ""
@@ -26480,7 +26618,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20042-sakura-bakushin-o",
       "release": ""
@@ -26641,7 +26779,7 @@
             "value": 20
           }
         ],
-        "level": 35
+        "level": 1
       },
       "url_name": "20043-special-week",
       "release": ""
@@ -26801,7 +26939,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20044-curren-chan",
       "release": ""
@@ -26967,7 +27105,7 @@
             "value": 20
           }
         ],
-        "level": 35
+        "level": 1
       },
       "url_name": "20045-smart-falcon",
       "release": ""
@@ -27143,7 +27281,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20046-sweep-tosho",
       "release": ""
@@ -27303,7 +27441,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20047-tokai-teio",
       "release": ""
@@ -27483,7 +27621,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20048-oguri-cap",
       "release": ""
@@ -27657,7 +27795,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20049-gold-city",
       "release": ""
@@ -27832,7 +27970,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20050-seiun-sky",
       "release": ""
@@ -27982,7 +28120,7 @@
             "value": 1
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20051-ksmiracle",
       "release": ""
@@ -28131,7 +28269,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20052-tsurumaru-tsuyoshi",
       "release": ""
@@ -28304,7 +28442,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20053-narita-top-road",
       "release": ""
@@ -28467,7 +28605,7 @@
             "value": 1
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20054-tm-opera-o",
       "release": ""
@@ -28646,7 +28784,7 @@
             "value": 1
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20055-aston-machan",
       "release": ""
@@ -28822,7 +28960,7 @@
             "value": 1
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20056-jungle-pocket",
       "release": ""
@@ -29000,7 +29138,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20057-mejiro-dober",
       "release": ""
@@ -29191,7 +29329,7 @@
             "value": 1
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20058-symboli-rudolf",
       "release": ""
@@ -29382,7 +29520,7 @@
             "value": 15
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20059-agnes-tachyon",
       "release": ""
@@ -29529,7 +29667,7 @@
             "value": 1
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20060-hishi-akebono",
       "release": ""
@@ -29710,7 +29848,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20061-gold-ship",
       "release": ""
@@ -29873,7 +30011,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20062-maruzensky",
       "release": ""
@@ -30064,7 +30202,7 @@
             "value": 15
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20063-silence-suzuka",
       "release": ""
@@ -30246,7 +30384,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20064-copano-rickey",
       "release": ""
@@ -30408,7 +30546,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20065-grass-wonder",
       "release": ""
@@ -30596,7 +30734,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20066-kitasan-black",
       "release": ""
@@ -30755,14 +30893,6 @@
         202672,
         200582
       ],
-      "event_skills_ko": [
-        202672,
-        200582
-      ],
-      "event_skills_zh_tw": [
-        202672,
-        200582
-      ],
       "hints": {
         "hint_others": [
           {
@@ -30796,7 +30926,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20067-taiki-shuttle",
       "release": ""
@@ -30984,7 +31114,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20068-nice-nature",
       "release": ""
@@ -31158,7 +31288,7 @@
             "value": 15
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20069-matikanetannhauser",
       "release": ""
@@ -31321,7 +31451,7 @@
             "value": 1
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20070-verxina",
       "release": ""
@@ -31482,7 +31612,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20071-royce-and-royce",
       "release": ""
@@ -31685,7 +31815,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20072-tanino-gimlet",
       "release": ""
@@ -31860,7 +31990,7 @@
             "value": 5
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20073-tosen-jordan",
       "release": ""
@@ -32021,7 +32151,7 @@
             "value": 1
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20074-yaeno-muteki",
       "release": ""
@@ -32201,7 +32331,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20075-tap-dance-city",
       "release": ""
@@ -32347,7 +32477,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20076-air-shakur",
       "release": ""
@@ -32551,7 +32681,7 @@
             "value": 15
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20077-dantsu-flame",
       "release": ""
@@ -32738,7 +32868,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20078-matikanefukukitaru",
       "release": ""
@@ -32917,7 +33047,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20079-marvelous-sunday",
       "release": ""
@@ -33120,7 +33250,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20080-sakura-laurel",
       "release": ""
@@ -33310,7 +33440,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20081-north-flight",
       "release": ""
@@ -33484,7 +33614,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20082-bubble-gum-fellow",
       "release": ""
@@ -33659,7 +33789,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20083-mejiro-ramonu",
       "release": ""
@@ -33862,7 +33992,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20084-lucky-lilac",
       "release": ""
@@ -34028,7 +34158,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20085-mejiro-mcqueen",
       "release": ""
@@ -34203,7 +34333,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20086-rice-shower",
       "release": ""
@@ -34393,7 +34523,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20087-daring-heart",
       "release": ""
@@ -34584,7 +34714,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20088-curren-bouquetdor",
       "release": ""
@@ -34763,7 +34893,7 @@
             "value": 20
           }
         ],
-        "level": 25
+        "level": 1
       },
       "url_name": "20089-kawakami-princess",
       "release": ""
@@ -34959,6 +35089,182 @@
       "release": ""
     },
     {
+      "char_id": 1126,
+      "char_name": "Sakura Chitose O",
+      "effects": [
+        [
+          1,
+          10,
+          -1,
+          -1,
+          -1,
+          -1,
+          20,
+          -1,
+          -1,
+          -1,
+          25,
+          -1
+        ],
+        [
+          2,
+          10,
+          10,
+          -1,
+          -1,
+          -1,
+          30,
+          -1,
+          -1,
+          -1,
+          40,
+          -1
+        ],
+        [
+          8,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          5,
+          -1
+        ],
+        [
+          14,
+          10,
+          10,
+          -1,
+          -1,
+          -1,
+          20,
+          -1,
+          -1,
+          -1,
+          25,
+          -1
+        ],
+        [
+          15,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          1,
+          -1,
+          5,
+          -1,
+          -1
+        ],
+        [
+          16,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          5,
+          -1,
+          10,
+          -1,
+          -1
+        ],
+        [
+          17,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          2,
+          -1,
+          -1,
+          -1,
+          3,
+          -1
+        ],
+        [
+          18,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          40,
+          -1,
+          -1,
+          -1,
+          50,
+          -1
+        ],
+        [
+          19,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          35,
+          -1,
+          -1,
+          -1,
+          50,
+          -1
+        ]
+      ],
+      "event_skills": [
+        203632
+      ],
+      "hints": {
+        "hint_others": [
+          {
+            "hint_type": 1,
+            "hint_value": 6
+          },
+          {
+            "hint_type": 3,
+            "hint_value": 2
+          }
+        ],
+        "hint_skills": [
+          200222,
+          201112,
+          201142,
+          202532,
+          203142,
+          203172,
+          203242,
+          203312,
+          203432
+        ]
+      },
+      "rarity": 2,
+      "support_id": 20091,
+      "type": "speed",
+      "unique": {
+        "effects": [
+          {
+            "type": 30,
+            "value": 1
+          },
+          {
+            "type": 9,
+            "value": 20
+          }
+        ],
+        "level": 1
+      },
+      "url_name": "20091-sakura-chitose-o",
+      "release": ""
+    },
+    {
       "char_id": 1001,
       "char_name": "Special Week",
       "effects": [
@@ -35126,7 +35432,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30001-special-week",
       "release": "2025-06-26"
@@ -35295,7 +35601,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30002-silence-suzuka",
       "release": "2025-06-26"
@@ -35469,7 +35775,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30003-tokai-teio",
       "release": "2025-06-26"
@@ -35644,7 +35950,7 @@
             "value": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30004-gold-ship",
       "release": "2025-06-26"
@@ -35826,7 +36132,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30005-vodka",
       "release": "2025-06-26"
@@ -36001,7 +36307,7 @@
             "value": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30006-grass-wonder",
       "release": "2025-06-26"
@@ -36177,7 +36483,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30007-el-condor-pasa",
       "release": "2025-06-26"
@@ -36360,7 +36666,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30008-seiun-sky",
       "release": "2025-06-26"
@@ -36554,7 +36860,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30009-tamamo-cross",
       "release": "2025-06-26"
@@ -36728,7 +37034,7 @@
             "value": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30010-fine-motion",
       "release": "2025-06-26"
@@ -36920,7 +37226,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30011-ines-fujin",
       "release": "2025-06-26"
@@ -37116,7 +37422,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30012-winning-ticket",
       "release": "2025-06-26"
@@ -37293,7 +37599,7 @@
             "value": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30013-air-shakur",
       "release": "2025-06-26"
@@ -37469,7 +37775,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30014-gold-city",
       "release": "2025-06-26"
@@ -37645,7 +37951,7 @@
             "value": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30015-sakura-bakushin-o",
       "release": "2025-06-26"
@@ -37804,7 +38110,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30016-super-creek",
       "release": "2025-06-26"
@@ -37990,7 +38296,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30017-smart-falcon",
       "release": "2025-06-26"
@@ -38182,7 +38488,7 @@
             "value": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30018-nishino-flower",
       "release": "2025-06-26"
@@ -38339,7 +38645,7 @@
             "value": 5
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30019-haru-urara",
       "release": "2025-06-26"
@@ -38500,7 +38806,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30020-biko-pegasus",
       "release": "2025-06-26"
@@ -38632,7 +38938,7 @@
             "value": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30021-tazuna-hayakawa",
       "release": "2025-06-26"
@@ -38811,7 +39117,7 @@
             "value": 20
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30022-mejiro-mcqueen",
       "release": "2025-06-26"
@@ -38989,7 +39295,7 @@
             "value": 20
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30023-rice-shower",
       "release": "2025-06-26"
@@ -39155,7 +39461,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30024-oguri-cap",
       "release": "2025-06-26"
@@ -39304,7 +39610,7 @@
             "value": 5
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30025-special-week",
       "release": "2025-06-26"
@@ -39466,7 +39772,7 @@
             "value": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30026-twin-turbo",
       "release": "2025-07-02"
@@ -39657,7 +39963,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30027-mejiro-palmer",
       "release": "2025-07-10"
@@ -39847,7 +40153,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30028-kitasan-black",
       "release": "2025-07-16"
@@ -40027,7 +40333,7 @@
             "value": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30029-satono-diamond",
       "release": "2025-07-16"
@@ -40191,7 +40497,7 @@
             "value": 20
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30030-matikanetannhauser",
       "release": "2025-07-16"
@@ -40369,7 +40675,7 @@
             "value": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30031-yukino-bijin",
       "release": "2025-07-27"
@@ -40550,7 +40856,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30032-yaeno-muteki",
       "release": "2025-08-03"
@@ -40709,7 +41015,7 @@
             "value": 15
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30033-winning-ticket",
       "release": "2025-08-03"
@@ -40887,7 +41193,7 @@
             "value": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30034-rice-shower",
       "release": ""
@@ -41048,7 +41354,7 @@
             "value": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30036-riko-kashimoto",
       "release": ""
@@ -41260,7 +41566,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30037-symboli-rudolf",
       "release": ""
@@ -41439,7 +41745,7 @@
             "value": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30038-sakura-chiyono-o",
       "release": "2025-08-20"
@@ -41598,7 +41904,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30039-kawakami-princess",
       "release": "2025-08-28"
@@ -41771,7 +42077,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30040-hishi-akebono",
       "release": "2025-08-28"
@@ -41930,7 +42236,7 @@
             "value": 5
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30041-mejiro-dober",
       "release": "2025-08-28"
@@ -42109,7 +42415,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30042-bamboo-memory",
       "release": "2025-09-17"
@@ -42289,7 +42595,7 @@
             "value": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30043-nakayama-festa",
       "release": ""
@@ -42451,10 +42757,10 @@
             "value": 20
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30044-narita-brian",
-      "release": ""
+      "release": "2025-10-07"
     },
     {
       "char_id": 1044,
@@ -42598,7 +42904,7 @@
             "value": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30045-sweep-tosho",
       "release": ""
@@ -42767,7 +43073,7 @@
             "value": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30046-winning-ticket",
       "release": ""
@@ -42928,7 +43234,7 @@
             "value": 20
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30047-daiwa-scarlet",
       "release": ""
@@ -43105,10 +43411,10 @@
             "value": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30048-mejiro-ryan",
-      "release": ""
+      "release": "2025-10-02"
     },
     {
       "char_id": 9008,
@@ -43276,7 +43582,7 @@
             "value_1": 30
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30052-light-hello",
       "release": ""
@@ -43437,16 +43743,6 @@
         200681,
         200582
       ],
-      "event_skills_ko": [
-        201042,
-        200681,
-        200582
-      ],
-      "event_skills_zh_tw": [
-        201042,
-        200681,
-        200582
-      ],
       "hints": {
         "hint_others": [
           {
@@ -43481,7 +43777,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30053-taiki-shuttle",
       "release": ""
@@ -43671,7 +43967,7 @@
             "value": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30054-nice-nature",
       "release": ""
@@ -43832,7 +44128,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30055-seiun-sky",
       "release": "2025-09-21"
@@ -44000,7 +44296,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30056-king-halo",
       "release": "2025-09-21"
@@ -44157,7 +44453,7 @@
             "value": 20
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30057-gold-ship",
       "release": "2025-09-21"
@@ -44303,7 +44599,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30058-tokai-teio",
       "release": ""
@@ -44462,7 +44758,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30059-mihono-bourbon",
       "release": ""
@@ -44613,7 +44909,7 @@
             "value": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30060-twin-turbo",
       "release": ""
@@ -44773,7 +45069,7 @@
             "value": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30061-biwa-hayahide",
       "release": ""
@@ -44938,7 +45234,7 @@
             "value": 20
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30062-silence-suzuka",
       "release": ""
@@ -45116,7 +45412,7 @@
             "value": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30063-ikuno-dictus",
       "release": ""
@@ -45278,7 +45574,7 @@
             "value": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30064-tamamo-cross",
       "release": ""
@@ -45442,7 +45738,7 @@
             "value": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30065-zenno-rob-roy",
       "release": ""
@@ -45615,7 +45911,7 @@
             "value": 20
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30066-mihono-bourbon",
       "release": ""
@@ -45792,7 +46088,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30067-the-thrones-assemblage",
       "release": ""
@@ -45968,7 +46264,7 @@
             "value": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30068-curren-chan",
       "release": ""
@@ -46159,7 +46455,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30069-narita-brian",
       "release": ""
@@ -46323,7 +46619,7 @@
             "value": 15
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30070-yukino-bijin",
       "release": ""
@@ -46501,7 +46797,7 @@
             "value": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30071-daitaku-helios",
       "release": ""
@@ -46677,7 +46973,7 @@
             "value": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30072-mayano-top-gun",
       "release": ""
@@ -46827,7 +47123,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30073-narita-taishin",
       "release": ""
@@ -46974,7 +47270,7 @@
             "value": 5
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30074-marvelous-sunday",
       "release": ""
@@ -47149,7 +47445,7 @@
             "value": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30075-manhattan-cafe",
       "release": ""
@@ -47298,7 +47594,7 @@
             "value": 5
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30076-silence-suzuka",
       "release": ""
@@ -47472,7 +47768,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30077-admire-vega",
       "release": ""
@@ -47689,7 +47985,7 @@
             "value": 10
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30078-matikanefukukitaru",
       "release": ""
@@ -47865,7 +48161,7 @@
             "value": 20
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30079-meisho-doto",
       "release": ""
@@ -47962,7 +48258,7 @@
       "type": "friend",
       "unique": {
         "effects": [],
-        "level": 30
+        "level": 1
       },
       "unique_desc": "Sasami Anshinzawa random events are more likely to occur",
       "url_name": "30080-sasami-anshinzawa",
@@ -48141,7 +48437,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30081-team-sirius",
       "release": ""
@@ -48312,7 +48608,7 @@
             "value_2": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30082-nishino-flower",
       "release": ""
@@ -48491,7 +48787,7 @@
             "value_1": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30083-sakura-bakushin-o",
       "release": ""
@@ -48666,7 +48962,7 @@
             "value": 20
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30084-tosen-jordan",
       "release": ""
@@ -48855,7 +49151,7 @@
             "value_1": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30085-agnes-digital",
       "release": ""
@@ -49029,7 +49325,7 @@
             "value_1": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30086-narita-top-road",
       "release": ""
@@ -49173,7 +49469,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30087-mejiro-bright",
       "release": ""
@@ -49374,7 +49670,7 @@
             "value_1": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30088-satono-diamond",
       "release": ""
@@ -49549,7 +49845,7 @@
             "value_2": 60
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30089-marvelous-sunday",
       "release": ""
@@ -49723,7 +50019,7 @@
             "value_1": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30090-symboli-rudolf",
       "release": ""
@@ -49925,7 +50221,7 @@
             "value_2": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30091-sirius-symboli",
       "release": ""
@@ -50098,7 +50394,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30092-air-shakur",
       "release": ""
@@ -50257,7 +50553,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30093-daiwa-scarlet",
       "release": ""
@@ -50423,7 +50719,7 @@
             "value_4": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30094-bamboo-memory",
       "release": ""
@@ -50586,18 +50882,6 @@
         202121,
         201591
       ],
-      "event_skills_ko": [
-        200702,
-        202042,
-        202121,
-        201591
-      ],
-      "event_skills_zh_tw": [
-        200702,
-        202042,
-        202121,
-        201591
-      ],
       "hints": {
         "hint_others": [
           {
@@ -50635,7 +50919,7 @@
             "value_4": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30095-seeking-the-pearl",
       "release": ""
@@ -50779,7 +51063,7 @@
             "value": 5
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30096-kawakami-princess",
       "release": ""
@@ -50998,7 +51282,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30097-mr-cb",
       "release": ""
@@ -51173,7 +51457,7 @@
             "value": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30098-haru-urara",
       "release": ""
@@ -51346,7 +51630,7 @@
             "value_1": 30
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30099-ikuno-dictus",
       "release": ""
@@ -51534,7 +51818,7 @@
             "value_4": 1
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30100-rice-shower",
       "release": ""
@@ -51710,7 +51994,7 @@
             "value_2": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30101-agnes-tachyon",
       "release": ""
@@ -51886,7 +52170,7 @@
             "value_1": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30102-el-condor-pasa",
       "release": ""
@@ -52074,7 +52358,7 @@
             "value_2": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30103-matikanetannhauser",
       "release": ""
@@ -52262,7 +52546,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30104-zenno-rob-roy",
       "release": ""
@@ -52470,7 +52754,7 @@
             "value": 15
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30105-special-week",
       "release": ""
@@ -52647,7 +52931,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30106-air-groove",
       "release": ""
@@ -52837,7 +53121,7 @@
             "value_1": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30107-maruzensky",
       "release": ""
@@ -53043,7 +53327,7 @@
             "value": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30108-nakayama-festa",
       "release": ""
@@ -53208,7 +53492,7 @@
             "value_4": 1
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30109-sakura-chiyono-o",
       "release": ""
@@ -53395,7 +53679,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30110-manhattan-cafe",
       "release": ""
@@ -53583,7 +53867,7 @@
             "value_1": 30
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30111-tokai-teio",
       "release": ""
@@ -53747,7 +54031,7 @@
             "value_2": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30112-twin-turbo",
       "release": ""
@@ -53939,7 +54223,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30113-biwa-hayahide",
       "release": ""
@@ -54090,7 +54374,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30114-daiichi-ruby",
       "release": ""
@@ -54252,7 +54536,7 @@
             "value_2": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30115-mejiro-palmer",
       "release": ""
@@ -54428,7 +54712,7 @@
             "value_1": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30116-daitaku-helios",
       "release": ""
@@ -54608,7 +54892,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30117-shinko-windy",
       "release": ""
@@ -54797,7 +55081,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30118-symboli-kris-s",
       "release": ""
@@ -54940,7 +55224,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30119-mejiro-ardan",
       "release": ""
@@ -55147,7 +55431,7 @@
             "value_2": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30120-yaeno-muteki",
       "release": ""
@@ -55306,7 +55590,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30121-mihono-bourbon",
       "release": ""
@@ -55496,7 +55780,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30122-eishin-flash",
       "release": ""
@@ -55672,7 +55956,7 @@
             "value_1": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30123-narita-brian",
       "release": ""
@@ -55864,7 +56148,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30124-air-groove",
       "release": ""
@@ -56040,7 +56324,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30125-sakura-laurel",
       "release": ""
@@ -56248,7 +56532,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30126-yamanin-zephyr",
       "release": ""
@@ -56452,7 +56736,7 @@
             "value_1": 60
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30127-special-week",
       "release": ""
@@ -56655,7 +56939,7 @@
             "value_2": 40
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30128-sweep-tosho",
       "release": ""
@@ -56828,7 +57112,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30129-grass-wonder",
       "release": ""
@@ -57019,7 +57303,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30130-ksmiracle",
       "release": ""
@@ -57222,7 +57506,7 @@
             "value_2": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30131-marvelous-sunday",
       "release": ""
@@ -57399,7 +57683,7 @@
             "value_4": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30132-biko-pegasus",
       "release": ""
@@ -57586,7 +57870,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30133-hishi-akebono",
       "release": ""
@@ -57778,7 +58062,7 @@
             "value_3": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30134-mejiro-ramonu",
       "release": ""
@@ -57954,7 +58238,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30135-katsuragi-ace",
       "release": ""
@@ -58117,7 +58401,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30136-symboli-kris-s",
       "release": ""
@@ -58308,7 +58592,7 @@
             "value_2": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30137-ancestors-guides",
       "release": ""
@@ -58512,7 +58796,7 @@
             "value_2": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30138-nice-nature",
       "release": ""
@@ -58689,7 +58973,7 @@
             "value_2": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30139-mejiro-mcqueen",
       "release": ""
@@ -58849,7 +59133,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30140-tokai-teio",
       "release": ""
@@ -59024,7 +59308,7 @@
             "value_1": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30141-mihono-bourbon",
       "release": ""
@@ -59214,7 +59498,7 @@
             "value_3": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30142-sakura-laurel",
       "release": ""
@@ -59358,7 +59642,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30143-ikuno-dictus",
       "release": ""
@@ -59516,7 +59800,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30145-tanino-gimlet",
       "release": ""
@@ -59722,7 +60006,7 @@
             "value_1": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30146-oguri-cap",
       "release": ""
@@ -59924,7 +60208,7 @@
             "value_2": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30147-jungle-pocket",
       "release": ""
@@ -60119,7 +60403,7 @@
             "value_2": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30148-daiwa-scarlet",
       "release": ""
@@ -60321,7 +60605,7 @@
             "value_1": 60
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30149-aston-machan",
       "release": ""
@@ -60508,7 +60792,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30150-vodka",
       "release": ""
@@ -60709,7 +60993,7 @@
             "value_2": 10
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30151-mayano-top-gun",
       "release": ""
@@ -60929,7 +61213,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30152-tm-opera-o",
       "release": ""
@@ -61136,7 +61420,7 @@
             "value_2": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30153-gold-city",
       "release": ""
@@ -61327,7 +61611,7 @@
             "value_3": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30154-mejiro-palmer",
       "release": ""
@@ -61558,7 +61842,7 @@
             "value_2": 40
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30155-daitaku-helios",
       "release": ""
@@ -61762,7 +62046,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30156-wonder-acute",
       "release": ""
@@ -61954,7 +62238,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30157-manhattan-cafe",
       "release": ""
@@ -62133,7 +62417,7 @@
             "value_2": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30158-jungle-pocket",
       "release": ""
@@ -62307,7 +62591,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30159-air-groove",
       "release": ""
@@ -62463,7 +62747,7 @@
             "value_1": 60
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30160-mei-satake",
       "release": ""
@@ -62684,7 +62968,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30161-el-condor-pasa",
       "release": ""
@@ -62828,7 +63112,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30162-admire-vega",
       "release": ""
@@ -62989,7 +63273,7 @@
             "value_2": 10
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30163-nakayama-festa",
       "release": ""
@@ -63178,7 +63462,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30164-hishi-amazon",
       "release": ""
@@ -63367,7 +63651,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30165-tanino-gimlet",
       "release": ""
@@ -63531,7 +63815,7 @@
             "value_3": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30166-tap-dance-city",
       "release": ""
@@ -63689,7 +63973,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30167-fine-motion",
       "release": ""
@@ -63867,7 +64151,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30168-gold-ship",
       "release": ""
@@ -64041,7 +64325,7 @@
             "value_2": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30169-tsurumaru-tsuyoshi",
       "release": ""
@@ -64234,7 +64518,7 @@
             "value_3": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30170-king-halo",
       "release": ""
@@ -64385,7 +64669,7 @@
             "value_2": 40
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30171-haru-urara",
       "release": ""
@@ -64617,7 +64901,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30172-mejiro-mcqueen",
       "release": ""
@@ -64820,7 +65104,7 @@
             "value_1": 10
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30173-sounds-of-earth",
       "release": ""
@@ -65022,7 +65306,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30174-mejiro-dober",
       "release": ""
@@ -65215,7 +65499,7 @@
             "value_3": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30175-mejiro-ramonu",
       "release": ""
@@ -65363,7 +65647,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30176-mejiro-ryan",
       "release": ""
@@ -65570,7 +65854,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30177-vivlos",
       "release": ""
@@ -65759,7 +66043,7 @@
             "value_4": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30178-duramente",
       "release": ""
@@ -65979,7 +66263,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30179-satono-diamond",
       "release": ""
@@ -66154,7 +66438,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30180-group",
       "release": ""
@@ -66331,7 +66615,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30181-twin-turbo",
       "release": ""
@@ -66531,7 +66815,7 @@
             "value_1": 15
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30182-hokko-tarumae",
       "release": ""
@@ -66746,7 +67030,7 @@
             "value_2": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30183-winning-ticket",
       "release": ""
@@ -66935,7 +67219,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30184-sakura-bakushin-o",
       "release": ""
@@ -67109,7 +67393,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30185-north-flight",
       "release": ""
@@ -67256,7 +67540,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30186-gentildonna",
       "release": ""
@@ -67435,7 +67719,7 @@
             "value_3": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30187-orfevre",
       "release": ""
@@ -67592,7 +67876,7 @@
             "value_2": 60
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30188-ryoka-tsurugi",
       "release": ""
@@ -67739,7 +68023,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30189-kitasan-black",
       "release": ""
@@ -67895,7 +68179,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30190-duramente",
       "release": ""
@@ -68053,7 +68337,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30191-sounds-of-earth",
       "release": ""
@@ -68227,7 +68511,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30192-vivlos",
       "release": ""
@@ -68402,7 +68686,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30193-cheval-grand",
       "release": ""
@@ -68593,7 +68877,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30194-rhein-kraft",
       "release": ""
@@ -68783,7 +69067,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30195-ksmiracle",
       "release": ""
@@ -68985,7 +69269,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30196-yamanin-zephyr",
       "release": ""
@@ -69144,7 +69428,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30197-bamboo-memory",
       "release": ""
@@ -69347,7 +69631,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30198-neo-universe",
       "release": ""
@@ -69535,7 +69819,7 @@
             "value_2": 20
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30199-hishi-miracle",
       "release": ""
@@ -69726,7 +70010,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30200-no-reason",
       "release": ""
@@ -69945,7 +70229,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30201-narita-taishin",
       "release": ""
@@ -70139,7 +70423,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30202-vodka",
       "release": ""
@@ -70312,7 +70596,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30203-jungle-pocket",
       "release": ""
@@ -70528,7 +70812,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30204-seiun-sky",
       "release": ""
@@ -70687,7 +70971,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30205-verxina",
       "release": ""
@@ -70876,7 +71160,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30206-vivlos",
       "release": ""
@@ -71060,7 +71344,7 @@
             "value_1": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30207-yayoi-akikawa",
       "release": ""
@@ -71247,7 +71531,7 @@
             "value_1": 30
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30208-nishino-flower",
       "release": ""
@@ -71439,7 +71723,7 @@
             "value_4": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30209-dantsu-flame",
       "release": ""
@@ -71658,7 +71942,7 @@
             "value_3": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30210-smart-falcon",
       "release": ""
@@ -71894,7 +72178,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30211-copano-rickey",
       "release": ""
@@ -72093,7 +72377,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30212-wonder-acute",
       "release": ""
@@ -72252,7 +72536,7 @@
             "value": 1
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30213-tokai-teio",
       "release": ""
@@ -72474,7 +72758,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30214-fine-motion",
       "release": ""
@@ -72709,7 +72993,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30215-still-in-love",
       "release": ""
@@ -72872,7 +73156,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30216-buena-vista",
       "release": ""
@@ -73058,7 +73342,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30217-cesario",
       "release": ""
@@ -73261,16 +73545,6 @@
         203161,
         200582
       ],
-      "event_skills_ko": [
-        203162,
-        203161,
-        200582
-      ],
-      "event_skills_zh_tw": [
-        203162,
-        203161,
-        200582
-      ],
       "hints": {
         "hint_others": [
           {
@@ -73305,7 +73579,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30218-taiki-shuttle",
       "release": ""
@@ -73527,7 +73801,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30219-fuji-kiseki",
       "release": ""
@@ -73714,7 +73988,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30220-symboli-kris-s",
       "release": ""
@@ -73902,7 +74176,7 @@
             "value_4": 1
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30221-satono-diamond",
       "release": ""
@@ -74122,7 +74396,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30222-espoir-city",
       "release": ""
@@ -74330,7 +74604,7 @@
             "value_3": 5
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30223-hishi-amazon",
       "release": ""
@@ -74548,7 +74822,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30224-narita-brian",
       "release": ""
@@ -74737,7 +75011,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30225-matikanefukukitaru",
       "release": ""
@@ -74941,7 +75215,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30226-air-shakur",
       "release": ""
@@ -75150,7 +75424,7 @@
             "value_3": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30227-daiwa-scarlet",
       "release": ""
@@ -75355,7 +75629,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30228-symboli-kris-s",
       "release": ""
@@ -75574,7 +75848,7 @@
             "value_3": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30229-agnes-digital",
       "release": ""
@@ -75806,7 +76080,7 @@
             "value_2": 3
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30230-meisho-doto",
       "release": ""
@@ -75966,7 +76240,7 @@
             "value_4": 1
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30231-tm-opera-o",
       "release": ""
@@ -76176,7 +76450,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30232-blast-onepiece",
       "release": ""
@@ -76398,7 +76672,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30233-symboli-rudolf",
       "release": ""
@@ -76591,7 +76865,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30234-mejiro-ardan",
       "release": ""
@@ -76753,7 +77027,7 @@
             "value_4": 1
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30235-maruzensky",
       "release": ""
@@ -76942,16 +77216,6 @@
         202751,
         201591
       ],
-      "event_skills_ko": [
-        202752,
-        202751,
-        201591
-      ],
-      "event_skills_zh_tw": [
-        202752,
-        202751,
-        201591
-      ],
       "hints": {
         "hint_others": [
           {
@@ -76987,7 +77251,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30236-seeking-the-pearl",
       "release": ""
@@ -77198,7 +77462,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30237-curren-chan",
       "release": ""
@@ -77430,7 +77694,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30238-ikuno-dictus",
       "release": ""
@@ -77632,7 +77896,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30239-nice-nature",
       "release": ""
@@ -77793,7 +78057,7 @@
             "value_4": 1
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30240-jungle-pocket",
       "release": ""
@@ -77958,7 +78222,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30241-group",
       "release": ""
@@ -78167,7 +78431,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30242-almond-eye",
       "release": ""
@@ -78368,7 +78632,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30243-gran-alegria",
       "release": ""
@@ -78603,7 +78867,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30244-mejiro-bright",
       "release": ""
@@ -78810,7 +79074,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30245-vodka",
       "release": ""
@@ -79046,7 +79310,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30246-dream-journey",
       "release": ""
@@ -79220,7 +79484,7 @@
             "value_2": 10
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30247-symboli-kris-s",
       "release": ""
@@ -79454,7 +79718,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30248-daring-tact",
       "release": ""
@@ -79678,7 +79942,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30249-transcend",
       "release": ""
@@ -79896,7 +80160,7 @@
             "value_1": 10
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30250-buena-vista",
       "release": ""
@@ -80062,7 +80326,7 @@
             "value_4": 1
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30251-espoir-city",
       "release": ""
@@ -80271,7 +80535,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30252-silence-suzuka",
       "release": ""
@@ -80478,7 +80742,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30253-rhein-kraft",
       "release": ""
@@ -80698,7 +80962,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30254-daring-heart",
       "release": ""
@@ -80886,7 +81150,7 @@
             "value_4": 1
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30255-air-messiah",
       "release": ""
@@ -81105,7 +81369,7 @@
             "value_1": 60
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30256-tamamo-cross",
       "release": ""
@@ -81276,7 +81540,7 @@
             "value_1": 60
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30257-tucker-bryne",
       "release": ""
@@ -81494,7 +81758,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30258-mejiro-ryan",
       "release": ""
@@ -81668,7 +81932,7 @@
             "value_4": 1
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30259-fusaichi-pandora",
       "release": ""
@@ -81855,7 +82119,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30260-mejiro-mcqueen",
       "release": ""
@@ -82089,7 +82353,7 @@
             "value_2": 2
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30261-win-variation",
       "release": ""
@@ -82310,7 +82574,7 @@
             "value_4": 1
           }
         ],
-        "level": 30
+        "level": 1
       },
       "url_name": "30262-duramente",
       "release": ""
@@ -82483,7 +82747,7 @@
             "value_2": 2
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30263-vivlos",
       "release": ""
@@ -83119,7 +83383,7 @@
             "value_4": 1
           }
         ],
-        "level": 40
+        "level": 1
       },
       "url_name": "30266-chrono-genesis",
       "release": ""
@@ -83961,6 +84225,881 @@
         "level": 1
       },
       "url_name": "30270-daiichi-ruby",
+      "release": ""
+    },
+    {
+      "char_id": 1005,
+      "char_name": "Fuji Kiseki",
+      "effects": [
+        [
+          1,
+          10,
+          -1,
+          -1,
+          -1,
+          25,
+          -1,
+          35,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          2,
+          10,
+          -1,
+          -1,
+          -1,
+          40,
+          -1,
+          50,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          3,
+          1,
+          -1,
+          -1,
+          1,
+          -1,
+          1,
+          1,
+          -1,
+          -1,
+          1,
+          -1
+        ],
+        [
+          8,
+          1,
+          -1,
+          1,
+          -1,
+          -1,
+          5,
+          5,
+          -1,
+          -1,
+          10,
+          -1
+        ],
+        [
+          9,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          5,
+          10,
+          25,
+          -1,
+          -1
+        ],
+        [
+          11,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          5,
+          15,
+          30
+        ],
+        [
+          14,
+          10,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          25,
+          -1,
+          -1,
+          -1,
+          35
+        ],
+        [
+          15,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          5,
+          5,
+          -1,
+          -1,
+          -1,
+          10
+        ],
+        [
+          16,
+          1,
+          -1,
+          1,
+          -1,
+          -1,
+          10,
+          10,
+          -1,
+          -1,
+          -1,
+          15
+        ],
+        [
+          17,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          2,
+          -1,
+          -1,
+          -1,
+          4
+        ],
+        [
+          18,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          40,
+          -1,
+          -1,
+          -1,
+          60
+        ],
+        [
+          19,
+          5,
+          -1,
+          -1,
+          -1,
+          50,
+          -1,
+          80,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          30,
+          1,
+          -1,
+          -1,
+          1,
+          -1,
+          1,
+          1,
+          -1,
+          -1,
+          1,
+          -1
+        ]
+      ],
+      "event_skills": [
+        203961,
+        200582
+      ],
+      "hints": {
+        "hint_others": [
+          {
+            "hint_type": 1,
+            "hint_value": 1
+          },
+          {
+            "hint_type": 3,
+            "hint_value": 1
+          },
+          {
+            "hint_type": 4,
+            "hint_value": 6
+          }
+        ],
+        "hint_skills": [
+          200362,
+          200492,
+          200682,
+          201042,
+          201651,
+          201902,
+          202372,
+          202672,
+          202742,
+          203162,
+          203232,
+          203962
+        ]
+      },
+      "rarity": 3,
+      "support_id": 30271,
+      "type": "guts",
+      "unique": {
+        "effects": [
+          {
+            "type": 101,
+            "value": 80,
+            "value_1": 3,
+            "value_2": 1,
+            "value_3": 5,
+            "value_4": 1
+          }
+        ],
+        "level": 1
+      },
+      "url_name": "30271-fuji-kiseki",
+      "release": ""
+    },
+    {
+      "char_id": 1037,
+      "char_name": "Eishin Flash",
+      "effects": [
+        [
+          1,
+          10,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          25,
+          -1,
+          -1,
+          -1,
+          35
+        ],
+        [
+          2,
+          10,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          40,
+          -1,
+          -1,
+          -1,
+          60
+        ],
+        [
+          8,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          10,
+          -1,
+          -1,
+          -1,
+          15
+        ],
+        [
+          11,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          5,
+          15,
+          30
+        ],
+        [
+          14,
+          10,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          25,
+          -1,
+          -1,
+          -1,
+          35
+        ],
+        [
+          15,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          5,
+          5,
+          -1,
+          -1
+        ],
+        [
+          16,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          10,
+          15,
+          -1,
+          -1
+        ],
+        [
+          17,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          2,
+          -1,
+          -1,
+          -1,
+          3
+        ],
+        [
+          18,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          40,
+          -1,
+          -1,
+          -1,
+          50
+        ],
+        [
+          19,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          50,
+          -1,
+          -1,
+          -1,
+          80
+        ],
+        [
+          30,
+          1,
+          -1,
+          -1,
+          1,
+          -1,
+          1,
+          1,
+          -1,
+          -1,
+          1,
+          -1
+        ]
+      ],
+      "event_skills": [
+        203332,
+        202641,
+        203671,
+        210091,
+        210082,
+        210062,
+        200292
+      ],
+      "hints": {
+        "hint_others": [
+          {
+            "hint_type": 1,
+            "hint_value": 6
+          },
+          {
+            "hint_type": 3,
+            "hint_value": 2
+          }
+        ],
+        "hint_skills": [
+          200362,
+          200462,
+          201382,
+          201392,
+          201661,
+          202122,
+          202152,
+          202612,
+          202642,
+          203672
+        ]
+      },
+      "rarity": 3,
+      "support_id": 30272,
+      "type": "speed",
+      "unique": {
+        "effects": [
+          {
+            "type": 101,
+            "value": 80,
+            "value_1": 3,
+            "value_2": 1,
+            "value_3": 5,
+            "value_4": 1
+          }
+        ],
+        "level": 1
+      },
+      "url_name": "30272-eishin-flash",
+      "release": ""
+    },
+    {
+      "char_id": 1048,
+      "char_name": "Tosen Jordan",
+      "effects": [
+        [
+          1,
+          10,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          25,
+          -1,
+          -1,
+          -1,
+          30
+        ],
+        [
+          8,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          5,
+          10,
+          -1,
+          -1
+        ],
+        [
+          10,
+          10,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          25,
+          -1,
+          -1,
+          -1,
+          35
+        ],
+        [
+          14,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          15,
+          30
+        ],
+        [
+          15,
+          1,
+          -1,
+          -1,
+          1,
+          -1,
+          1,
+          1,
+          -1,
+          -1,
+          5,
+          -1
+        ],
+        [
+          16,
+          1,
+          -1,
+          -1,
+          1,
+          -1,
+          5,
+          5,
+          -1,
+          -1,
+          10,
+          -1
+        ],
+        [
+          17,
+          1,
+          -1,
+          -1,
+          1,
+          -1,
+          1,
+          1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          18,
+          5,
+          -1,
+          -1,
+          5,
+          -1,
+          20,
+          20,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          19,
+          5,
+          -1,
+          5,
+          -1,
+          -1,
+          35,
+          35,
+          -1,
+          -1,
+          50,
+          -1
+        ]
+      ],
+      "event_skills": [
+        202121,
+        201562
+      ],
+      "hints": {
+        "hint_others": [
+          {
+            "hint_type": 2,
+            "hint_value": 2
+          },
+          {
+            "hint_type": 3,
+            "hint_value": 6
+          }
+        ],
+        "hint_skills": [
+          200032,
+          200602,
+          201402,
+          201661,
+          201692,
+          202612,
+          202722,
+          203312
+        ]
+      },
+      "rarity": 3,
+      "support_id": 30273,
+      "type": "power",
+      "unique": {
+        "effects": [
+          {
+            "type": 101,
+            "value": 80,
+            "value_1": 2,
+            "value_2": 15,
+            "value_3": 5,
+            "value_4": 1
+          }
+        ],
+        "level": 1
+      },
+      "url_name": "30273-tosen-jordan",
+      "release": ""
+    },
+    {
+      "char_id": 1134,
+      "char_name": "Curren Bouquetd'or",
+      "effects": [
+        [
+          1,
+          10,
+          -1,
+          -1,
+          -1,
+          15,
+          -1,
+          20,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          2,
+          10,
+          -1,
+          -1,
+          10,
+          20,
+          -1,
+          30,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          4,
+          1,
+          -1,
+          -1,
+          1,
+          -1,
+          1,
+          1,
+          -1,
+          -1,
+          1,
+          2
+        ],
+        [
+          6,
+          1,
+          -1,
+          -1,
+          1,
+          -1,
+          1,
+          1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          8,
+          1,
+          -1,
+          -1,
+          1,
+          -1,
+          5,
+          5,
+          -1,
+          -1,
+          5,
+          -1
+        ],
+        [
+          10,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          5,
+          15,
+          30
+        ],
+        [
+          12,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          5,
+          10,
+          25,
+          -1,
+          -1
+        ],
+        [
+          14,
+          10,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          25,
+          -1,
+          -1,
+          -1,
+          30
+        ],
+        [
+          15,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          5,
+          5,
+          -1,
+          -1,
+          -1,
+          10
+        ],
+        [
+          16,
+          1,
+          -1,
+          1,
+          -1,
+          -1,
+          10,
+          10,
+          -1,
+          -1,
+          -1,
+          15
+        ],
+        [
+          17,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          2,
+          -1,
+          -1,
+          -1,
+          3
+        ],
+        [
+          18,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          40,
+          -1,
+          -1,
+          -1,
+          50
+        ],
+        [
+          19,
+          5,
+          -1,
+          -1,
+          -1,
+          50,
+          -1,
+          80,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        [
+          30,
+          1,
+          -1,
+          -1,
+          1,
+          -1,
+          1,
+          1,
+          -1,
+          -1,
+          -1,
+          -1
+        ]
+      ],
+      "event_skills": [
+        200351,
+        203991,
+        203122
+      ],
+      "hints": {
+        "hint_others": [
+          {
+            "hint_type": 2,
+            "hint_value": 6
+          },
+          {
+            "hint_type": 4,
+            "hint_value": 2
+          }
+        ],
+        "hint_skills": [
+          200172,
+          200352,
+          200562,
+          202372,
+          202472,
+          202482,
+          202982,
+          203032,
+          203642,
+          203652,
+          203992
+        ]
+      },
+      "rarity": 3,
+      "support_id": 30274,
+      "type": "stamina",
+      "unique": {
+        "effects": [
+          {
+            "type": 101,
+            "value": 100,
+            "value_1": 1,
+            "value_2": 20
+          }
+        ],
+        "level": 1
+      },
+      "url_name": "30274-curren-bouquetdor",
       "release": ""
     }
   ]

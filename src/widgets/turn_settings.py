@@ -8,8 +8,8 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw
 
-from modules import Mood, FacilityType, EfficiencyCalculator
-from common import auto_title_from_instance, GameplayConstants
+from modules import Mood, Facility, FacilityType, EfficiencyCalculator
+from common import auto_title_from_instance
 
 
 class TurnSettings(Adw.Bin):
@@ -94,11 +94,7 @@ class TurnSettings(Adw.Bin):
         self.facility_spins = {}
         for facility_type in FacilityType:
             row = Adw.ActionRow(title=f"{facility_type.name.title()} Facility")
-            spin = Gtk.SpinButton(
-                adjustment=Gtk.Adjustment(
-                    value=self.calculator.facility_levels[facility_type], lower=GameplayConstants.MIN_FACILITY_LEVEL, upper=GameplayConstants.MAX_FACILITY_LEVEL, step_increment=1
-                )
-            )
+            spin = Gtk.SpinButton(adjustment=Gtk.Adjustment(value=self.calculator.facility_levels[facility_type], lower=Facility.MIN_LEVEL, upper=Facility.MAX_LEVEL, step_increment=1))
             spin.set_digits(0)
             row.add_suffix(spin)
             facility_group.add(row)

@@ -59,7 +59,7 @@ class DeckList:
             "limit_break_set_at_slot": self.limit_break_set_for_active_deck_at_slot,
             "deck_was_cleared": self.active_deck_was_cleared,
             "deck_pushed_past_capacity": self.active_deck_pushed_past_capacity,
-            "mute_toggled_at_slot": self.mute_toggled_for_active_deck_at_slot
+            "mute_toggled_at_slot": self.mute_toggled_for_active_deck_at_slot,
         }
 
         # Ensure that we have a mapping for every Deck event
@@ -139,6 +139,6 @@ class DeckList:
     def __contains__(self, deck: Deck) -> bool:
         return deck in self._decks
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[tuple[int, Deck]]:
         for index in range(DeckList.SIZE):
             yield (index, self._decks[index])

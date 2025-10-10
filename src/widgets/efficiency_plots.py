@@ -173,7 +173,7 @@ class EfficiencyPlots(Adw.Bin):
         self.app = window.app
         self.window = window
         self.calculator = self.app.efficiency_calculator
-        
+
         self.setup_ui()
         self.connect_signals()
 
@@ -184,17 +184,17 @@ class EfficiencyPlots(Adw.Bin):
         self.scrolled_window = Gtk.ScrolledWindow()
         self.scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         self.scrolled_window.set_vexpand(True)
-        
+
         self.main_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.main_container.set_spacing(EfficiencyPlots.SPACING)
         self.main_container.set_margin_start(EfficiencyPlots.MARGIN)
         self.main_container.set_margin_end(EfficiencyPlots.MARGIN)
         self.main_container.set_margin_top(EfficiencyPlots.MARGIN)
         self.main_container.set_margin_bottom(EfficiencyPlots.MARGIN)
-        
+
         # Initial empty state
         self._show_empty_state()
-        
+
         self.scrolled_window.set_child(self.main_container)
         self.set_child(self.scrolled_window)
 
@@ -237,39 +237,39 @@ class EfficiencyPlots(Adw.Bin):
         for facility_type in FacilityType:
             facility_group = Adw.PreferencesGroup()
             facility_group.set_title(f"{facility_type.name.title()} Training")
-            
+
             # Get raw data for this facility
             facility_gains = self.calculator._aggregated_stat_gains[facility_type]
             facility_skill_points = self.calculator._aggregated_skill_points[facility_type]
-            
+
             # Create plots for each stat
             for stat_type in StatType:
                 values = facility_gains[stat_type]
                 if not values or all(v == 0 for v in values):
                     continue
-                
+
                 stat_data = results["per_facility"][facility_type]["stats"][stat_type]
-                
+
                 # Create row with stats and violin plot
                 row = Adw.ActionRow(title=stat_type.name.title())
                 row.set_subtitle(f"Mean: {stat_data['mean']:.1f} | Range: {stat_data['min']}-{stat_data['max']}")
-                
+
                 # Create violin plot
-                violin = ViolinPlot(values, stat_type.name, stat_data['min'], stat_data['max'])
+                violin = ViolinPlot(values, stat_type.name, stat_data["min"], stat_data["max"])
                 row.add_suffix(violin)
-                
+
                 facility_group.add(row)
-            
+
             # Skill points plot
             if facility_skill_points and not all(v == 0 for v in facility_skill_points):
                 sp_data = results["per_facility"][facility_type]["skill_points"]
-                
+
                 row = Adw.ActionRow(title="Skill Points")
                 row.set_subtitle(f"Mean: {sp_data['mean']:.1f} | Range: {sp_data['min']}-{sp_data['max']}")
-                
-                violin = ViolinPlot(facility_skill_points, "Skill Points", sp_data['min'], sp_data['max'])
+
+                violin = ViolinPlot(facility_skill_points, "Skill Points", sp_data["min"], sp_data["max"])
                 row.add_suffix(violin)
-                
+
                 facility_group.add(row)
-            
+
             self.main_container.append(facility_group)

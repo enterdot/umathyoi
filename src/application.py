@@ -8,23 +8,32 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gio, Adw
 
+from dataclasses import dataclass
+from typing import ClassVar
+
 from modules import CardDatabase, ScenarioDatabase, CharacterDatabase
 from modules import Deck, CardView, DeckList, EfficiencyCalculator, GenericCharacter, StatType, Aptitude
 from windows import MainWindow
 from common import auto_title_from_instance
 
 
+@dataclass(frozen=True)
+class MainConfiguration:
+    APPLICATION_NAME: ClassVar[str] = "Umathyoi"
+    APPLICATION_VERSION: ClassVar[str] = "0.0"
+
+
 class MainApplication(Adw.Application):
     """Main application class handling application-level logic and data."""
 
-    def __init__(self, app_name: str, app_version: str, app_reverse_dns: str):
+    def __init__(self):
         """Initialize the main application."""
-        super().__init__(application_id=app_reverse_dns)
+        super().__init__(application_id=f"com.{MainConfiguration.APPLICATION_NAME.lower()}")
 
-        self.app_name = app_name
-        self.app_version = app_version
+        self.name = MainConfiguration.APPLICATION_NAME
+        self.version = MainConfiguration.APPLICATION_VERSION
 
-        logger.info(f"Starting {self.app_name} version {self.app_version}")
+        logger.info(f"Starting {self.name} version {self.version}")
 
         self.connect("activate", self.on_activate)
 
@@ -119,7 +128,7 @@ class MainApplication(Adw.Application):
 
     def on_activate(self, app: Adw.Application) -> None:
         """Handle application activation by creating and presenting main window."""
-        window = MainWindow(self, self.app_name)
+        window = MainWindow(self, self.name)
         window.present()
 
     def _on_preferences(self, action: Gio.SimpleAction, param) -> None:
@@ -137,10 +146,10 @@ class MainApplication(Adw.Application):
         if window:
             about_dialog = Adw.AboutWindow(
                 transient_for=window,
-                application_name=self.app_name,
+                application_name=self.name,
                 application_icon="applications-games-symbolic",
-                developer_name=f"{self.app_name} Team",
-                version=self.app_version,
+                developer_name=f"{self.name} Team",
+                version=self.version,
                 license_type=Gtk.License.MIT_X11,
             )
             about_dialog.present()
