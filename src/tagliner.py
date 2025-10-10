@@ -59,7 +59,7 @@ def generate_tagline_template():
                 continue
 
         # Add placeholder with character name for easier manual update
-        char_name = card.get("char_name", "Unknown")
+        char_name = card.get("character_name", "Unknown")
         rarity = "SSR" if card["rarity"] == 3 else "SR"
         card_type = card.get("type", "unknown")
         tagline_mapping[support_id] = (

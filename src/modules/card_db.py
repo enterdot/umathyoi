@@ -99,9 +99,11 @@ class CardDatabase:
         cards_data = self._load_cards_data(cards_file)
 
         for card_data in cards_data:
-            try:
+            try:             
+                if not card_data["release"]:
+                    continue
                 card_id = card_data["id"]
-
+                
                 # Transform unique effects from dict format to list format
                 unique_effects_list = []
                 unique_data = card_data.get("unique", {})
