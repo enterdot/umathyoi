@@ -17,7 +17,9 @@ from common import auto_title_from_instance
 class ViolinPlot(Gtk.DrawingArea):
     """Violin plot widget showing distribution of stat gains."""
 
-    def __init__(self, values: list[int], title: str, min_val: int, max_val: int):
+    def __init__(
+        self, values: list[int], title: str, min_val: int, max_val: int
+    ):
         super().__init__()
         self.values = sorted(values) if values else []
         self.title = title
@@ -26,7 +28,9 @@ class ViolinPlot(Gtk.DrawingArea):
         self.set_size_request(250, 80)
         self.set_draw_func(self.on_draw)
 
-    def calculate_kde(self, bandwidth: float = 3.0) -> tuple[list[float], list[float]]:
+    def calculate_kde(
+        self, bandwidth: float = 3.0
+    ) -> tuple[list[float], list[float]]:
         """Kernel density estimation using Gaussian kernels."""
         if not self.values:
             return [], []
@@ -37,7 +41,10 @@ class ViolinPlot(Gtk.DrawingArea):
 
         # Create evaluation points
         n_points = 100
-        x_points = [self.min_val + (i / n_points) * val_range for i in range(n_points + 1)]
+        x_points = [
+            self.min_val + (i / n_points) * val_range
+            for i in range(n_points + 1)
+        ]
         densities = []
 
         for x in x_points:
@@ -45,7 +52,10 @@ class ViolinPlot(Gtk.DrawingArea):
             for val in self.values:
                 diff = (x - val) / bandwidth
                 density += math.exp(-0.5 * diff * diff)
-            densities.append(density / (len(self.values) * bandwidth * math.sqrt(2 * math.pi)))
+            densities.append(
+                density
+                / (len(self.values) * bandwidth * math.sqrt(2 * math.pi))
+            )
 
         return x_points, densities
 
@@ -53,7 +63,9 @@ class ViolinPlot(Gtk.DrawingArea):
         if not self.values:
             # Draw empty state
             ctx.set_source_rgba(0.5, 0.5, 0.5, 0.3)
-            ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+            ctx.select_font_face(
+                "Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL
+            )
             ctx.set_font_size(12)
             text = "No data"
             extents = ctx.text_extents(text)
@@ -119,7 +131,10 @@ class ViolinPlot(Gtk.DrawingArea):
         # Find and draw peaks
         peaks = []
         for i in range(1, len(densities) - 1):
-            if densities[i] > densities[i - 1] and densities[i] > densities[i + 1]:
+            if (
+                densities[i] > densities[i - 1]
+                and densities[i] > densities[i + 1]
+            ):
                 if densities[i] > max_density * 0.2:
                     peaks.append((x_points[i], densities[i]))
 
@@ -139,7 +154,9 @@ class ViolinPlot(Gtk.DrawingArea):
         ctx.stroke()
 
         # Labels
-        ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+        ctx.select_font_face(
+            "Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL
+        )
         ctx.set_font_size(10)
         ctx.set_source_rgb(0.3, 0.3, 0.3)
 
@@ -155,7 +172,12 @@ class ViolinPlot(Gtk.DrawingArea):
 
         # Peak labels
         if peaks:
-            peak_text = "peak" + ("s" if len(peaks) > 1 else "") + ": " + ", ".join([f"{int(p[0])}" for p in peaks])
+            peak_text = (
+                "peak"
+                + ("s" if len(peaks) > 1 else "")
+                + ": "
+                + ", ".join([f"{int(p[0])}" for p in peaks])
+            )
             extents = ctx.text_extents(peak_text)
             ctx.move_to((width - extents.width) / 2, height - 1)
             ctx.show_text(peak_text)
@@ -182,7 +204,9 @@ class EfficiencyPlots(Adw.Bin):
     def setup_ui(self) -> None:
         """Set up the efficiency plots UI components."""
         self.scrolled_window = Gtk.ScrolledWindow()
-        self.scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        self.scrolled_window.set_policy(
+            Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC
+        )
         self.scrolled_window.set_vexpand(True)
 
         self.main_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -200,7 +224,9 @@ class EfficiencyPlots(Adw.Bin):
 
     def connect_signals(self) -> None:
         """Connect to calculator events."""
-        self.calculator.calculation_finished.subscribe(self._on_calculation_finished)
+        self.calculator.calculation_finished.subscribe(
+            self._on_calculation_finished
+        )
 
     def _show_empty_state(self) -> None:
         """Show message when no calculation has been run."""
@@ -239,8 +265,12 @@ class EfficiencyPlots(Adw.Bin):
             facility_group.set_title(f"{facility_type.name.title()} Training")
 
             # Get raw data for this facility
-            facility_gains = self.calculator._aggregated_stat_gains[facility_type]
-            facility_skill_points = self.calculator._aggregated_skill_points[facility_type]
+            facility_gains = self.calculator._aggregated_stat_gains[
+                facility_type
+            ]
+            facility_skill_points = self.calculator._aggregated_skill_points[
+                facility_type
+            ]
 
             # Create plots for each stat
             for stat_type in StatType:
@@ -248,26 +278,41 @@ class EfficiencyPlots(Adw.Bin):
                 if not values or all(v == 0 for v in values):
                     continue
 
-                stat_data = results["per_facility"][facility_type]["stats"][stat_type]
+                stat_data = results["per_facility"][facility_type]["stats"][
+                    stat_type
+                ]
 
                 # Create row with stats and violin plot
                 row = Adw.ActionRow(title=stat_type.name.title())
-                row.set_subtitle(f"Mean: {stat_data['mean']:.1f} | Range: {stat_data['min']}-{stat_data['max']}")
+                row.set_subtitle(
+                    f"Mean: {stat_data['mean']:.1f} | Range: {stat_data['min']}-{stat_data['max']}"
+                )
 
                 # Create violin plot
-                violin = ViolinPlot(values, stat_type.name, stat_data["min"], stat_data["max"])
+                violin = ViolinPlot(
+                    values, stat_type.name, stat_data["min"], stat_data["max"]
+                )
                 row.add_suffix(violin)
 
                 facility_group.add(row)
 
             # Skill points plot
-            if facility_skill_points and not all(v == 0 for v in facility_skill_points):
+            if facility_skill_points and not all(
+                v == 0 for v in facility_skill_points
+            ):
                 sp_data = results["per_facility"][facility_type]["skill_points"]
 
                 row = Adw.ActionRow(title="Skill Points")
-                row.set_subtitle(f"Mean: {sp_data['mean']:.1f} | Range: {sp_data['min']}-{sp_data['max']}")
+                row.set_subtitle(
+                    f"Mean: {sp_data['mean']:.1f} | Range: {sp_data['min']}-{sp_data['max']}"
+                )
 
-                violin = ViolinPlot(facility_skill_points, "Skill Points", sp_data["min"], sp_data["max"])
+                violin = ViolinPlot(
+                    facility_skill_points,
+                    "Skill Points",
+                    sp_data["min"],
+                    sp_data["max"],
+                )
                 row.add_suffix(violin)
 
                 facility_group.add(row)

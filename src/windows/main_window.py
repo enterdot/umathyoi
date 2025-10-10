@@ -8,7 +8,13 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gdk, Adw
 
-from views import DeckBuilder, LegacyManager, BannerPlanner, PullChance, RaceSimulator
+from views import (
+    DeckBuilder,
+    LegacyManager,
+    BannerPlanner,
+    PullChance,
+    RaceSimulator,
+)
 from common import auto_title_from_instance
 
 
@@ -29,8 +35,12 @@ class MainWindow(Adw.ApplicationWindow):
         self.app = app
 
         self.set_title(app_name)
-        self.set_default_size(MainWindow.DEFAULT_WINDOW_WIDTH, MainWindow.DEFAULT_WINDOW_HEIGHT)
-        self.set_size_request(MainWindow.MIN_WINDOW_WIDTH, MainWindow.MIN_WINDOW_HEIGHT)
+        self.set_default_size(
+            MainWindow.DEFAULT_WINDOW_WIDTH, MainWindow.DEFAULT_WINDOW_HEIGHT
+        )
+        self.set_size_request(
+            MainWindow.MIN_WINDOW_WIDTH, MainWindow.MIN_WINDOW_HEIGHT
+        )
 
         self.width_breakpoint: Adw.Breakpoint
         self.height_breakpoint: Adw.Breakpoint
@@ -39,7 +49,9 @@ class MainWindow(Adw.ApplicationWindow):
         self._load_css()
         self._setup_ui()
 
-        logger.info(f"Presenting {auto_title_from_instance(self)} ({MainWindow.DEFAULT_WINDOW_WIDTH} by {MainWindow.DEFAULT_WINDOW_HEIGHT})")
+        logger.info(
+            f"Presenting {auto_title_from_instance(self)} ({MainWindow.DEFAULT_WINDOW_WIDTH} by {MainWindow.DEFAULT_WINDOW_HEIGHT})"
+        )
         self.present()
 
         logger.debug(f"{auto_title_from_instance(self)} initialized")
@@ -52,10 +64,14 @@ class MainWindow(Adw.ApplicationWindow):
             height: Breakpoint height in pixels, or None to skip
         """
         if width:
-            self.width_breakpoint = Adw.Breakpoint.new(Adw.BreakpointCondition.parse(f"max-width: {str(width)}sp"))
+            self.width_breakpoint = Adw.Breakpoint.new(
+                Adw.BreakpointCondition.parse(f"max-width: {str(width)}sp")
+            )
             self.add_breakpoint(self.width_breakpoint)
         if height:
-            self.height_breakpoint = Adw.Breakpoint.new(Adw.BreakpointCondition.parse(f"max-height: {str(height)}sp"))
+            self.height_breakpoint = Adw.Breakpoint.new(
+                Adw.BreakpointCondition.parse(f"max-height: {str(height)}sp")
+            )
             self.add_breakpoint(self.height_breakpoint)
 
     def _setup_ui(self) -> None:
@@ -74,10 +90,16 @@ class MainWindow(Adw.ApplicationWindow):
         race_simulator_view = RaceSimulator(self)
 
         view_stack.add_titled(deck_builder_view, "deck_builder", "Deck Builder")
-        view_stack.add_titled(legacy_manager_view, "legacy_manager", "Legacy Manager")
-        view_stack.add_titled(banner_planner_view, "banner_planner", "Banner Planner")
+        view_stack.add_titled(
+            legacy_manager_view, "legacy_manager", "Legacy Manager"
+        )
+        view_stack.add_titled(
+            banner_planner_view, "banner_planner", "Banner Planner"
+        )
         view_stack.add_titled(pull_chance_view, "pull_chance", "Pull Chance")
-        view_stack.add_titled(race_simulator_view, "race_simulator", "Race Simulator")
+        view_stack.add_titled(
+            race_simulator_view, "race_simulator", "Race Simulator"
+        )
 
         header_bar.set_title_widget(view_switcher)
         main_box.append(header_bar)
@@ -138,4 +160,8 @@ class MainWindow(Adw.ApplicationWindow):
 
         css_provider.load_from_string(css)
 
-        Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(),
+            css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+        )

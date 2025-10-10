@@ -31,7 +31,9 @@ class CardView:
         if card != self._card:
             prev_card = self._card
             self._card = card
-            self.card_changed.trigger(self, card=self._card, prev_card=prev_card)
+            self.card_changed.trigger(
+                self, card=self._card, prev_card=prev_card
+            )
 
     @property
     def limit_break(self) -> int:
@@ -42,9 +44,16 @@ class CardView:
     def limit_break(self, limit_break: int) -> None:
         """Set limit break level."""
         if not (Card.MIN_LIMIT_BREAK <= limit_break <= Card.MAX_LIMIT_BREAK):
-            raise ValueError(f"{limit_break=} is not in range [{Card.MIN_LIMIT_BREAK}, {Card.MAX_LIMIT_BREAK}]")
+            raise ValueError(
+                f"{limit_break=} is not in range [{Card.MIN_LIMIT_BREAK}, {Card.MAX_LIMIT_BREAK}]"
+            )
 
         if limit_break != self._limit_break:
             prev_limit_break = self._limit_break
             self._limit_break = limit_break
-            self.limit_break_changed.trigger(self, card=self._card, limit_break=self._limit_break, prev_limit_break=prev_limit_break)
+            self.limit_break_changed.trigger(
+                self,
+                card=self._card,
+                limit_break=self._limit_break,
+                prev_limit_break=prev_limit_break,
+            )

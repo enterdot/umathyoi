@@ -58,7 +58,13 @@ class TurnSettings(Adw.Bin):
         # Max Energy spin button
         self.max_energy_row = Adw.ActionRow(title="Max Energy")
         self.max_energy_spin = Gtk.SpinButton(
-            adjustment=Gtk.Adjustment(value=self.calculator.max_energy, lower=EfficiencyCalculator.MIN_MAX_ENERGY, upper=EfficiencyCalculator.MAX_ENERGY, step_increment=4, page_increment=4)
+            adjustment=Gtk.Adjustment(
+                value=self.calculator.max_energy,
+                lower=EfficiencyCalculator.MIN_MAX_ENERGY,
+                upper=EfficiencyCalculator.MAX_ENERGY,
+                step_increment=4,
+                page_increment=4,
+            )
         )
         self.max_energy_spin.set_digits(0)
         self.max_energy_row.add_suffix(self.max_energy_spin)
@@ -66,8 +72,17 @@ class TurnSettings(Adw.Bin):
 
         # Energy slider
         self.energy_row = Adw.ActionRow(title="Energy")
-        self.energy_adjustment = Gtk.Adjustment(value=self.calculator.energy, lower=EfficiencyCalculator.MIN_ENERGY, upper=self.calculator.max_energy, step_increment=5, page_increment=10)
-        self.energy_scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=self.energy_adjustment)
+        self.energy_adjustment = Gtk.Adjustment(
+            value=self.calculator.energy,
+            lower=EfficiencyCalculator.MIN_ENERGY,
+            upper=self.calculator.max_energy,
+            step_increment=5,
+            page_increment=10,
+        )
+        self.energy_scale = Gtk.Scale(
+            orientation=Gtk.Orientation.HORIZONTAL,
+            adjustment=self.energy_adjustment,
+        )
         self.energy_scale.set_hexpand(True)
         self.energy_scale.set_value_pos(Gtk.PositionType.RIGHT)
         self.energy_scale.set_digits(0)
@@ -77,7 +92,13 @@ class TurnSettings(Adw.Bin):
         # Fan count spin button
         self.fan_count_row = Adw.ActionRow(title="Fan Count")
         self.fan_count_spin = Gtk.SpinButton(
-            adjustment=Gtk.Adjustment(value=self.calculator.fan_count, lower=EfficiencyCalculator.MIN_FANS, upper=EfficiencyCalculator.MAX_FANS, step_increment=10000, page_increment=100000)
+            adjustment=Gtk.Adjustment(
+                value=self.calculator.fan_count,
+                lower=EfficiencyCalculator.MIN_FANS,
+                upper=EfficiencyCalculator.MAX_FANS,
+                step_increment=10000,
+                page_increment=100000,
+            )
         )
         self.fan_count_spin.set_digits(0)
         self.fan_count_row.add_suffix(self.fan_count_spin)
@@ -88,13 +109,22 @@ class TurnSettings(Adw.Bin):
         # Facility levels group
         facility_group = Adw.PreferencesGroup()
         facility_group.set_title("Facility Levels")
-        facility_group.set_description("Set the training facility levels for the scenario")
+        facility_group.set_description(
+            "Set the training facility levels for the scenario"
+        )
 
         # Create facility level controls
         self.facility_spins = {}
         for facility_type in FacilityType:
             row = Adw.ActionRow(title=f"{facility_type.name.title()} Facility")
-            spin = Gtk.SpinButton(adjustment=Gtk.Adjustment(value=self.calculator.facility_levels[facility_type], lower=Facility.MIN_LEVEL, upper=Facility.MAX_LEVEL, step_increment=1))
+            spin = Gtk.SpinButton(
+                adjustment=Gtk.Adjustment(
+                    value=self.calculator.facility_levels[facility_type],
+                    lower=Facility.MIN_LEVEL,
+                    upper=Facility.MAX_LEVEL,
+                    step_increment=1,
+                )
+            )
             spin.set_digits(0)
             row.add_suffix(spin)
             facility_group.add(row)
@@ -108,11 +138,15 @@ class TurnSettings(Adw.Bin):
         """Connect widget signals to update calculator settings."""
         self.mood_row.connect("notify::selected", self._on_mood_changed)
         self.energy_scale.connect("value-changed", self._on_energy_changed)
-        self.max_energy_spin.connect("value-changed", self._on_max_energy_changed)
+        self.max_energy_spin.connect(
+            "value-changed", self._on_max_energy_changed
+        )
         self.fan_count_spin.connect("value-changed", self._on_fan_count_changed)
 
         for facility_type, spin in self.facility_spins.items():
-            spin.connect("value-changed", self._on_facility_level_changed, facility_type)
+            spin.connect(
+                "value-changed", self._on_facility_level_changed, facility_type
+            )
 
     def _on_mood_changed(self, combo_row, param) -> None:
         """Handle mood selection change."""
@@ -148,7 +182,9 @@ class TurnSettings(Adw.Bin):
         logger.debug(f"Fan count changed to: {fan_count}")
         self.calculator.fan_count = fan_count
 
-    def _on_facility_level_changed(self, spin_button, facility_type: FacilityType) -> None:
+    def _on_facility_level_changed(
+        self, spin_button, facility_type: FacilityType
+    ) -> None:
         """Handle facility level change."""
         level = int(spin_button.get_value())
         logger.debug(f"{facility_type.name} facility level changed to: {level}")

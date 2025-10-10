@@ -107,21 +107,41 @@ class CardUniqueEffect(Enum):
 @dataclass(frozen=True)
 class Card:
 
-    NO_LIMIT_BREAK_MAX_LEVEL: ClassVar[dict[CardRarity, int]] = {CardRarity.R: 20, CardRarity.SR: 25, CardRarity.SSR: 30}
+    NO_LIMIT_BREAK_MAX_LEVEL: ClassVar[dict[CardRarity, int]] = {
+        CardRarity.R: 20,
+        CardRarity.SR: 25,
+        CardRarity.SSR: 30,
+    }
     LEVELS_PER_LIMIT_BREAK: ClassVar[int] = 5
     MIN_LEVEL: ClassVar[int] = 1
     FRIENDSHIP_BOND_THRESHOLD: ClassVar[int] = 80
     DYNAMIC_UNIQUE_EFFECT_ID_THRESHOLD: ClassVar[int] = 100
-    MILESTONE_LEVELS: ClassVar[list[int]] = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+    MILESTONE_LEVELS: ClassVar[list[int]] = [
+        1,
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        35,
+        40,
+        45,
+        50,
+    ]
     MIN_LIMIT_BREAK: ClassVar[int] = 0
     MAX_LIMIT_BREAK: ClassVar[int] = 4
+    DEFAULT_TAGLINE: ClassVar[str] = "Tracen Academy"
 
     id: int
     name: str
     view_name: str
+    tagline: str
     rarity: CardRarity
     type: CardType
-    effects: list[list[int]]  # [type, value_at_lvl1, value_at_lvl5, value_at_lvl10, ...]
+    effects: list[
+        list[int]
+    ]  # [type, value_at_lvl1, value_at_lvl5, value_at_lvl10, ...]
     unique_effects: list[list[int]]  # [[type, value1], [type, value1, value2]]
     unique_effects_unlock_level: int  # unique effects unlock at this level
 
@@ -134,7 +154,9 @@ class Card:
                 if len(effects_row) > 0:
                     try:
                         effect_type = CardEffect(effects_row[0])
-                        value = self._interpolate_effect_value(effect_type, level)
+                        value = self._interpolate_effect_value(
+                            effect_type, level
+                        )
                         cache[(effect_type, level)] = value
                     except ValueError:
                         continue
@@ -147,7 +169,10 @@ class Card:
 
     @property
     def max_level(self) -> int:
-        return Card.NO_LIMIT_BREAK_MAX_LEVEL[self.rarity] + Card.LEVELS_PER_LIMIT_BREAK * Card.MAX_LIMIT_BREAK
+        return (
+            Card.NO_LIMIT_BREAK_MAX_LEVEL[self.rarity]
+            + Card.LEVELS_PER_LIMIT_BREAK * Card.MAX_LIMIT_BREAK
+        )
 
     @property
     def preferred_facility(self) -> FacilityType:
@@ -155,7 +180,9 @@ class Card:
             return None
         return FacilityType(self.type.value)
 
-    def _interpolate_effect_value(self, effect_type: CardEffect, level: int) -> int:
+    def _interpolate_effect_value(
+        self, effect_type: CardEffect, level: int
+    ) -> int:
         """Calculate effect value at specific level using interpolation between milestones"""
 
         if not self.min_level <= level <= self.max_level:
@@ -171,7 +198,9 @@ class Card:
 
         # Valid effect should have values for all milestone levels plus the effect type ID
         if not effect or len(effect) < len(Card.MILESTONE_LEVELS) + 1:
-            logger.debug(f"Card {self.id} does not have effect type {effect_type} ({effect_type.name})")
+            logger.debug(
+                f"Card {self.id} does not have effect type {effect_type} ({effect_type.name})"
+            )
             return 0
 
         # Find milestone values
@@ -184,7 +213,9 @@ class Card:
                     milestones.append((target_level, value))
 
         if not milestones:
-            logger.warning(f"Card {self.id} has no valid milestone for effect type {effect_type} ({effect_type.name})")
+            logger.warning(
+                f"Card {self.id} has no valid milestone for effect type {effect_type} ({effect_type.name})"
+            )
             return 0
 
         # If level matches a milestone exactly, return that value
@@ -220,7 +251,9 @@ class Card:
         progress = (level - lower_level) / (upper_level - lower_level)
 
         # Interpolate and round to nearest integer
-        interpolated_value = lower_value + (upper_value - lower_value) * progress
+        interpolated_value = (
+            lower_value + (upper_value - lower_value) * progress
+        )
         return round(interpolated_value)
 
     def get_level_at_limit_break(self, limit_break: int) -> int:
@@ -228,15 +261,22 @@ class Card:
         Get maximum level at the specified limit break.
         """
         if not Card.MIN_LIMIT_BREAK <= limit_break <= Card.MAX_LIMIT_BREAK:
-            raise ValueError(f"{limit_break=} is not in valid range [{Card.MIN_LIMIT_BREAK}, {Card.MAX_LIMIT_BREAK}]")
+            raise ValueError(
+                f"{limit_break=} is not in valid range [{Card.MIN_LIMIT_BREAK}, {Card.MAX_LIMIT_BREAK}]"
+            )
 
-        return Card.NO_LIMIT_BREAK_MAX_LEVEL[self.rarity] + Card.LEVELS_PER_LIMIT_BREAK * limit_break
+        return (
+            Card.NO_LIMIT_BREAK_MAX_LEVEL[self.rarity]
+            + Card.LEVELS_PER_LIMIT_BREAK * limit_break
+        )
 
     def get_effect_at_level(self, effect: CardEffect, level: int) -> int:
         """Get effect value at specified level."""
         return self._effect_cache.get((effect, level), 0)
 
-    def get_effect_at_limit_break(self, effect: CardEffect, limit_break: int) -> int:
+    def get_effect_at_limit_break(
+        self, effect: CardEffect, limit_break: int
+    ) -> int:
         """Get effect value at specified limit break."""
         level = self.get_level_at_limit_break(limit_break)
         return self.get_effect_at_level(effect, level)
@@ -271,7 +311,9 @@ class Card:
         for effect_type_id in present_effect_ids:
             try:
                 effect_type = CardEffect(effect_type_id)
-                value = self.get_effect_at_level(CardEffect(effect_type_id), level)
+                value = self.get_effect_at_level(
+                    CardEffect(effect_type_id), level
+                )
                 if value > 0:  # Only include non-zero effects
                     effects[effect_type] = value
             except ValueError:
@@ -279,12 +321,16 @@ class Card:
 
         return effects
 
-    def get_all_effects_at_limit_break(self, limit_break: int) -> dict[str, int]:
+    def get_all_effects_at_limit_break(
+        self, limit_break: int
+    ) -> dict[str, int]:
         """Get all effects for this card at the specified limit break."""
         level = self.get_level_at_limit_break(limit_break)
         return self.get_all_effects_at_level(level)
 
-    def get_all_unique_effects(self) -> dict[CardUniqueEffect, list[int]] | None:
+    def get_all_unique_effects(
+        self,
+    ) -> dict[CardUniqueEffect, list[int]] | None:
         if self.rarity == CardRarity.SSR:
             unique_effects = {}
             for unique_effects_row in self.unique_effects:
@@ -293,9 +339,13 @@ class Card:
                     try:
                         unique_effect_type = CardUniqueEffect(unique_effect_id)
                         unique_effect_values = unique_effects_row[1:]
-                        unique_effects[unique_effect_type] = unique_effect_values
+                        unique_effects[unique_effect_type] = (
+                            unique_effect_values
+                        )
                     except ValueError:
-                        logger.warning(f"Card {self.id} has not implemented unique effect id {unique_effect_id}")
+                        logger.warning(
+                            f"Card {self.id} has not implemented unique effect id {unique_effect_id}"
+                        )
 
             return unique_effects
         else:

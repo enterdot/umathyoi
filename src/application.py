@@ -8,30 +8,32 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gio, Adw
 
-from dataclasses import dataclass
-from typing import ClassVar
-
 from modules import CardDatabase, ScenarioDatabase, CharacterDatabase
-from modules import Deck, CardView, DeckList, EfficiencyCalculator, GenericCharacter, StatType, Aptitude
+from modules import (
+    Deck,
+    CardView,
+    DeckList,
+    EfficiencyCalculator,
+    GenericCharacter,
+    StatType,
+    Aptitude,
+)
 from windows import MainWindow
 from common import auto_title_from_instance
-
-
-@dataclass(frozen=True)
-class MainConfiguration:
-    APPLICATION_NAME: ClassVar[str] = "Umathyoi"
-    APPLICATION_VERSION: ClassVar[str] = "0.0"
 
 
 class MainApplication(Adw.Application):
     """Main application class handling application-level logic and data."""
 
+    NAME: str = "Umathyoi"
+    VERSION: str = "0.0"
+
     def __init__(self):
         """Initialize the main application."""
-        super().__init__(application_id=f"com.{MainConfiguration.APPLICATION_NAME.lower()}")
+        super().__init__(application_id=f"com.{MainApplication.NAME.lower()}")
 
-        self.name = MainConfiguration.APPLICATION_NAME
-        self.version = MainConfiguration.APPLICATION_VERSION
+        self.name = MainApplication.NAME
+        self.version = MainApplication.VERSION
 
         logger.info(f"Starting {self.name} version {self.version}")
 
@@ -60,9 +62,16 @@ class MainApplication(Adw.Application):
 
         # Initialize with first scenario and a generic character
         # TODO: load from dconf for session persistence
-        character = GenericCharacter({StatType.speed: 20, StatType.power: 10}, Aptitude.A, Aptitude.A, Aptitude.A)
+        character = GenericCharacter(
+            {StatType.speed: 20, StatType.power: 10},
+            Aptitude.A,
+            Aptitude.A,
+            Aptitude.A,
+        )
         scenario = self.scenario_db.scenarios[0]
-        self.efficiency_calculator = EfficiencyCalculator(self.deck_list, scenario, character)
+        self.efficiency_calculator = EfficiencyCalculator(
+            self.deck_list, scenario, character
+        )
 
     def _create_test_decks(self) -> list[Deck]:
         """Create test decks for development and testing."""

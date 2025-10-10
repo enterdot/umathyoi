@@ -29,7 +29,11 @@ class RaceSimulator(Adw.Bin):
 
     def setup_ui(self) -> None:
         """Set up placeholder UI."""
-        self.set_child(Placeholder("Race Simulator (plus Stamina Target)", "Coming soon..."))
+        self.set_child(
+            Placeholder(
+                "Race Simulator (plus Stamina Target)", "Coming soon..."
+            )
+        )
 
     def setup_responsive_ui(self) -> None:
         """Set up responsive behavior (none needed for placeholder)."""

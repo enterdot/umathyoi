@@ -48,7 +48,9 @@ class ScenarioDatabase:
                 file_data = json.load(f)
                 logger.info(f"Loaded scenario data from {f.name}")
         except FileNotFoundError:
-            raise FileNotFoundError(f"Scenarios file {scenarios_file} not found.")
+            raise FileNotFoundError(
+                f"Scenarios file {scenarios_file} not found."
+            )
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON in scenarios file: {e}")
 
@@ -75,15 +77,25 @@ class ScenarioDatabase:
                 except (ValueError, KeyError):
                     release = None
 
-                facilities = self._create_facilities_from_scenario_data(scenario_data)
-                scenario = Scenario(scenario_name, scenario_id, release, facilities)
+                facilities = self._create_facilities_from_scenario_data(
+                    scenario_data
+                )
+                scenario = Scenario(
+                    scenario_name, scenario_id, release, facilities
+                )
                 self._scenarios[scenario_id] = scenario
-                logger.debug(f"Scenario {scenario_id} '{scenario_name}' added to database")
+                logger.debug(
+                    f"Scenario {scenario_id} '{scenario_name}' added to database"
+                )
 
             except (KeyError, ValueError) as e:
-                logger.warning(f"Skipping invalid data for scenario '{scenario_key}': {e}")
+                logger.warning(
+                    f"Skipping invalid data for scenario '{scenario_key}': {e}"
+                )
 
-    def _create_facilities_from_scenario_data(self, scenario_data: dict) -> dict[FacilityType, Facility]:
+    def _create_facilities_from_scenario_data(
+        self, scenario_data: dict
+    ) -> dict[FacilityType, Facility]:
         """Create facilities dictionary from scenario JSON data."""
         facilities = {}
 
@@ -92,16 +104,22 @@ class ScenarioDatabase:
         for facility_name, facility_levels_data in facilities_data.items():
             try:
                 facility_type = self._parse_facility_type(facility_name)
-                facility = self._create_facility_from_data(facility_type, facility_levels_data)
+                facility = self._create_facility_from_data(
+                    facility_type, facility_levels_data
+                )
                 facilities[facility_type] = facility
 
             except (ValueError, KeyError) as e:
-                logger.warning(f"Skipping invalid facility '{facility_name}': {e}")
+                logger.warning(
+                    f"Skipping invalid facility '{facility_name}': {e}"
+                )
                 continue
 
         return facilities
 
-    def _create_facility_from_data(self, facility_type: FacilityType, facility_data: dict) -> Facility:
+    def _create_facility_from_data(
+        self, facility_type: FacilityType, facility_data: dict
+    ) -> Facility:
         """Create a Facility instance from JSON data."""
         stat_gain = {}
         skill_points_gain = {}
@@ -127,7 +145,13 @@ class ScenarioDatabase:
             stat_gain[level] = level_stat_gains
 
         # Create facility with min level as default
-        return Facility(type=facility_type, level=Facility.MIN_LEVEL, stat_gain=stat_gain, skill_points_gain=skill_points_gain, energy_gain=energy_gain)
+        return Facility(
+            type=facility_type,
+            level=Facility.MIN_LEVEL,
+            stat_gain=stat_gain,
+            skill_points_gain=skill_points_gain,
+            energy_gain=energy_gain,
+        )
 
     def _parse_stat_type(self, stat_name: str) -> StatType | None:
         """Parse stat name string to StatType enum."""

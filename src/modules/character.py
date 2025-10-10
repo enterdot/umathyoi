@@ -67,8 +67,13 @@ class GenericCharacter:
     style_aptitude: Aptitude
 
     def __post_init__(self) -> None:
-        if sum(v for v in self.stat_growth.values()) > self.__class__.MAX_TOTAL_STAT_GROWTH:
-            raise ValueError(f"Total stat growth bonus exceeds {self.__class__.MAX_TOTAL_STAT_GROWTH}% limit")
+        if (
+            sum(v for v in self.stat_growth.values())
+            > self.__class__.MAX_TOTAL_STAT_GROWTH
+        ):
+            raise ValueError(
+                f"Total stat growth bonus exceeds {self.__class__.MAX_TOTAL_STAT_GROWTH}% limit"
+            )
 
     def get_stat_growth(self, stat_type: StatType) -> int:
         return self.stat_growth.get(stat_type, 0)

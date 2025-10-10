@@ -10,7 +10,9 @@ from common import auto_title_from_instance, texture_from_pixbuf
 class CardArtwork(Gtk.Box):
     """A widget that displays card artwork with async loading and placeholder."""
 
-    def __init__(self, window, card: Card = None, width: int = 45, height: int = 60):
+    def __init__(
+        self, window, card: Card = None, width: int = 45, height: int = 60
+    ):
         """Initialize card artwork widget."""
         super().__init__()
         self.app = window.app
@@ -127,4 +129,6 @@ class CardArtwork(Gtk.Box):
             GLib.idle_add(update_ui)
 
         # Start background download
-        self.app.card_db.load_card_image_async(self.card.id, self.width, self.height, on_image_loaded)
+        self.app.card_db.load_card_image_async(
+            self.card.id, self.width, self.height, on_image_loaded
+        )

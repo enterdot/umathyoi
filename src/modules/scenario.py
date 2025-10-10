@@ -25,7 +25,9 @@ class Facility:
     level: int
     stat_gain: dict[int, dict[StatType, int]]  # level -> {stat_type: value}
     skill_points_gain: dict[int, int]  # level -> skill_points
-    energy_gain: dict[int, int]  # level -> energy value (negative = cost, positive = recovery)
+    energy_gain: dict[
+        int, int
+    ]  # level -> energy value (negative = cost, positive = recovery)
 
     def get_stat_gain_at_level(self, level: int, stat_type: StatType) -> int:
         """Get specified stat gain for training at specified facility level."""

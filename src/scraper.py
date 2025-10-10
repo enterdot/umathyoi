@@ -6,9 +6,10 @@ transformation, preserving the original structure for maximum flexibility.
 """
 
 from common import setup_logging, get_logger
+from pathlib import Path
 
-setup_logging("DEBUG")
-logger = get_logger(__name__)
+setup_logging("info")
+logger = get_logger(Path(__file__).name)
 
 import json
 import asyncio
@@ -21,11 +22,6 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from modules import CardDatabase, SkillDatabase, CharacterDatabase
-from application import MainConfiguration
-
-
-CHARACTER_IDS_FILE = "data/character_ids.txt"
-CHARACTER_LIST_URL = "https://gametora.com/umamusume/characters"
 
 
 @dataclass
@@ -38,21 +34,74 @@ class GametoraEndpoint:
     description: str
 
 
-GAMETORA_ENDPOINTS = {
-    "cards": GametoraEndpoint(
-        name="support_cards",
-        url="https://gametora.com/data/umamusume/support-cards.36dc3929.json",
-        output_file=CardDatabase.CARDS_JSON,
-        description="Support cards with stats, effects, and skills",
-    ),
-    "skills": GametoraEndpoint(
-        name="skills",
-        url="https://gametora.com/data/umamusume/skills.742ab78e.json",
-        output_file=SkillDatabase.SKILLS_JSON,
-        description="Skills that can be learned by characters and granted by cards",
-    ),
-    # Characters will be handled separately due to individual endpoint pattern
-}
+MANIFEST_URL = "https://gametora.com/data/manifests/umamusume.json"
+
+
+async def fetch_gametora_manifest() -> dict[str, str] | None:
+    """Fetch Gametora manifest with current file hashes"""
+    try:
+        logger.debug(f"Fetching Gametora manifest from {MANIFEST_URL}")
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(MANIFEST_URL) as response:
+                if response.status == 200:
+                    manifest = await response.json()
+                    logger.debug(
+                        f"Fetched manifest with {len(manifest)} entries"
+                    )
+                    return manifest
+                else:
+                    logger.error(
+                        f"HTTP {response.status} when fetching manifest"
+                    )
+                    return None
+
+    except Exception as e:
+        logger.error(f"Error fetching manifest: {e}")
+        return None
+
+
+def build_endpoints_from_manifest(
+    manifest: dict[str, str],
+) -> dict[str, GametoraEndpoint]:
+    """Build endpoint configurations from manifest data"""
+
+    endpoints = {}
+
+    # Support cards endpoint
+    if "support-cards" in manifest:
+        cards_hash = manifest["support-cards"]
+        endpoints["cards"] = GametoraEndpoint(
+            name="support_cards",
+            url=f"https://gametora.com/data/umamusume/support-cards.{cards_hash}.json",
+            output_file=CardDatabase.CARDS_JSON,
+            description="Support cards with stats, effects, and skills",
+        )
+        logger.debug(f"Cards endpoint: {endpoints['cards'].url}")
+
+    # Skills endpoint
+    if "skills" in manifest:
+        skills_hash = manifest["skills"]
+        endpoints["skills"] = GametoraEndpoint(
+            name="skills",
+            url=f"https://gametora.com/data/umamusume/skills.{skills_hash}.json",
+            output_file=SkillDatabase.SKILLS_JSON,
+            description="Skills that can be learned by characters and granted by cards",
+        )
+        logger.debug(f"Skills endpoint: {endpoints['skills'].url}")
+
+    # Characters endpoint
+    if "character-cards" in manifest:
+        characters_hash = manifest["character-cards"]
+        endpoints["characters"] = GametoraEndpoint(
+            name="characters",
+            url=f"https://gametora.com/data/umamusume/character-cards.{characters_hash}.json",
+            output_file=CharacterDatabase.CHARACTERS_JSON,
+            description="Characters with name, stats and aptitudes",
+        )
+        logger.debug(f"Characters endpoint: {endpoints['characters'].url}")
+
+    return endpoints
 
 
 class GametoraScraperBase:
@@ -65,16 +114,22 @@ class GametoraScraperBase:
     async def fetch_data(self) -> list[dict[str, Any]] | None:
         """Fetch raw data from Gametora endpoint"""
         try:
-            logger.info(f"Fetching {self.endpoint.description} from {self.endpoint.url}")
+            logger.debug(
+                f"Fetching {self.endpoint.description} from {self.endpoint.url}"
+            )
 
             async with aiohttp.ClientSession() as session:
                 async with session.get(self.endpoint.url) as response:
                     if response.status == 200:
                         data = await response.json()
-                        logger.info(f"Successfully fetched {len(data)} {self.endpoint.name} records")
+                        logger.debug(
+                            f"Fetched {len(data)} {self.endpoint.name} records"
+                        )
                         return data
                     else:
-                        logger.error(f"HTTP {response.status} when fetching {self.endpoint.name}")
+                        logger.error(
+                            f"HTTP {response.status} when fetching {self.endpoint.name}"
+                        )
                         return None
 
         except aiohttp.ClientError as e:
@@ -87,60 +142,71 @@ class GametoraScraperBase:
             logger.error(f"Unexpected error fetching {self.endpoint.name}: {e}")
             return None
 
-    def clean_data(self, raw_data: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        """
-        Minimal cleanup of raw data - override in subclasses for specific needs.
+    def _pre_process(self, data: list[dict[str, Any]]) -> None:
+        # Override for JSON specific pre-processing
+        pass
 
-        This should only do essential cleanup like:
-        - Null handling
-        - Removing clearly invalid records
-        - Basic data validation
+    @property
+    def fields_to_remove(self) -> list[str]:
+        # Override for JSON specific fields to remove
+        return []
 
-        NOT semantic transformation of the data structure.
-        """
-        cleaned_data = []
+    @property
+    def fields_to_rename(self) -> dict[str, str]:
+        # Override for JSON specific fields to rename
+        return {}
 
-        for record in raw_data:
-            try:
-                # Basic validation - ensure record has required fields
-                if self._is_valid_record(record):
-                    # Minimal cleanup
-                    cleaned_record = self._clean_record(record)
-                    cleaned_data.append(cleaned_record)
+    def _post_process(self, data: list[dict[str, Any]]) -> None:
+        # Override for JSON specific post-processing
+        pass
+
+    def clean_data(self, data: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Cleanup of raw data"""
+        self._pre_process(data)
+
+        clean_data = []
+        for record in data:
+            clean_record = {}
+            for key, value in record.items():
+                # Convert JavaScript null to Python None
+                clean_record[key] = None if value is None else value
+
+            for field in self.fields_to_remove:
+                clean_record.pop(field, None)
+
+            for from_field, to_field in self.fields_to_rename.items():
+                if from_field in clean_record:
+                    clean_record[to_field] = clean_record.pop(from_field)
                 else:
-                    logger.debug(f"Skipping invalid record: {record.get('id', 'unknown')}")
-            except Exception as e:
-                logger.warning(f"Error cleaning record {record.get('id', 'unknown')}: {e}")
-                continue
+                    clean_record[to_field] = ""
+            clean_data.append(clean_record)
 
-        return cleaned_data
+        self._post_process(clean_data)
 
-    def _is_valid_record(self, record: dict[str, Any]) -> bool:
-        """Check if record has minimum required fields - override in subclasses"""
-        return True  # Base implementation accepts all records
-
-    def _clean_record(self, record: dict[str, Any]) -> dict[str, Any]:
-        """Minimal cleanup of individual record - override in subclasses"""
-        # Base implementation: just ensure consistent null handling
-        cleaned = {}
-        for key, value in record.items():
-            # Convert JavaScript null to Python None, keep everything else as-is
-            cleaned[key] = None if value is None else value
-        return cleaned
+        return clean_data
 
     def save_data(self, cleaned_data: list[dict[str, Any]]) -> bool:
         """Save cleaned data to JSON file with metadata"""
         try:
             output_path = Path(self.endpoint.output_file)
             output_path.parent.mkdir(parents=True, exist_ok=True)
-
             # Preserve original structure with minimal metadata
-            output = {"metadata": {"source": "Gametora", "scraped_at": datetime.now().isoformat(), "endpoint": self.endpoint.url, "record_count": len(cleaned_data)}, "data": cleaned_data}
+            output = {
+                "metadata": {
+                    "source": "Gametora",
+                    "scraped_at": datetime.now().isoformat(),
+                    "endpoint": self.endpoint.url,
+                    "record_count": len(cleaned_data),
+                },
+                "data": cleaned_data,
+            }
 
             with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(output, f, indent=2, ensure_ascii=False)
 
-            logger.info(f"Saved {len(cleaned_data)} records to {self.endpoint.output_file}")
+            logger.info(
+                f"Saved {len(cleaned_data)} records to {self.endpoint.output_file}"
+            )
             return True
 
         except Exception as e:
@@ -149,19 +215,22 @@ class GametoraScraperBase:
 
     async def run(self) -> bool:
         """Execute the complete scraping pipeline"""
-        logger.info(f"Starting {self.endpoint.name} scraper (raw data approach)")
+        logger.debug(f"Starting {self.endpoint.name} scraper")
 
         # Fetch raw data
         raw_data = await self.fetch_data()
         if not raw_data:
             return False
 
-        # Minimal cleanup
         try:
             cleaned_data = self.clean_data(raw_data)
-            logger.info(f"Cleaned {len(raw_data)} -> {len(cleaned_data)} {self.endpoint.name} records")
+            logger.debug(
+                f"Cleaned {len(raw_data)} -> {len(cleaned_data)} {self.endpoint.name} records"
+            )
         except Exception as e:
-            logger.error(f"Error cleaning {self.endpoint.name} data: {e}")
+            logger.error(
+                f"{self.__class__.__name__} failed to clean {self.endpoint.name} data: {e}"
+            )
             return False
 
         # Save to file
@@ -169,426 +238,181 @@ class GametoraScraperBase:
 
 
 class CardsScraper(GametoraScraperBase):
-    """Scraper for support cards - preserves raw effects arrays with EN/Global cleanup"""
+    """Scraper for support cards - preserves raw effects arrays"""
 
-    # Fields to remove from card records
-    FIELDS_TO_REMOVE = {"release", "release_ko", "release_zh_tw", "obtained", "name_jp", "name_ko", "name_tw"}
+    @property
+    def fields_to_remove(self) -> list[str]:
+        return [
+            "release",
+            "release_ko",
+            "release_zh_tw",
+            "obtained",
+            "name_jp",
+            "name_ko",
+            "name_tw",
+        ]
 
-    def _is_valid_record(self, record: dict[str, Any]) -> bool:
-        """Validate card record has essential fields"""
-        required_fields = ["support_id", "char_name", "rarity", "type"]
-        return all(field in record for field in required_fields)
-
-    def _clean_record(self, record: dict[str, Any]) -> dict[str, Any]:
-        """Clean card record for EN/Global version"""
-        cleaned = super()._clean_record(record)
-
-        # Remove unwanted fields
-        for field in self.FIELDS_TO_REMOVE:
-            cleaned.pop(field, None)
-
-        # Rename release_en to release
-        if "release_en" in cleaned:
-            cleaned["release"] = cleaned.pop("release_en")
-        else:
-            # Add empty release if no release_en exists
-            cleaned["release"] = ""
-
-        # Ensure effects is a list (not null)
-        if "effects" not in cleaned or cleaned["effects"] is None:
-            cleaned["effects"] = []
-
-        # Ensure hints structure exists
-        if "hints" not in cleaned or cleaned["hints"] is None:
-            cleaned["hints"] = {"hint_others": [], "hint_skills": []}
-
-        # Ensure event_skills is a list
-        if "event_skills" not in cleaned or cleaned["event_skills"] is None:
-            cleaned["event_skills"] = []
-
-        return cleaned
+    @property
+    def fields_to_rename(self) -> dict[str, str]:
+        # Override for JSON specific fields to rename
+        return {
+            "release_en": "release",
+            "release_en": "release",
+            "release_en": "release",
+            "support_id": "id",
+            "char_id": "character_id",
+            "char_name": "character_name",
+        }
 
 
 class SkillsScraper(GametoraScraperBase):
-    """Scraper for skills - preserves structure with EN/Global cleanup and flattens gene_version"""
+    """Scraper for skills - flattens gene_version"""
 
-    # Fields to remove from skill records
-    FIELDS_TO_REMOVE = {"desc_ko", "desc_tw", "endesc", "enname", "jpdesc", "jpname", "name_ko", "name_tw", "loc"}
+    @property
+    def fields_to_remove(self) -> list[str]:
+        return [
+            "desc_ko",
+            "desc_tw",
+            "endesc",
+            "enname",
+            "jpdesc",
+            "jpname",
+            "name_ko",
+            "name_tw",
+            "loc",
+            "evo_cond",
+            "pre_evo",
+            "sup_hint",
+            "sup_e",
+            "sce_e",
+            "evo",
+            "rarity",
+        ]
 
-    def _is_valid_record(self, record: dict[str, Any]) -> bool:
-        """Validate skill record has essential fields"""
-        return "id" in record or "skill_id" in record
+    @property
+    def fields_to_rename(self) -> dict[str, str]:
+        # Override for JSON specific fields to rename
+        return {
+            "name_en": "name",
+            "desc_en": "description",
+            "char": "character_ids",
+            "iconid": "icon_id",
+        }
 
-    def clean_data(self, raw_data: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def _pre_process(self, data: list[dict[str, Any]]) -> None:
         """
-        Override clean_data to handle gene_version flattening.
-
-        This extracts gene_version sub-skills and adds them as separate entries
-        at the same hierarchical level as their parent skills.
+        Override to handle gene_version flattening.
+        Extracts gene_version sub-skills and adds them as separate entries.
         """
-        cleaned_data = []
-
-        for record in raw_data:
+        gene_skill_data = []
+        for record in data:
             try:
-                if self._is_valid_record(record):
-                    # Clean the main skill
-                    cleaned_record = self._clean_record(record)
-                    cleaned_data.append(cleaned_record)
-
-                    # Extract and clean gene_version skills as separate entries
-                    if "gene_version" in record and record["gene_version"]:
-                        gene_skill = self._clean_gene_version_skill(record["gene_version"], record.get("id"))
-                        if gene_skill:
-                            cleaned_data.append(gene_skill)
-
-                else:
-                    logger.debug(f"Skipping invalid record: {record.get('id', 'unknown')}")
+                # Extract gene_version skills as separate entries
+                if "gene_version" in record and record["gene_version"]:
+                    gene_skill_record = record.pop("gene_version", None)
+                    if gene_skill_record:
+                        gene_skill_record["parent_skill"] = record.get("id")
+                        gene_skill_data.append(gene_skill_record)
             except Exception as e:
-                logger.warning(f"Error cleaning record {record.get('id', 'unknown')}: {e}")
+                logger.warning(
+                    f"Error cleaning record {record.get('id', 'unknown')}: {e}"
+                )
                 continue
-
-        return cleaned_data
-
-    def _clean_record(self, record: dict[str, Any]) -> dict[str, Any]:
-        """Clean skill record for EN/Global version"""
-        cleaned = super()._clean_record(record)
-
-        # Remove unwanted fields
-        for field in self.FIELDS_TO_REMOVE:
-            cleaned.pop(field, None)
-
-        # Rename name_en to name
-        if "name_en" in cleaned:
-            cleaned["name"] = cleaned.pop("name_en")
-
-        # Rename desc_en to description
-        if "desc_en" in cleaned:
-            cleaned["description"] = cleaned.pop("desc_en")
-
-        # Remove gene_version since we're flattening it
-        cleaned.pop("gene_version", None)
-
-        return cleaned
-
-    def _clean_gene_version_skill(self, gene_skill: dict[str, Any], parent_id: Any) -> dict[str, Any] | None:
-        """
-        Clean gene_version skill and prepare it as a separate entry.
-
-        Args:
-            gene_skill: The gene_version skill data
-            parent_id: ID of the parent skill
-
-        Returns:
-            Cleaned gene skill with parent_skills field, or None if invalid
-        """
-
-        # TODO: Review this method
-
-        if not isinstance(gene_skill, dict):
-            return None
-
-        try:
-            cleaned = dict(gene_skill)  # Copy to avoid modifying original
-
-            # Remove unwanted fields
-            for field in self.FIELDS_TO_REMOVE:
-                cleaned.pop(field, None)
-
-            # Rename name_en to name
-            if "name_en" in cleaned:
-                cleaned["name"] = cleaned.pop("name_en")
-
-            # Rename desc_en to description
-            if "desc_en" in cleaned:
-                cleaned["description"] = cleaned.pop("desc_en")
-
-            # Add parent_skills field to identify this as a gene skill
-            if parent_id is not None:
-                cleaned["parent_skills"] = [parent_id]
-
-            # Remove nested gene_version if it exists (shouldn't normally)
-            cleaned.pop("gene_version", None)
-
-            return cleaned
-
-        except Exception as e:
-            logger.warning(f"Error cleaning gene_version skill: {e}")
-            return None
-
-
-class CharactersScraper:
-    """
-    Special scraper for characters that handles individual character endpoints
-    with EN/Global cleanup.
-    """
-
-    # Fields to remove from itemData
-    ITEM_DATA_FIELDS_TO_REMOVE = {"name_jp", "name_ko", "name_tw", "title", "title_jp", "title_ko", "title_tw", "release", "release_ko", "release_zh_tw", "obtained", "skills_event"}
-
-    def __init__(self, character_ids: list[str], base_url_template: str):
-        """
-        Initialize characters scraper.
-
-        Args:
-            character_ids: list of character ID strings (e.g., ["101102-grass-wonder"])
-            base_url_template: URL template with {character_id} placeholder
-        """
-        self.character_ids = character_ids
-        self.base_url_template = base_url_template
-        self.output_file = CharacterDatabase.CHARACTERS_JSON
-
-    async def fetch_character(self, character_id: str) -> dict[str, Any] | None:
-        """Fetch data for a single character"""
-        url = self.base_url_template.format(character_id=character_id)
-
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        logger.debug(f"Fetched character {character_id}")
-                        return data
-                    else:
-                        logger.warning(f"HTTP {response.status} for character {character_id}")
-                        return None
-        except Exception as e:
-            logger.warning(f"Error fetching character {character_id}: {e}")
-            return None
-
-    def _clean_character_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
-        """Clean character record for EN/Global version"""
-        try:
-            # Extract only itemData, discard everything else
-            if "pageProps" not in record or "itemData" not in record["pageProps"]:
-                logger.debug("Character record missing pageProps.itemData")
-                return None
-
-            item_data = record["pageProps"]["itemData"]
-            if not isinstance(item_data, dict):
-                logger.debug("itemData is not a dictionary")
-                return None
-
-            cleaned = dict(item_data)  # Copy to avoid modifying original
-
-            # Remove unwanted fields
-            for field in self.ITEM_DATA_FIELDS_TO_REMOVE:
-                cleaned.pop(field, None)
-
-            # Rename name_en to name
-            if "name_en" in cleaned:
-                cleaned["name"] = cleaned.pop("name_en")
-
-            # Rename title_en_gl to title
-            if "title_en_gl" in cleaned:
-                cleaned["title"] = cleaned.pop("title_en_gl")
-
-            # Rename release_en to release, or add empty release
-            if "release_en" in cleaned:
-                cleaned["release"] = cleaned.pop("release_en")
-            else:
-                cleaned["release"] = ""
-
-            # Rename skills_event_en to skills_event
-            if "skills_event_en" in cleaned:
-                cleaned["skills_event"] = cleaned.pop("skills_event_en")
-
-            return cleaned
-
-        except Exception as e:
-            logger.warning(f"Error cleaning character record: {e}")
-            return None
-
-    async def fetch_all_characters(self) -> list[dict[str, Any]]:
-        """Fetch all characters concurrently"""
-        logger.info(f"Fetching {len(self.character_ids)} individual character files")
-
-        # Fetch all characters concurrently
-        tasks = [self.fetch_character(char_id) for char_id in self.character_ids]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # Filter out failed fetches and clean the data
-        characters = []
-        for char_id, result in zip(self.character_ids, results):
-            if isinstance(result, dict):
-                cleaned = self._clean_character_record(result)
-                if cleaned:
-                    characters.append(cleaned)
-                else:
-                    logger.warning(f"Failed to clean character data for {char_id}")
-            else:
-                logger.warning(f"Failed to fetch character {char_id}")
-
-        logger.info(f"Successfully processed {len(characters)}/{len(self.character_ids)} characters")
-        return characters
-
-    def save_characters(self, characters: list[dict[str, Any]]) -> bool:
-        """Save character data to JSON file"""
-        try:
-            output_path = Path(self.output_file)
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-
-            output = {
-                "metadata": {
-                    "source": "Gametora",
-                    "scraped_at": datetime.now().isoformat(),
-                    "endpoint_pattern": self.base_url_template,
-                    "record_count": len(characters),
-                    "data_format": "raw_gametora",
-                    "character_ids_requested": self.character_ids,
-                    "success_rate": f"{len(characters)}/{len(self.character_ids)}",
-                },
-                "data": characters,
-            }
-
-            with open(output_path, "w", encoding="utf-8") as f:
-                json.dump(output, f, indent=2, ensure_ascii=False)
-
-            logger.info(f"Saved {len(characters)} character records to {self.output_file}")
-            return True
-
-        except Exception as e:
-            logger.error(f"Error saving character data: {e}")
-            return False
-
-    async def run(self) -> bool:
-        """Execute character scraping"""
-        if not self.character_ids:
-            logger.warning("No character IDs provided, skipping character scraping")
-            return False
-
-        characters = await self.fetch_all_characters()
-        if not characters:
-            return False
-
-        return self.save_characters(characters)
-
-
-class CharacterIdListScraper:
-    """Scraper to extract character IDs from Gametora's character list page"""
-
-    def __init__(self):
-        self.url = CHARACTER_LIST_URL
-        self.output_file = CHARACTER_IDS_FILE
-
-    async def fetch_page(self) -> str | None:
-        """Fetch the character list HTML page"""
-        try:
-            logger.info(f"Fetching character list from {self.url}")
-
-            async with aiohttp.ClientSession() as session:
-                async with session.get(self.url) as response:
-                    if response.status == 200:
-                        html = await response.text()
-                        logger.info(f"Successfully fetched character list page ({len(html)} bytes)")
-                        return html
-                    else:
-                        logger.error(f"HTTP {response.status} when fetching character list")
-                        return None
-
-        except Exception as e:
-            logger.error(f"Error fetching character list: {e}")
-            return None
-
-    def extract_character_ids(self, html: str) -> list[str]:
-        """
-        Extract character IDs from the HTML page.
-
-        Looks for <a> tags with hrefs like /umamusume/characters/{character_id}
-        """
-        from bs4 import BeautifulSoup
-
-        soup = BeautifulSoup(html, "html.parser")
-        character_ids = []
-        seen_ids = set()
-
-        # Find all links to character pages
-        # Pattern: /umamusume/characters/{character_id}
-        links = soup.find_all("a", href=True)
-
-        for link in links:
-            href = link["href"]
-
-            # Check if this is a character page link
-            if href.startswith("/umamusume/characters/") and href != "/umamusume/characters":
-                # Extract ID from URL like /umamusume/characters/102802-hishi-akebono
-                char_id = href.replace("/umamusume/characters/", "").rstrip("/")
-
-                # Only add if valid and not already seen
-                if char_id and char_id not in seen_ids:
-                    seen_ids.add(char_id)
-                    character_ids.append(char_id)
-
-        logger.info(f"Found {len(character_ids)} unique character IDs")
-        return character_ids
-
-    def save_character_ids(self, character_ids: list[str]) -> bool:
-        """Save character IDs to file"""
-        try:
-            output_path = Path(self.output_file)
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-
-            with open(output_path, "w", encoding="utf-8") as f:
-                for char_id in character_ids:
-                    f.write(f"{char_id}\n")
-
-            logger.info(f"Saved {len(character_ids)} character IDs to {self.output_file}")
-            return True
-
-        except Exception as e:
-            logger.error(f"Error saving character IDs: {e}")
-            return False
-
-    async def run(self) -> bool:
-        """Execute character ID list scraping"""
-        logger.info("Starting character ID list scraper")
-
-        # Fetch the page
-        html = await self.fetch_page()
-        if not html:
-            return False
-
-        # Extract character IDs
-        try:
-            character_ids = self.extract_character_ids(html)
-            if not character_ids:
-                logger.error("No character IDs found on page")
-                return False
-
-            logger.info(f"Extracted {len(character_ids)} character IDs")
-        except Exception as e:
-            logger.error(f"Error extracting character IDs: {e}")
-            return False
-
-        # Save to file
-        return self.save_character_ids(character_ids)
+        data.extend(gene_skill_data)
+
+
+class CharactersScraper(GametoraScraperBase):
+    """Scraper for characters - preserves structure with EN/Global cleanup"""
+
+    @property
+    def fields_to_remove(self) -> list[str]:
+        return [
+            "base_stats",
+            "two_star_stats",
+            "three_star_stats",
+            "four_star_stats",
+            "five_star_stats",
+            "card_id",
+            "release",
+            "release_ko",
+            "release_zh_tw",
+            "obtained",
+            "rarity",
+            "name_jp",
+            "name_ko",
+            "name_tw",
+            "skills_event",
+            "talent_group",
+            "title",
+            "title_jp",
+            "title_ko",
+            "title_tw",
+        ]
+
+    @property
+    def fields_to_rename(self) -> dict[str, str]:
+        # Override for JSON specific fields to rename
+        return {
+            "name_en": "name",
+            "release_en": "release",
+            "skills_event_en": "skills_event",
+            "title_en_gl": "title",
+            "skills_awakening": "skills_potential",
+            "skills_evo": "skills_evolution",
+            "char_id": "id",
+            "costume": "costume_id",
+        }
+
+    def _post_process(self, data: list[dict[str, Any]]) -> None:
+        """Remove brackets from title field"""
+        for record in data:
+            if "title" in record and record["title"]:
+                title = record["title"]
+                # Remove leading [ and trailing ]
+                if title.startswith("[") and title.endswith("]"):
+                    record["title"] = title[1:-1]
 
 
 class GametoraScrapeManager:
     """Main manager for running scrapers with raw data approach"""
 
     def __init__(self):
-        self.scrapers = {
-            "cards": CardsScraper(GAMETORA_ENDPOINTS["cards"]),
-            "skills": SkillsScraper(GAMETORA_ENDPOINTS["skills"]),
-            "character_ids": CharacterIdListScraper(),
-        }
-        self.character_scraper = None
+        # Endpoints will be set after fetching manifest
+        self.scrapers = {}
+        self.endpoints = None
 
-    def set_character_ids(self, character_ids: list[str], url_template: str):
-        """Set up character scraper with provided IDs"""
-        self.character_scraper = CharactersScraper(character_ids, url_template)
-        self.scrapers["characters"] = self.character_scraper
+    async def initialize(self) -> bool:
+        """Fetch manifest and initialize scrapers"""
+        # Fetch manifest
+        manifest = await fetch_gametora_manifest()
+        if not manifest:
+            logger.error("Failed to fetch Gametora manifest")
+            return False
 
-    async def run_scrapers(self, selected_scrapers: list[str]) -> dict[str, bool]:
+        # Build endpoints from manifest
+        self.endpoints = build_endpoints_from_manifest(manifest)
+
+        # Initialize scrapers
+        if "cards" in self.endpoints:
+            self.scrapers["cards"] = CardsScraper(self.endpoints["cards"])
+        if "skills" in self.endpoints:
+            self.scrapers["skills"] = SkillsScraper(self.endpoints["skills"])
+        if "characters" in self.endpoints:
+            self.scrapers["characters"] = CharactersScraper(
+                self.endpoints["characters"]
+            )
+
+        logger.debug(f"Initialized {len(self.scrapers)} scrapers")
+        return True
+
+    async def run_scrapers(
+        self, selected_scrapers: list[str]
+    ) -> dict[str, bool]:
         """Run selected scrapers and return results"""
         results = {}
 
         for scraper_name in selected_scrapers:
             if scraper_name not in self.scrapers:
-                if scraper_name == "characters":
-                    logger.error("Characters scraper not configured. Use --characters-file or --characters-ids")
-                else:
-                    logger.error(f"Unknown scraper: {scraper_name}")
                 results[scraper_name] = False
                 continue
 
@@ -598,158 +422,123 @@ class GametoraScrapeManager:
                 results[scraper_name] = success
 
                 if success:
-                    logger.info(f"✓ {scraper_name} scraping completed successfully")
+                    logger.info(
+                        f"{scraper_name.title()} scraping completed successfully"
+                    )
                 else:
-                    logger.error(f"✗ {scraper_name} scraping failed")
+                    logger.error(f"{scraper_name.title()} scraping failed")
 
             except Exception as e:
-                logger.error(f"✗ {scraper_name} scraping failed with exception: {e}")
+                logger.error(
+                    f"✗ {scraper_name} scraping failed with exception: {e}"
+                )
                 results[scraper_name] = False
 
         return results
 
-    def print_summary(self, results: dict[str, bool]):
+    def log_summary(self, results: dict[str, bool]):
         """Print a summary of scraping results"""
-        print("\n" + "=" * 60)
-        print("SCRAPING SUMMARY (Raw Data Approach)")
-        print("=" * 60)
-
         successful = [name for name, success in results.items() if success]
         failed = [name for name, success in results.items() if not success]
-
         if successful:
-            print(f"✓ Successful: {', '.join(successful)}")
-
+            logger.info(f"Successful scrapers: {', '.join(successful)} ({len(successful)}/{len(results)})")
         if failed:
-            print(f"✗ Failed: {', '.join(failed)}")
-
-        print(f"\nTotal: {len(successful)}/{len(results)} scrapers succeeded")
+            logger.error(f"Failed scrapers: {', '.join(failed)} ({len(failed)}/{len(results)})")
 
         if successful:
-            print("\nOutput files generated:")
             for name in successful:
-                if name in GAMETORA_ENDPOINTS:
-                    endpoint = GAMETORA_ENDPOINTS[name]
-                    print(f"  - {endpoint.output_file}")
-                elif name == "characters":
-                    print(f"  - {CharacterDatabase.CHARACTERS_JSON}")
-
-        print("\nNote: Data stored with minimal transformation.")
-        print("Use view classes in the app to access typed, clean interfaces.")
+                logger.debug(f"Created: {self.endpoints[name].output_file}")
 
 
 async def main():
     """Main entry point"""
-    parser = argparse.ArgumentParser(description="Scrape Gametora data with minimal cleanup")
+    parser = argparse.ArgumentParser(
+        description="Scrape Gametora data with minimal cleanup"
+    )
 
     # Individual scraper options
-    parser.add_argument("--cards", action="store_true", help="Scrape support cards data")
-    parser.add_argument("--skills", action="store_true", help="Scrape skills data")
-    parser.add_argument("--characters", action="store_true", help="Scrape characters data")
-    parser.add_argument("--fetch-character-ids", action="store_true", help="Fetch and save list of character IDs from Gametora")
-
-    # Character-specific options
-    parser.add_argument("--characters-file", help="File containing character IDs (one per line)")
-    parser.add_argument("--characters-ids", help='Comma-separated character IDs (e.g. "30025-special-week,10007-vodka")')
     parser.add_argument(
-        "--characters-url-template",
-        default="https://gametora.com/_next/data/pgqKwGpVRDewvjE3UX6O2/umamusume/characters/{character_id}.json?id={character_id}",
-        help="URL template for character endpoints",
+        "--cards", action="store_true", help="Scrape support cards data"
+    )
+    parser.add_argument(
+        "--skills", action="store_true", help="Scrape skills data"
+    )
+    parser.add_argument(
+        "--characters", action="store_true", help="Scrape characters data"
     )
 
     # Convenience options
-    parser.add_argument("--cards-only", action="store_true", help="Scrape only cards (same as --cards)")
-    parser.add_argument("--all", action="store_true", help="Scrape all available data types")
+    parser.add_argument(
+        "--all", action="store_true", help="Scrape all available data types"
+    )
 
     # Utility options
-    parser.add_argument("--list-endpoints", action="store_true", help="List all known endpoints")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be scraped without doing it")
+    parser.add_argument(
+        "--list-endpoints", action="store_true", help="List all known endpoints"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be scraped without doing it",
+    )
 
     args = parser.parse_args()
+    manager = GametoraScrapeManager()
+
+    # List endpoints doesn't need manifest
+    if not args.list_endpoints:
+        if not await manager.initialize():
+            logger.error("Failed to initialize scraper manager")
+            return
 
     # Handle list endpoints
     if args.list_endpoints:
-        print("Known Gametora endpoints:")
-        for name, endpoint in GAMETORA_ENDPOINTS.items():
-            print(f"  ✓ {name}: {endpoint.url}")
-            print(f"     → {endpoint.description}")
-            print(f"     → Output: {endpoint.output_file}")
-        print("  ✓ characters: Individual endpoints (pattern-based)")
-        print(f"     → Pattern: {args.characters_url_template}")
-        print(f"     → Output: {CharacterDatabase.CHARACTERS_JSON}")
-        print("  ✓ character_ids: Character list page scraper")
-        print(f"     → URL: {CHARACTER_LIST_URL}")
-        print(f"     → Output: {CHARACTER_IDS_FILE}")
+        # Fetch manifest just for listing
+        manifest = await fetch_gametora_manifest()
+        if manifest:
+            endpoints = build_endpoints_from_manifest(manifest)
+            print("Known Gametora endpoints:")
+            for name, endpoint in endpoints.items():
+                print(f"  ✓ {name}: {endpoint.url}")
+                print(f"     → {endpoint.description}")
+                print(f"     → Output: {endpoint.output_file}")
         return
-
-    manager = GametoraScrapeManager()
-
-    # Handle character IDs setup
-    character_ids = []
-    if args.characters_file:
-        try:
-            with open(args.characters_file, "r") as f:
-                character_ids = [line.strip() for line in f if line.strip()]
-            logger.info(f"Loaded {len(character_ids)} character IDs from {args.characters_file}")
-        except Exception as e:
-            logger.error(f"Error reading character IDs file: {e}")
-            return
-    elif args.characters_ids:
-        character_ids = [id.strip() for id in args.characters_ids.split(",") if id.strip()]
-        logger.info(f"Using {len(character_ids)} character IDs from command line")
-    elif args.characters:
-        # Auto-load from default file if --characters specified without explicit file
-        try:
-            with open(CHARACTER_IDS_FILE, "r") as f:
-                character_ids = [line.strip() for line in f if line.strip()]
-            logger.info(f"Auto-loaded {len(character_ids)} character IDs from {CHARACTER_IDS_FILE}")
-        except FileNotFoundError:
-            logger.error(f"Character IDs file not found: {CHARACTER_IDS_FILE}")
-            logger.error("Run with --fetch-character-ids first to generate the file")
-            return
-        except Exception as e:
-            logger.error(f"Error reading character IDs file: {e}")
-            return
-
-    if character_ids:
-        manager.set_character_ids(character_ids, args.characters_url_template)
 
     # Determine which scrapers to run
     selected_scrapers = []
 
     if args.all:
-        selected_scrapers = ["cards", "skills"]
-        if character_ids:
-            selected_scrapers.append("characters")
+        selected_scrapers = ["cards", "skills", "characters"]
     else:
-        if args.cards or args.cards_only:
+        if args.cards:
             selected_scrapers.append("cards")
         if args.skills:
             selected_scrapers.append("skills")
         if args.characters:
             selected_scrapers.append("characters")
-        if args.fetch_character_ids:
-            selected_scrapers.append("character_ids")
 
-    # Default to cards if nothing specified
+    # Default to all if nothing specified
     if not selected_scrapers:
-        selected_scrapers = ["cards"]
-        print("No scrapers specified, defaulting to --cards")
+        selected_scrapers = ["cards", "skills", "characters"]
 
     # Handle dry run
     if args.dry_run:
         print("DRY RUN - Would scrape the following:")
         for name in selected_scrapers:
-            if name in GAMETORA_ENDPOINTS:
-                endpoint = GAMETORA_ENDPOINTS[name]
+            if name == "cards" and "cards" in manager.endpoints:
+                endpoint = manager.endpoints["cards"]
                 print(f"  - {name}: {endpoint.url} → {endpoint.output_file}")
-            elif name == "characters":
-                print(f"  - characters: {len(character_ids)} individual endpoints → {CharacterDatabase.CHARACTERS_JSON}")
+            elif name == "skills" and "skills" in manager.endpoints:
+                endpoint = manager.endpoints["skills"]
+                print(f"  - {name}: {endpoint.url} → {endpoint.output_file}")
+            elif name == "characters" and "characters" in manager.endpoints:
+                endpoint = manager.endpoints["characters"]
+                print(f"  - {name}: {endpoint.url} → {endpoint.output_file}")
         return
 
     # Run the scrapers
     results = await manager.run_scrapers(selected_scrapers)
-    manager.print_summary(results)
+    manager.log_summary(results)
 
     # Exit with error code if any scrapers failed
     if not all(results.values()):

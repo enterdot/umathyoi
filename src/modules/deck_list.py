@@ -18,12 +18,18 @@ class DeckList:
 
         if decks is not None:
             if len(decks) > DeckList.SIZE:
-                logger.warning(f"Size is {DeckList.SIZE} but {len(decks)} decks were given, discarding {len(decks) - DeckList.SIZE}")
+                logger.warning(
+                    f"Size is {DeckList.SIZE} but {len(decks)} decks were given, discarding {len(decks) - DeckList.SIZE}"
+                )
                 decks = decks[: DeckList.SIZE]
-            self._decks = [deck if deck is not None else Deck() for deck in decks]
+            self._decks = [
+                deck if deck is not None else Deck() for deck in decks
+            ]
 
             if len(self._decks) < DeckList.SIZE:
-                self._decks.extend([Deck() for _ in range(DeckList.SIZE - len(self._decks))])
+                self._decks.extend(
+                    [Deck() for _ in range(DeckList.SIZE - len(self._decks))]
+                )
         else:
             self._decks = [Deck() for _ in range(DeckList.SIZE)]
 
@@ -48,7 +54,9 @@ class DeckList:
         # Set up event forwarding for all decks
         self._setup_deck_event_forwarding()
 
-        logger.info(f"{auto_title_from_instance(self)} initialized with {DeckList.SIZE} decks")
+        logger.info(
+            f"{auto_title_from_instance(self)} initialized with {DeckList.SIZE} decks"
+        )
 
     def _setup_deck_event_forwarding(self):
         """Subscribe to all deck events and forward active deck events."""
@@ -64,11 +72,17 @@ class DeckList:
 
         # Ensure that we have a mapping for every Deck event
         sample_deck = Deck()
-        deck_events = {name for name, attr in vars(sample_deck).items() if isinstance(attr, Event)}
+        deck_events = {
+            name
+            for name, attr in vars(sample_deck).items()
+            if isinstance(attr, Event)
+        }
         mapped_events = set(event_mapping.keys())
         if not mapped_events == deck_events:
             logger.error(f"Missing from mapping: {deck_events - mapped_events}")
-            logger.error(f"Extraneous in mapping: {deck_events - mapped_events}")
+            logger.error(
+                f"Extraneous in mapping: {deck_events - mapped_events}"
+            )
             raise RuntimeError("Event mapping mismatch")
 
         for deck in self._decks:
@@ -82,7 +96,9 @@ class DeckList:
                         if source_deck is self.active_deck:
                             target_event.trigger(self, **kwargs)
 
-                    handler.__name__ = f"{deck_event_name} - forward event by {__name__}"
+                    handler.__name__ = (
+                        f"{deck_event_name} - forward event by {__name__}"
+                    )
                     return handler
 
                 deck_event.subscribe(create_handler(active_event))
@@ -104,16 +120,24 @@ class DeckList:
     def active_slot(self, index: int) -> None:
         if 0 <= index < DeckList.SIZE:
             if index != self.active_slot:
-                self.slot_deactivated.trigger(self, index=self.active_slot, deck=self.active_deck)
+                self.slot_deactivated.trigger(
+                    self, index=self.active_slot, deck=self.active_deck
+                )
                 self._active_slot = index
-                self.slot_activated.trigger(self, index=self.active_slot, deck=self.active_deck)
-                logger.debug(f"Activated deck '{self.active_deck}' in slot {self._active_slot}")
+                self.slot_activated.trigger(
+                    self, index=self.active_slot, deck=self.active_deck
+                )
+                logger.debug(
+                    f"Activated deck '{self.active_deck}' in slot {self._active_slot}"
+                )
         else:
             raise ValueError(f"Slot {index} is out of bounds")
 
     def get_slot_at_offset(self, offset: int) -> int:
         offset_index = self._active_slot + offset
-        offset_index = ((offset_index % DeckList.SIZE) + DeckList.SIZE) % DeckList.SIZE
+        offset_index = (
+            (offset_index % DeckList.SIZE) + DeckList.SIZE
+        ) % DeckList.SIZE
         return offset_index
 
     def get_deck_at_offset(self, offset: int) -> Deck:

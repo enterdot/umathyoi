@@ -8,7 +8,17 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
-from modules import CardDatabase, ScenarioDatabase, FacilityType, CardEffect, CardRarity, Deck, DeckList, EfficiencyCalculator, Mood
+from modules import (
+    CardDatabase,
+    ScenarioDatabase,
+    FacilityType,
+    CardEffect,
+    CardRarity,
+    Deck,
+    DeckList,
+    EfficiencyCalculator,
+    Mood,
+)
 
 from common import stopwatch
 
@@ -40,12 +50,16 @@ def test_card_effects():
 
     print("\nFriendship training effectiveness progression:")
     for level in test_levels:
-        bonus = special_week.get_effect_at_level(CardEffect.friendship_effectiveness, level)
+        bonus = special_week.get_effect_at_level(
+            CardEffect.friendship_effectiveness, level
+        )
         print(f"  Level {level:2d}: {bonus}%")
 
     print("\nSpeed Bonus progression:")
     for level in test_levels:
-        bonus = special_week.get_effect_at_level(CardEffect.speed_stat_bonus, level)
+        bonus = special_week.get_effect_at_level(
+            CardEffect.speed_stat_bonus, level
+        )
         print(f"  Level {level:2d}: +{bonus}")
 
     print("\nAll effects at level 50:")
@@ -60,13 +74,17 @@ def test_card_effects():
     # First call (cache miss)
     start_time = time.time()
     for _ in range(1000):
-        special_week.get_effect_at_level(CardEffect.friendship_effectiveness, 25)
+        special_week.get_effect_at_level(
+            CardEffect.friendship_effectiveness, 25
+        )
     first_time = time.time() - start_time
 
     # Second call (cache hit)
     start_time = time.time()
     for _ in range(1000):
-        special_week.get_effect_at_level(CardEffect.friendship_effectiveness, 25)
+        special_week.get_effect_at_level(
+            CardEffect.friendship_effectiveness, 25
+        )
     second_time = time.time() - start_time
 
     print(f"First 1000 calls (cache miss): {first_time:.4f}s")
@@ -85,7 +103,9 @@ def test_efficiency_calculator():
     cards = []
 
     # Try to get 6 SSR cards of different types
-    ssr_cards = [c for c in card_db.cards.values() if c.rarity == CardRarity.SSR]
+    ssr_cards = [
+        c for c in card_db.cards.values() if c.rarity == CardRarity.SSR
+    ]
     if len(ssr_cards) >= 6:
         cards = ssr_cards[:6]
     else:
@@ -120,7 +140,9 @@ def test_efficiency_calculator():
 
     # Create calculator
     print("\nInitializing calculator...")
-    calculator = EfficiencyCalculator(deck_list=deck_list, scenario=scenario, character=character)
+    calculator = EfficiencyCalculator(
+        deck_list=deck_list, scenario=scenario, character=character
+    )
 
     # Set test parameters
     calculator.energy = 80
@@ -128,7 +150,13 @@ def test_efficiency_calculator():
     calculator.mood = Mood.good
     calculator.fan_count = 50000
 
-    calculator.facility_levels = {FacilityType.speed: 5, FacilityType.stamina: 5, FacilityType.power: 5, FacilityType.guts: 5, FacilityType.wit: 5}
+    calculator.facility_levels = {
+        FacilityType.speed: 5,
+        FacilityType.stamina: 5,
+        FacilityType.power: 5,
+        FacilityType.guts: 5,
+        FacilityType.wit: 5,
+    }
 
     calculator.turn_count = 10000  # Fewer turns for quick test
 

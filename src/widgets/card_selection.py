@@ -60,19 +60,29 @@ class CardSelection(Adw.Bin):
     def setup_ui(self) -> None:
         """Set up the card selection UI with view stack."""
         view_stack = Adw.ViewStack()
-        view_stack.add_named(self._create_card_list_view(), "card_selection_view")
+        view_stack.add_named(
+            self._create_card_list_view(), "card_selection_view"
+        )
         view_stack.add_named(self._create_stats_info_view(), "stats_info_view")
         self.set_child(view_stack)
 
     def connect_signals(self) -> None:
         """Connect all event signals."""
         # Deck list events for active deck changes
-        self.app.deck_list.slot_deactivated.subscribe(self._on_active_deck_deactivated)
-        self.app.deck_list.slot_activated.subscribe(self._on_active_deck_activated)
+        self.app.deck_list.slot_deactivated.subscribe(
+            self._on_active_deck_deactivated
+        )
+        self.app.deck_list.slot_activated.subscribe(
+            self._on_active_deck_activated
+        )
 
         # Active deck card change events
-        self.app.deck_list.card_added_to_active_deck_at_slot.subscribe(self._on_active_deck_card_added)
-        self.app.deck_list.card_removed_from_active_deck_at_slot.subscribe(self._on_active_deck_card_removed)
+        self.app.deck_list.card_added_to_active_deck_at_slot.subscribe(
+            self._on_active_deck_card_added
+        )
+        self.app.deck_list.card_removed_from_active_deck_at_slot.subscribe(
+            self._on_active_deck_card_removed
+        )
 
         # Card view events
         self.app.card_view.card_changed.subscribe(self._on_card_view_changed)
@@ -113,7 +123,9 @@ class CardSelection(Adw.Bin):
         list_box.connect("row-activated", self._on_card_row_activated)
 
         click_gesture = Gtk.GestureClick()
-        click_gesture.connect("pressed", self._on_card_list_view_clicked, list_box)
+        click_gesture.connect(
+            "pressed", self._on_card_list_view_clicked, list_box
+        )
         list_box.add_controller(click_gesture)
 
         self._populate_card_list(list_box)
@@ -126,7 +138,9 @@ class CardSelection(Adw.Bin):
 
         # Wrap in scrolled window
         scrolled_window = Gtk.ScrolledWindow()
-        scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.set_policy(
+            Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC
+        )
         scrolled_window.set_child(list_box)
 
         self.list_box = list_box
@@ -138,7 +152,9 @@ class CardSelection(Adw.Bin):
         Args:
             list_box: List box to populate
         """
-        logger.debug(f"Populating card selection list with {self.app.card_db.count} cards")
+        logger.debug(
+            f"Populating card selection list with {self.app.card_db.count} cards"
+        )
         for card in sorted(self.app.card_db, key=lambda c: c.view_name):
             row = self._create_card_action_row(card)
             list_box.append(row)
@@ -154,11 +170,17 @@ class CardSelection(Adw.Bin):
         """
         row = Adw.ActionRow()
         row.card = card  # Store card reference
-        row.set_title(card.view_name)
+        row.set_title(card.tagline)
+        row.set_subtitle(card.view_name)
         row.set_activatable(True)
 
         # Add card thumbnail
-        thumbnail = CardArtwork(self.window, card, CardSelection.CARD_THUMBNAIL_WIDTH, CardSelection.CARD_THUMBNAIL_HEIGHT)
+        thumbnail = CardArtwork(
+            self.window,
+            card,
+            CardSelection.CARD_THUMBNAIL_WIDTH,
+            CardSelection.CARD_THUMBNAIL_HEIGHT,
+        )
         row.add_prefix(thumbnail)
 
         # Add info button
@@ -196,7 +218,12 @@ class CardSelection(Adw.Bin):
         content.append(header_bar)
 
         # Large card artwork display
-        card_artwork = CardArtwork(self.window, None, CardSelection.CARD_ARTWORK_WIDTH, CardSelection.CARD_ARTWORK_HEIGHT)
+        card_artwork = CardArtwork(
+            self.window,
+            None,
+            CardSelection.CARD_ARTWORK_WIDTH,
+            CardSelection.CARD_ARTWORK_HEIGHT,
+        )
         card_artwork.set_halign(Gtk.Align.CENTER)
         content.append(card_artwork)
 
@@ -226,7 +253,9 @@ class CardSelection(Adw.Bin):
         back_button = Gtk.Button()
         back_button.set_icon_name("go-previous-symbolic")
         back_button.add_css_class("flat")
-        back_button.connect("clicked", self._on_stats_info_view_back_button_clicked)
+        back_button.connect(
+            "clicked", self._on_stats_info_view_back_button_clicked
+        )
         header_bar.pack_start(back_button)
 
         return header_bar
@@ -242,8 +271,16 @@ class CardSelection(Adw.Bin):
 
         # Limit break slider
         current_value = self.app.card_view.limit_break
-        slider_adjustment = Gtk.Adjustment(value=current_value, lower=Card.MIN_LIMIT_BREAK, upper=Card.MAX_LIMIT_BREAK, step_increment=1, page_increment=1)
-        slider_scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL, adjustment=slider_adjustment)
+        slider_adjustment = Gtk.Adjustment(
+            value=current_value,
+            lower=Card.MIN_LIMIT_BREAK,
+            upper=Card.MAX_LIMIT_BREAK,
+            step_increment=1,
+            page_increment=1,
+        )
+        slider_scale = Gtk.Scale(
+            orientation=Gtk.Orientation.HORIZONTAL, adjustment=slider_adjustment
+        )
         slider_scale.set_draw_value(False)
         slider_scale.set_round_digits(0)
 
@@ -251,14 +288,18 @@ class CardSelection(Adw.Bin):
         for i in range(Card.MAX_LIMIT_BREAK + 1):
             slider_scale.add_mark(i, Gtk.PositionType.BOTTOM, str(i))
 
-        slider_scale.connect("value-changed", self._on_stats_info_view_slider_changed)
+        slider_scale.connect(
+            "value-changed", self._on_stats_info_view_slider_changed
+        )
         limit_break_selector.append(slider_scale)
 
         # Add button
         add_button = Gtk.Button()
         add_button.set_icon_name("list-add-symbolic")
         add_button.add_css_class("flat")
-        add_button.connect("clicked", self._on_stats_info_view_add_button_clicked)
+        add_button.connect(
+            "clicked", self._on_stats_info_view_add_button_clicked
+        )
         limit_break_selector.append(add_button)
 
         return limit_break_selector
@@ -316,11 +357,17 @@ class CardSelection(Adw.Bin):
         # TODO: Update the large artwork display when card changes
         # This would be implemented when stats view is fully developed
         to_card_id = kwargs.get("card").id
-        from_card_id = kwargs.get("prev_card").id if kwargs.get("prev_card") else "none"
-        logger.debug(f"Callback on info panel updates from card {to_card_id} to card {from_card_id}")
+        from_card_id = (
+            kwargs.get("prev_card").id if kwargs.get("prev_card") else "none"
+        )
+        logger.debug(
+            f"Callback on info panel updates from card {to_card_id} to card {from_card_id}"
+        )
 
     # UI event handlers
-    def _on_card_row_activated(self, list_box: Gtk.ListBox, row: Adw.ActionRow) -> None:
+    def _on_card_row_activated(
+        self, list_box: Gtk.ListBox, row: Adw.ActionRow
+    ) -> None:
         """Handle when a card row is activated (clicked).
 
         Args:
@@ -332,10 +379,19 @@ class CardSelection(Adw.Bin):
             logger.error("No active deck")
             return
 
-        logger.debug(f"Try adding card {row.card.id} to active deck from row '{row.get_title()}'")
+        logger.debug(
+            f"Try adding card {row.card.id} to active deck from row '{row.get_title()}'"
+        )
         active_deck.add_card(row.card)
 
-    def _on_card_list_view_clicked(self, gesture: Gtk.GestureClick, n_press: int, x: float, y: float, list_box: Gtk.ListBox) -> None:
+    def _on_card_list_view_clicked(
+        self,
+        gesture: Gtk.GestureClick,
+        n_press: int,
+        x: float,
+        y: float,
+        list_box: Gtk.ListBox,
+    ) -> None:
         """Handle clicking on the card list view.
 
         Args:
@@ -349,7 +405,9 @@ class CardSelection(Adw.Bin):
         if split_view:
             split_view.set_show_content(True)
 
-    def _on_card_info_button_clicked(self, info_button: Gtk.Button, card: Card) -> None:
+    def _on_card_info_button_clicked(
+        self, info_button: Gtk.Button, card: Card
+    ) -> None:
         """Handle clicking the info button on a card.
 
         Args:
@@ -361,7 +419,9 @@ class CardSelection(Adw.Bin):
         if view_stack:
             view_stack.set_visible_child_name("stats_info_view")
 
-    def _on_stats_info_view_back_button_clicked(self, button: Gtk.Button) -> None:
+    def _on_stats_info_view_back_button_clicked(
+        self, button: Gtk.Button
+    ) -> None:
         """Handle clicking the back button in stats info view.
 
         Args:
@@ -380,7 +440,9 @@ class CardSelection(Adw.Bin):
         limit_break = int(slider.get_value())
         self.app.card_view.limit_break = limit_break
 
-    def _on_stats_info_view_add_button_clicked(self, button: Gtk.Button) -> None:
+    def _on_stats_info_view_add_button_clicked(
+        self, button: Gtk.Button
+    ) -> None:
         """Handle clicking the add button in stats info view.
 
         Args:
@@ -388,5 +450,7 @@ class CardSelection(Adw.Bin):
         """
         card_view = self.app.card_view
         active_deck = self.app.deck_list.active_deck
-        logger.debug(f"Try adding card {card_view.card.id} at limit break {card_view.limit_break} to active deck from info panel")
+        logger.debug(
+            f"Try adding card {card_view.card.id} at limit break {card_view.limit_break} to active deck from info panel"
+        )
         active_deck.add_card(card_view.card, card_view.limit_break)

@@ -54,7 +54,9 @@ def stopwatch(log_func: Callable[[str], None] = None, show_args=False):
                 args_repr = ", ".join(repr(a) for a in args)
                 kwargs_repr = ", ".join(f"{k}={v!r}" for k, v in kwargs.items())
                 all_args = ", ".join(filter(None, [args_repr, kwargs_repr]))
-                log_func(f"{func.__name__}({all_args}) took {elapsed * 1000:.2f}ms")
+                log_func(
+                    f"{func.__name__}({all_args}) took {elapsed * 1000:.2f}ms"
+                )
             else:
                 log_func(f"{func.__name__} took {elapsed * 1000:.2f}ms")
 
@@ -105,7 +107,9 @@ def memoize(maxsize=128):
                 cache_name = f"_cache_{func.__name__}"
 
                 if not hasattr(self, cache_name):
-                    cached_func = lru_cache(maxsize=maxsize)(lambda *a, **kw: func(self, *a, **kw))
+                    cached_func = lru_cache(maxsize=maxsize)(
+                        lambda *a, **kw: func(self, *a, **kw)
+                    )
                     setattr(self, cache_name, cached_func)
 
                 return getattr(self, cache_name)(*args, **kwargs)

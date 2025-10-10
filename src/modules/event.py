@@ -22,7 +22,9 @@ class Event:
     def trigger(self, caller: Any, **kwargs: Any) -> None:
         for callback in self._callbacks:
             callback(caller, **kwargs)
-            logger.debug(f"{caller.__class__.__name__} triggered {self.count} callbacks")
+            logger.debug(
+                f"{caller.__class__.__name__} triggered {self.count} callbacks"
+            )
 
     @property
     def count(self) -> int:

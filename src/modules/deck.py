@@ -13,12 +13,18 @@ class Deck:
 
     SIZE: int = 6
 
-    def __init__(self, cards: list[Card | None] | None = None, limit_breaks: list[int] | None = None) -> None:
+    def __init__(
+        self,
+        cards: list[Card | None] | None = None,
+        limit_breaks: list[int] | None = None,
+    ) -> None:
 
         self._cards: list[Card | None] = [None] * Deck.SIZE
         if cards is not None:
             if len(cards) > Deck.SIZE:
-                logger.warning(f"Deck size is {Deck.SIZE} but {len(cards)} cards were given, discarding {len(cards) - Deck.SIZE}")
+                logger.warning(
+                    f"Deck size is {Deck.SIZE} but {len(cards)} cards were given, discarding {len(cards) - Deck.SIZE}"
+                )
                 self._cards = cards[: Deck.SIZE]
             else:
                 self._cards = cards + [None] * (Deck.SIZE - len(cards))
@@ -26,10 +32,14 @@ class Deck:
         self._limit_breaks: list[int] = [0] * Deck.SIZE
         if limit_breaks is not None:
             if len(limit_breaks) > Deck.SIZE:
-                logger.warning(f"Deck size is {Deck.SIZE} but {len(limit_breaks)} limit breaks were given, discarding {len(limit_breaks) - Deck.SIZE}")
+                logger.warning(
+                    f"Deck size is {Deck.SIZE} but {len(limit_breaks)} limit breaks were given, discarding {len(limit_breaks) - Deck.SIZE}"
+                )
                 self._limit_breaks = limit_breaks[: Deck.SIZE]
             else:
-                self._limit_breaks = limit_breaks + [0] * (Deck.SIZE - len(limit_breaks))
+                self._limit_breaks = limit_breaks + [0] * (
+                    Deck.SIZE - len(limit_breaks)
+                )
 
         # Mute state for each slot
         self._muted: list[bool] = [False] * Deck.SIZE
@@ -71,7 +81,11 @@ class Deck:
     @property
     def active_cards(self) -> list[Card]:
         """List of active (non-muted) cards in the deck."""
-        return [card for card, muted in zip(self._cards, self._muted) if card and not muted]
+        return [
+            card
+            for card, muted in zip(self._cards, self._muted)
+            if card and not muted
+        ]
 
     def is_muted_at_slot(self, slot: int) -> bool:
         """Check if card at slot is muted."""
@@ -80,7 +94,9 @@ class Deck:
     def set_mute_at_slot(self, slot: int, muted: bool) -> bool:
         """Set mute state at specified slot."""
         if not 0 <= slot < Deck.SIZE:
-            raise ValueError(f"Invalid slot {slot}, must be in range [0, {Deck.SIZE})")
+            raise ValueError(
+                f"Invalid slot {slot}, must be in range [0, {Deck.SIZE})"
+            )
 
         if self._cards[slot] is None:
             logger.debug(f"Cannot mute empty slot {slot} for deck {self}")
@@ -108,7 +124,9 @@ class Deck:
         self._muted[slot] = False  # Reset mute state
         if removed_card:
             logger.debug(f"Removed card at slot {slot} from deck {self}")
-            self.card_removed_at_slot.trigger(self, card=removed_card, slot=slot)
+            self.card_removed_at_slot.trigger(
+                self, card=removed_card, slot=slot
+            )
         return removed_card
 
     def remove_card_by_id(self, card_id: int) -> int | None:
@@ -123,11 +141,17 @@ class Deck:
         """Remove the specified card."""
         return self.remove_card_by_id(card.id)
 
-    def add_card(self, card: Card, limit_break: int = Card.MIN_LIMIT_BREAK) -> int | None:
+    def add_card(
+        self, card: Card, limit_break: int = Card.MIN_LIMIT_BREAK
+    ) -> int | None:
         """Add card to first available slot."""
-        logger.debug(f"Adding card {card.id} at limit break {limit_break} to deck {self}")
+        logger.debug(
+            f"Adding card {card.id} at limit break {limit_break} to deck {self}"
+        )
         if card in self:
-            logger.debug(f"Failed to add card {card.id}, already in deck {self}")
+            logger.debug(
+                f"Failed to add card {card.id}, already in deck {self}"
+            )
             return None
 
         slot = self.find_first_empty_slot()
@@ -143,7 +167,9 @@ class Deck:
             self.deck_pushed_past_capacity.trigger(self, card=card)
             return None
 
-    def add_card_at_slot(self, slot: int, card: Card, limit_break: int = Card.MIN_LIMIT_BREAK) -> bool:
+    def add_card_at_slot(
+        self, slot: int, card: Card, limit_break: int = Card.MIN_LIMIT_BREAK
+    ) -> bool:
         """Add card at specific slot."""
         if card in self:
             return False
@@ -176,16 +202,26 @@ class Deck:
     def set_limit_break_at_slot(self, slot: int, limit_break: int) -> bool:
         """Set limit break level at specified slot."""
         if not 0 <= slot < Deck.SIZE:
-            raise ValueError(f"Invalid slot {slot}, must be in range [0, {Deck.SIZE})")
+            raise ValueError(
+                f"Invalid slot {slot}, must be in range [0, {Deck.SIZE})"
+            )
         if not Card.MIN_LIMIT_BREAK <= limit_break <= Card.MAX_LIMIT_BREAK:
-            raise ValueError(f"Invalid limit_break {limit_break}, must be in range [{Card.MIN_LIMIT_BREAK}, {Card.MAX_LIMIT_BREAK}]")
+            raise ValueError(
+                f"Invalid limit_break {limit_break}, must be in range [{Card.MIN_LIMIT_BREAK}, {Card.MAX_LIMIT_BREAK}]"
+            )
 
         if self._cards[slot] is None:
-            logger.debug(f"Cannot set limit break on empty slot {slot} for deck {self}")
+            logger.debug(
+                f"Cannot set limit break on empty slot {slot} for deck {self}"
+            )
             return False
         self._limit_breaks[slot] = limit_break
-        logger.debug(f"Set limit break {self._limit_breaks[slot]} at slot {slot} for deck {self}")
-        self.limit_break_set_at_slot.trigger(self, limit_break=limit_break, slot=slot)
+        logger.debug(
+            f"Set limit break {self._limit_breaks[slot]} at slot {slot} for deck {self}"
+        )
+        self.limit_break_set_at_slot.trigger(
+            self, limit_break=limit_break, slot=slot
+        )
         return True
 
     def clear(self) -> None:
@@ -195,7 +231,9 @@ class Deck:
             card_removed = self.remove_card_at_slot(slot)
             if card_removed is not None:
                 cards_removed_count += 1
-        self.deck_was_cleared.trigger(self, cards_removed_count=cards_removed_count)
+        self.deck_was_cleared.trigger(
+            self, cards_removed_count=cards_removed_count
+        )
 
     def __contains__(self, card: Card) -> bool:
         """Check if card is in deck."""
@@ -207,7 +245,9 @@ class Deck:
         Yields:
             Tuple of (slot, card, limit_break, muted) for each position
         """
-        for slot, (card, limit_break, muted) in enumerate(zip(self._cards, self._limit_breaks, self._muted)):
+        for slot, (card, limit_break, muted) in enumerate(
+            zip(self._cards, self._limit_breaks, self._muted)
+        ):
             yield (slot, card, limit_break, muted)
 
     def __str__(self) -> str:

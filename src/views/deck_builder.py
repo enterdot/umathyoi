@@ -20,7 +20,9 @@ class DeckBuilder(Adw.Bin):
         self.app = window.app
         self.window = window
 
-        logger.debug(f"Setting up {auto_title_from_instance(self)} with navigation split view")
+        logger.debug(
+            f"Setting up {auto_title_from_instance(self)} with navigation split view"
+        )
         self.setup_ui()
         self.setup_responsive_ui()
         self.connect_signals()
@@ -38,20 +40,30 @@ class DeckBuilder(Adw.Bin):
         sidebar_page = Adw.NavigationPage()
         sidebar_child = CardSelection(self.window)
         sidebar_page.set_child(sidebar_child)
-        sidebar_page.set_tag(f"{auto_tag_from_instance(sidebar_child)}-nav-page")
-        sidebar_page.set_title(f"{auto_tag_from_instance(sidebar_child)} Navigation Page")
+        sidebar_page.set_tag(
+            f"{auto_tag_from_instance(sidebar_child)}-nav-page"
+        )
+        sidebar_page.set_title(
+            f"{auto_tag_from_instance(sidebar_child)} Navigation Page"
+        )
 
         content_page = Adw.NavigationPage()
         content_child = DeckInspector(self.window)
         content_page.set_child(content_child)
-        content_page.set_tag(f"{auto_tag_from_instance(content_child)}-nav-page")
-        content_page.set_title(f"{auto_tag_from_instance(content_child)} Navigation Page")
+        content_page.set_tag(
+            f"{auto_tag_from_instance(content_child)}-nav-page"
+        )
+        content_page.set_title(
+            f"{auto_tag_from_instance(content_child)} Navigation Page"
+        )
 
         sidebar_child.refresh_all_action_rows()
 
         split_view.set_sidebar(sidebar_page)
         split_view.set_content(content_page)
-        split_view.set_show_content(True)  # show content by default when collapsed
+        split_view.set_show_content(
+            True
+        )  # show content by default when collapsed
 
         self.set_child(split_view)
 
@@ -59,7 +71,9 @@ class DeckBuilder(Adw.Bin):
         """Set up responsive behavior for different screen sizes."""
         split_view = self.get_child()
         self.window.width_breakpoint.add_setter(split_view, "collapsed", True)
-        logger.debug(f"{auto_title_from_instance(self)} responsive UI configured")
+        logger.debug(
+            f"{auto_title_from_instance(self)} responsive UI configured"
+        )
 
     def connect_signals(self) -> None:
         """Connect any additional signals (currently none needed)."""
