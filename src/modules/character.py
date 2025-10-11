@@ -59,30 +59,48 @@ class Aptitude(Enum):
 class GenericCharacter:
     """Represents a generic trainee (character)."""
 
-    MAX_TOTAL_STAT_GROWTH: ClassVar[int] = 30
+    MAX_TOTAL_STAT_BONUS: ClassVar[int] = 30
 
-    stat_growth: dict[StatType, int]
-    track_aptitude: Aptitude
-    distance_aptitude: Aptitude
-    style_aptitude: Aptitude
+    stat_bonus: list[int]
+    aptitudes: list[Aptitude]
 
+    @property
+    def track_aptitude(self) -> list[Aptitude]:
+        return self.aptitudes[0,1]
+    @property
+    def distance_aptitude(self) -> list[Aptitude]:
+        return self.aptitudes[2,5]
+    @property
+    def style_aptitude(self) -> list[Aptitude]:
+        return self.aptitudes[6,9]
+        
     def __post_init__(self) -> None:
         if (
-            sum(v for v in self.stat_growth.values())
-            > self.__class__.MAX_TOTAL_STAT_GROWTH
+            sum(v for v in self.stat_bonus)
+            > self.__class__.MAX_TOTAL_STAT_BONUS
         ):
             raise ValueError(
-                f"Total stat growth bonus exceeds {self.__class__.MAX_TOTAL_STAT_GROWTH}% limit"
+                f"Total stat growth bonus exceeds {self.__class__.MAX_TOTAL_STAT_BONUS}% limit"
             )
 
-    def get_stat_growth(self, stat_type: StatType) -> int:
-        return self.stat_growth.get(stat_type, 0)
+    def get_stat_bonus(self, stat_type: StatType) -> int:
+        match stat_type:
+            case StatType.speed:
+                return self.stat_bonus[0]
+            case StatType.stamina:
+                return self.stat_bonus[1]
+            case StatType.power:
+                return self.stat_bonus[2]
+            case StatType.guts:
+                return self.stat_bonus[3]
+            case StatType.wit:
+                return self.stat_bonus[4]
 
-    def get_stat_growth_string(self, stat_type: StatType) -> str:
-        return f"{self.get_stat_growth(stat_type)}%"
+    def get_stat_bonus_string(self, stat_type: StatType) -> str:
+        return f"{self.get_stat_bonus(stat_type)}%"
 
-    def get_stat_growth_multipler(self, stat_type: StatType) -> float:
-        return (100 + self.get_stat_growth(stat_type)) / 100
+    def get_stat_bonus_multipler(self, stat_type: StatType) -> float:
+        return (100 + self.get_stat_bonus(stat_type)) / 100
 
 
 @dataclass(frozen=True)
@@ -90,10 +108,14 @@ class Character(GenericCharacter):
     """Represents a trainee (character)."""
 
     id: int
+    character_id: int
     name: str
     view_name: str
-    skills: list[Skill]
-    unique_skill: Skill
+    #skills: list[Skill]
+    #unique_skill: Skill
+
+    def costume_id(self) -> int:
+        return self.id - self.character_id * 100
 
     def __hash__(self) -> int:
         return hash(self.id)

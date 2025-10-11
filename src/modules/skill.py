@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from enum import Enum
 from dataclasses import dataclass
 
@@ -13,27 +16,9 @@ class SkillType(Enum):
         return self.name.title().replace("_", " ")
 
 
-@dataclass
+@dataclass(frozen=True)
 class Skill:
-    """Represents a skill that can be learned by characters."""
-
+    """Represents a skill that can be learned by characters or granted by cards"""
     id: int
     name: str
-
-    # Future expansion fields (commented out for now):
-    # description: str = ""
-    # skill_type: SkillType = SkillType.UNKNOWN
-    # effects: dict[str, Any] = None
-    # cost: int = 0
-    # requirements: list[str] = None
-
-    def __hash__(self) -> int:
-        return hash(self.id)
-
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, self.__class__):
-            return False
-        return self.id == other.id
-
-    def __str__(self) -> str:
-        return f"{self.name}"
+    icon_id: int

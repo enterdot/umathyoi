@@ -359,8 +359,8 @@ class CharactersScraper(GametoraScraperBase):
             "title_en_gl": "title",
             "skills_awakening": "skills_potential",
             "skills_evo": "skills_evolution",
-            "char_id": "id",
-            "costume": "costume_id",
+            "char_id": "character_id",
+            "costume": "id",
         }
 
     def _post_process(self, data: list[dict[str, Any]]) -> None:

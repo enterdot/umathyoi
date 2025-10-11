@@ -1,7 +1,7 @@
 {
   "metadata": {
     "source": "Gametora",
-    "scraped_at": "2025-10-10T21:31:29.892886",
+    "scraped_at": "2025-10-11T11:46:42.306519",
     "endpoint": "https://gametora.com/data/umamusume/character-cards.15eec53d.json",
     "record_count": 228
   },
@@ -61,8 +61,8 @@
           "old": 200511
         }
       ],
-      "id": 1001,
-      "costume_id": 100101
+      "character_id": 1001,
+      "id": 100101
     },
     {
       "aptitude": [
@@ -121,8 +121,8 @@
           "old": 200461
         }
       ],
-      "id": 1001,
-      "costume_id": 100130
+      "character_id": 1001,
+      "id": 100130
     },
     {
       "aptitude": [
@@ -176,8 +176,8 @@
           "old": 200551
         }
       ],
-      "id": 1002,
-      "costume_id": 100201
+      "character_id": 1002,
+      "id": 100201
     },
     {
       "aptitude": [
@@ -230,8 +230,8 @@
           "old": 201131
         }
       ],
-      "id": 1003,
-      "costume_id": 100301
+      "character_id": 1003,
+      "id": 100301
     },
     {
       "aptitude": [
@@ -287,8 +287,8 @@
           "old": 201141
         }
       ],
-      "id": 1003,
-      "costume_id": 100302
+      "character_id": 1003,
+      "id": 100302
     },
     {
       "aptitude": [
@@ -341,8 +341,8 @@
           "old": 201061
         }
       ],
-      "id": 1004,
-      "costume_id": 100401
+      "character_id": 1004,
+      "id": 100401
     },
     {
       "aptitude": [
@@ -397,8 +397,8 @@
           "old": 200681
         }
       ],
-      "id": 1004,
-      "costume_id": 100430
+      "character_id": 1004,
+      "id": 100430
     },
     {
       "aptitude": [
@@ -453,8 +453,8 @@
           "old": 200571
         }
       ],
-      "id": 1005,
-      "costume_id": 100501
+      "character_id": 1005,
+      "id": 100501
     },
     {
       "aptitude": [
@@ -511,8 +511,8 @@
           "old": 200341
         }
       ],
-      "id": 1006,
-      "costume_id": 100601
+      "character_id": 1006,
+      "id": 100601
     },
     {
       "aptitude": [
@@ -564,8 +564,8 @@
           "old": 201481
         }
       ],
-      "id": 1007,
-      "costume_id": 100701
+      "character_id": 1007,
+      "id": 100701
     },
     {
       "aptitude": [
@@ -620,8 +620,8 @@
           "old": 200701
         }
       ],
-      "id": 1008,
-      "costume_id": 100801
+      "character_id": 1008,
+      "id": 100801
     },
     {
       "aptitude": [
@@ -676,8 +676,8 @@
           "old": 200571
         }
       ],
-      "id": 1009,
-      "costume_id": 100901
+      "character_id": 1009,
+      "id": 100901
     },
     {
       "aptitude": [
@@ -730,8 +730,8 @@
           "old": 200681
         }
       ],
-      "id": 1010,
-      "costume_id": 101001
+      "character_id": 1010,
+      "id": 101001
     },
     {
       "aptitude": [
@@ -785,8 +785,8 @@
           "old": 200601
         }
       ],
-      "id": 1011,
-      "costume_id": 101101
+      "character_id": 1011,
+      "id": 101101
     },
     {
       "aptitude": [
@@ -841,8 +841,8 @@
           "old": 201421
         }
       ],
-      "id": 1011,
-      "costume_id": 101116
+      "character_id": 1011,
+      "id": 101116
     },
     {
       "aptitude": [
@@ -897,8 +897,8 @@
           "old": 200631
         }
       ],
-      "id": 1012,
-      "costume_id": 101201
+      "character_id": 1012,
+      "id": 101201
     },
     {
       "aptitude": [
@@ -949,8 +949,8 @@
           "old": 200561
         }
       ],
-      "id": 1013,
-      "costume_id": 101301
+      "character_id": 1013,
+      "id": 101301
     },
     {
       "aptitude": [
@@ -1002,8 +1002,8 @@
           "old": 200361
         }
       ],
-      "id": 1013,
-      "costume_id": 101302
+      "character_id": 1013,
+      "id": 101302
     },
     {
       "aptitude": [
@@ -1055,8 +1055,8 @@
           "old": 200561
         }
       ],
-      "id": 1014,
-      "costume_id": 101401
+      "character_id": 1014,
+      "id": 101401
     },
     {
       "aptitude": [
@@ -1112,8 +1112,8 @@
           "old": 200611
         }
       ],
-      "id": 1014,
-      "costume_id": 101416
+      "character_id": 1014,
+      "id": 101416
     },
     {
       "aptitude": [
@@ -1164,8 +1164,8 @@
           "old": 200721
         }
       ],
-      "id": 1015,
-      "costume_id": 101501
+      "character_id": 1015,
+      "id": 101501
     },
     {
       "aptitude": [
@@ -1216,8 +1216,8 @@
           "old": 200511
         }
       ],
-      "id": 1016,
-      "costume_id": 101601
+      "character_id": 1016,
+      "id": 101601
     },
     {
       "aptitude": [
@@ -1268,8 +1268,8 @@
           "old": 200331
         }
       ],
-      "id": 1017,
-      "costume_id": 101701
+      "character_id": 1017,
+      "id": 101701
     },
     {
       "aptitude": [
@@ -1321,8 +1321,8 @@
           "old": 200501
         }
       ],
-      "id": 1018,
-      "costume_id": 101801
+      "character_id": 1018,
+      "id": 101801
     },
     {
       "aptitude": [
@@ -1374,8 +1374,8 @@
           "old": 200341
         }
       ],
-      "id": 1018,
-      "costume_id": 101826
+      "character_id": 1018,
+      "id": 101826
     },
     {
       "aptitude": [
@@ -1438,8 +1438,8 @@
           "old": 201681
         }
       ],
-      "id": 1019,
-      "costume_id": 101901
+      "character_id": 1019,
+      "id": 101901
     },
     {
       "aptitude": [
@@ -1494,8 +1494,8 @@
           "old": 200541
         }
       ],
-      "id": 1020,
-      "costume_id": 102001
+      "character_id": 1020,
+      "id": 102001
     },
     {
       "aptitude": [
@@ -1549,8 +1549,8 @@
           "old": 200741
         }
       ],
-      "id": 1023,
-      "costume_id": 102301
+      "character_id": 1023,
+      "id": 102301
     },
     {
       "aptitude": [
@@ -1604,8 +1604,8 @@
           "old": 200491
         }
       ],
-      "id": 1024,
-      "costume_id": 102401
+      "character_id": 1024,
+      "id": 102401
     },
     {
       "aptitude": [
@@ -1661,8 +1661,8 @@
           "old": 200351
         }
       ],
-      "id": 1024,
-      "costume_id": 102426
+      "character_id": 1024,
+      "id": 102426
     },
     {
       "aptitude": [
@@ -1716,8 +1716,8 @@
           "old": 200711
         }
       ],
-      "id": 1026,
-      "costume_id": 102601
+      "character_id": 1026,
+      "id": 102601
     },
     {
       "aptitude": [
@@ -1771,8 +1771,8 @@
           "old": 200611
         }
       ],
-      "id": 1027,
-      "costume_id": 102701
+      "character_id": 1027,
+      "id": 102701
     },
     {
       "aptitude": [
@@ -1827,8 +1827,8 @@
           "old": 201351
         }
       ],
-      "id": 1028,
-      "costume_id": 102801
+      "character_id": 1028,
+      "id": 102801
     },
     {
       "aptitude": [
@@ -1881,8 +1881,8 @@
           "old": 200741
         }
       ],
-      "id": 1030,
-      "costume_id": 103001
+      "character_id": 1030,
+      "id": 103001
     },
     {
       "aptitude": [
@@ -1936,8 +1936,8 @@
           "old": 200571
         }
       ],
-      "id": 1032,
-      "costume_id": 103201
+      "character_id": 1032,
+      "id": 103201
     },
     {
       "aptitude": [
@@ -1991,8 +1991,8 @@
           "old": 200591
         }
       ],
-      "id": 1035,
-      "costume_id": 103501
+      "character_id": 1035,
+      "id": 103501
     },
     {
       "aptitude": [
@@ -2043,8 +2043,8 @@
           "old": 200511
         }
       ],
-      "id": 1037,
-      "costume_id": 103701
+      "character_id": 1037,
+      "id": 103701
     },
     {
       "aptitude": [
@@ -2095,8 +2095,8 @@
           "old": 201011
         }
       ],
-      "id": 1038,
-      "costume_id": 103801
+      "character_id": 1038,
+      "id": 103801
     },
     {
       "aptitude": [
@@ -2151,8 +2151,8 @@
           "old": 200601
         }
       ],
-      "id": 1040,
-      "costume_id": 104001
+      "character_id": 1040,
+      "id": 104001
     },
     {
       "aptitude": [
@@ -2207,8 +2207,8 @@
           "old": 200981
         }
       ],
-      "id": 1041,
-      "costume_id": 104101
+      "character_id": 1041,
+      "id": 104101
     },
     {
       "aptitude": [
@@ -2262,8 +2262,8 @@
           "old": 200351
         }
       ],
-      "id": 1045,
-      "costume_id": 104501
+      "character_id": 1045,
+      "id": 104501
     },
     {
       "aptitude": [
@@ -2321,8 +2321,8 @@
           "old": 201671
         }
       ],
-      "id": 1046,
-      "costume_id": 104601
+      "character_id": 1046,
+      "id": 104601
     },
     {
       "aptitude": [
@@ -2373,8 +2373,8 @@
           "old": 200641
         }
       ],
-      "id": 1050,
-      "costume_id": 105001
+      "character_id": 1050,
+      "id": 105001
     },
     {
       "aptitude": [
@@ -2426,8 +2426,8 @@
           "old": 200471
         }
       ],
-      "id": 1052,
-      "costume_id": 105201
+      "character_id": 1052,
+      "id": 105201
     },
     {
       "aptitude": [
@@ -2481,8 +2481,8 @@
           "old": 201561
         }
       ],
-      "id": 1056,
-      "costume_id": 105601
+      "character_id": 1056,
+      "id": 105601
     },
     {
       "aptitude": [
@@ -2537,8 +2537,8 @@
           "old": 200751
         }
       ],
-      "id": 1056,
-      "costume_id": 105623
+      "character_id": 1056,
+      "id": 105623
     },
     {
       "aptitude": [
@@ -2589,8 +2589,8 @@
           "old": 200471
         }
       ],
-      "id": 1058,
-      "costume_id": 105801
+      "character_id": 1058,
+      "id": 105801
     },
     {
       "aptitude": [
@@ -2644,8 +2644,8 @@
           "old": 201441
         }
       ],
-      "id": 1060,
-      "costume_id": 106001
+      "character_id": 1060,
+      "id": 106001
     },
     {
       "aptitude": [
@@ -2699,8 +2699,8 @@
           "old": 201431
         }
       ],
-      "id": 1061,
-      "costume_id": 106101
+      "character_id": 1061,
+      "id": 106101
     },
     {
       "aptitude": [
@@ -2756,8 +2756,8 @@
           "old": 200772
         }
       ],
-      "id": 1030,
-      "costume_id": 103040
+      "character_id": 1030,
+      "id": 103040
     },
     {
       "aptitude": [
@@ -2813,8 +2813,8 @@
           "old": 201161
         }
       ],
-      "id": 1045,
-      "costume_id": 104540
+      "character_id": 1045,
+      "id": 104540
     },
     {
       "aptitude": [
@@ -2865,8 +2865,8 @@
           "old": 200611
         }
       ],
-      "id": 1039,
-      "costume_id": 103901
+      "character_id": 1039,
+      "id": 103901
     },
     {
       "aptitude": [
@@ -2917,8 +2917,8 @@
           "old": 201221
         }
       ],
-      "id": 1025,
-      "costume_id": 102501
+      "character_id": 1025,
+      "id": 102501
     },
     {
       "aptitude": [
@@ -2970,8 +2970,8 @@
           "old": 200194
         }
       ],
-      "id": 1017,
-      "costume_id": 101743
+      "character_id": 1017,
+      "id": 101743
     },
     {
       "aptitude": [
@@ -3023,8 +3023,8 @@
           "old": 201691
         }
       ],
-      "id": 1040,
-      "costume_id": 104043
+      "character_id": 1040,
+      "id": 104043
     },
     {
       "aptitude": [
@@ -3075,8 +3075,8 @@
           "old": 200571
         }
       ],
-      "id": 1048,
-      "costume_id": 104801
+      "character_id": 1048,
+      "id": 104801
     },
     {
       "aptitude": [
@@ -3131,8 +3131,8 @@
           "old": 200064
         }
       ],
-      "id": 1059,
-      "costume_id": 105901
+      "character_id": 1059,
+      "id": 105901
     },
     {
       "aptitude": [
@@ -3184,8 +3184,8 @@
           "old": 200751
         }
       ],
-      "id": 1006,
-      "costume_id": 100646
+      "character_id": 1006,
+      "id": 100646
     },
     {
       "aptitude": [
@@ -3242,8 +3242,8 @@
           "old": 200511
         }
       ],
-      "id": 1023,
-      "costume_id": 102346
+      "character_id": 1023,
+      "id": 102346
     },
     {
       "aptitude": [
@@ -3298,8 +3298,8 @@
           "old": 201341
         }
       ],
-      "id": 1022,
-      "costume_id": 102201
+      "character_id": 1022,
+      "id": 102201
     },
     {
       "aptitude": [
@@ -3354,8 +3354,8 @@
           "old": 201612
         }
       ],
-      "id": 1021,
-      "costume_id": 102101
+      "character_id": 1021,
+      "id": 102101
     },
     {
       "aptitude": [
@@ -3411,8 +3411,8 @@
           "old": 202011
         }
       ],
-      "id": 1015,
-      "costume_id": 101510
+      "character_id": 1015,
+      "id": 101510
     },
     {
       "aptitude": [
@@ -3468,8 +3468,8 @@
           "old": 201401
         }
       ],
-      "id": 1052,
-      "costume_id": 105210
+      "character_id": 1052,
+      "id": 105210
     },
     {
       "aptitude": [
@@ -3524,8 +3524,8 @@
           "old": 200174
         }
       ],
-      "id": 1069,
-      "costume_id": 106901
+      "character_id": 1069,
+      "id": 106901
     },
     {
       "aptitude": [
@@ -3586,8 +3586,8 @@
           "old": 200431
         }
       ],
-      "id": 1026,
-      "costume_id": 102613
+      "character_id": 1026,
+      "id": 102613
     },
     {
       "aptitude": [
@@ -3643,8 +3643,8 @@
           "old": 201103
         }
       ],
-      "id": 1037,
-      "costume_id": 103713
+      "character_id": 1037,
+      "id": 103713
     },
     {
       "aptitude": [
@@ -3695,8 +3695,8 @@
           "old": 201701
         }
       ],
-      "id": 1071,
-      "costume_id": 107101
+      "character_id": 1071,
+      "id": 107101
     },
     {
       "aptitude": [
@@ -3747,8 +3747,8 @@
           "old": 200631
         }
       ],
-      "id": 1033,
-      "costume_id": 103301
+      "character_id": 1033,
+      "id": 103301
     },
     {
       "aptitude": [
@@ -3800,8 +3800,8 @@
           "old": 201211
         }
       ],
-      "id": 1062,
-      "costume_id": 106201
+      "character_id": 1062,
+      "id": 106201
     },
     {
       "aptitude": [
@@ -3859,8 +3859,8 @@
           "old": 201173
         }
       ],
-      "id": 1068,
-      "costume_id": 106801
+      "character_id": 1068,
+      "id": 106801
     },
     {
       "aptitude": [
@@ -3915,8 +3915,8 @@
           "old": 200014
         }
       ],
-      "id": 1067,
-      "costume_id": 106701
+      "character_id": 1067,
+      "id": 106701
     },
     {
       "aptitude": [
@@ -3967,8 +3967,8 @@
           "old": 202071
         }
       ],
-      "id": 1074,
-      "costume_id": 107401
+      "character_id": 1074,
+      "id": 107401
     },
     {
       "aptitude": [
@@ -4024,8 +4024,8 @@
           "old": 200581
         }
       ],
-      "id": 1005,
-      "costume_id": 100520
+      "character_id": 1005,
+      "id": 100520
     },
     {
       "aptitude": [
@@ -4081,8 +4081,8 @@
           "old": 201271
         }
       ],
-      "id": 1020,
-      "costume_id": 102020
+      "character_id": 1020,
+      "id": 102020
     },
     {
       "aptitude": [
@@ -4137,8 +4137,8 @@
           "old": 201341
         }
       ],
-      "id": 1051,
-      "costume_id": 105101
+      "character_id": 1051,
+      "id": 105101
     },
     {
       "aptitude": [
@@ -4193,8 +4193,8 @@
           "old": 200731
         }
       ],
-      "id": 1072,
-      "costume_id": 107201
+      "character_id": 1072,
+      "id": 107201
     },
     {
       "aptitude": [
@@ -4250,8 +4250,8 @@
           "old": 200491
         }
       ],
-      "id": 1060,
-      "costume_id": 106050
+      "character_id": 1060,
+      "id": 106050
     },
     {
       "aptitude": [
@@ -4307,8 +4307,8 @@
           "old": 200174
         }
       ],
-      "id": 1061,
-      "costume_id": 106150
+      "character_id": 1061,
+      "id": 106150
     },
     {
       "aptitude": [
@@ -4359,8 +4359,8 @@
           "old": 202131
         }
       ],
-      "id": 1031,
-      "costume_id": 103101
+      "character_id": 1031,
+      "id": 103101
     },
     {
       "aptitude": [
@@ -4415,8 +4415,8 @@
           "old": 201191
         }
       ],
-      "id": 1064,
-      "costume_id": 106401
+      "character_id": 1064,
+      "id": 106401
     },
     {
       "aptitude": [
@@ -4472,8 +4472,8 @@
           "old": 201901
         }
       ],
-      "id": 1022,
-      "costume_id": 102226
+      "character_id": 1022,
+      "id": 102226
     },
     {
       "aptitude": [
@@ -4529,8 +4529,8 @@
           "old": 200651
         }
       ],
-      "id": 1038,
-      "costume_id": 103826
+      "character_id": 1038,
+      "id": 103826
     },
     {
       "aptitude": [
@@ -4585,8 +4585,8 @@
           "old": 202001
         }
       ],
-      "id": 1034,
-      "costume_id": 103401
+      "character_id": 1034,
+      "id": 103401
     },
     {
       "aptitude": [
@@ -4641,8 +4641,8 @@
           "old": 201511
         }
       ],
-      "id": 1044,
-      "costume_id": 104401
+      "character_id": 1044,
+      "id": 104401
     },
     {
       "aptitude": [
@@ -4698,8 +4698,8 @@
           "old": 201901
         }
       ],
-      "id": 1010,
-      "costume_id": 101023
+      "character_id": 1010,
+      "id": 101023
     },
     {
       "aptitude": [
@@ -4755,8 +4755,8 @@
           "old": 202081
         }
       ],
-      "id": 1059,
-      "costume_id": 105923
+      "character_id": 1059,
+      "id": 105923
     },
     {
       "aptitude": [
@@ -4807,8 +4807,8 @@
           "old": 201453
         }
       ],
-      "id": 1036,
-      "costume_id": 103601
+      "character_id": 1036,
+      "id": 103601
     },
     {
       "aptitude": [
@@ -4867,8 +4867,8 @@
           "old": 202061
         }
       ],
-      "id": 1001,
-      "costume_id": 100102
+      "character_id": 1001,
+      "id": 100102
     },
     {
       "aptitude": [
@@ -4924,8 +4924,8 @@
           "old": 202101
         }
       ],
-      "id": 1007,
-      "costume_id": 100730
+      "character_id": 1007,
+      "id": 100730
     },
     {
       "aptitude": [
@@ -4977,8 +4977,8 @@
           "old": 202191
         }
       ],
-      "id": 1013,
-      "costume_id": 101330
+      "character_id": 1013,
+      "id": 101330
     },
     {
       "aptitude": [
@@ -5033,8 +5033,8 @@
           "old": 202111
         }
       ],
-      "id": 1053,
-      "costume_id": 105301
+      "character_id": 1053,
+      "id": 105301
     },
     {
       "aptitude": [
@@ -5085,8 +5085,8 @@
           "old": 202331
         }
       ],
-      "id": 1098,
-      "costume_id": 109801
+      "character_id": 1098,
+      "id": 109801
     },
     {
       "aptitude": [
@@ -5147,8 +5147,8 @@
           "old": 202311
         }
       ],
-      "id": 1046,
-      "costume_id": 104602
+      "character_id": 1046,
+      "id": 104602
     },
     {
       "aptitude": [
@@ -5206,8 +5206,8 @@
           "old": 201701
         }
       ],
-      "id": 1035,
-      "costume_id": 103516
+      "character_id": 1035,
+      "id": 103516
     },
     {
       "aptitude": [
@@ -5259,8 +5259,8 @@
           "old": 202081
         }
       ],
-      "id": 1050,
-      "costume_id": 105016
+      "character_id": 1050,
+      "id": 105016
     },
     {
       "aptitude": [
@@ -5315,8 +5315,8 @@
           "old": 201341
         }
       ],
-      "id": 1029,
-      "costume_id": 102901
+      "character_id": 1029,
+      "id": 102901
     },
     {
       "aptitude": [
@@ -5367,8 +5367,8 @@
           "old": 201071
         }
       ],
-      "id": 1042,
-      "costume_id": 104201
+      "character_id": 1042,
+      "id": 104201
     },
     {
       "aptitude": [
@@ -5434,8 +5434,8 @@
           "old": 202271
         }
       ],
-      "id": 1019,
-      "costume_id": 101940
+      "character_id": 1019,
+      "id": 101940
     },
     {
       "aptitude": [
@@ -5491,8 +5491,8 @@
           "old": 200351
         }
       ],
-      "id": 1058,
-      "costume_id": 105840
+      "character_id": 1058,
+      "id": 105840
     },
     {
       "aptitude": [
@@ -5543,8 +5543,8 @@
           "old": 202041
         }
       ],
-      "id": 1087,
-      "costume_id": 108701
+      "character_id": 1087,
+      "id": 108701
     },
     {
       "aptitude": [
@@ -5599,8 +5599,8 @@
           "old": 202411
         }
       ],
-      "id": 1078,
-      "costume_id": 107801
+      "character_id": 1078,
+      "id": 107801
     },
     {
       "aptitude": [
@@ -5656,8 +5656,8 @@
           "old": 200461
         }
       ],
-      "id": 1021,
-      "costume_id": 102143
+      "character_id": 1021,
+      "id": 102143
     },
     {
       "aptitude": [
@@ -5713,8 +5713,8 @@
           "old": 200641
         }
       ],
-      "id": 1034,
-      "costume_id": 103443
+      "character_id": 1034,
+      "id": 103443
     },
     {
       "aptitude": [
@@ -5765,8 +5765,8 @@
           "old": 202441
         }
       ],
-      "id": 1049,
-      "costume_id": 104901
+      "character_id": 1049,
+      "id": 104901
     },
     {
       "aptitude": [
@@ -5821,8 +5821,8 @@
           "old": 202301
         }
       ],
-      "id": 1100,
-      "costume_id": 110001
+      "character_id": 1100,
+      "id": 110001
     },
     {
       "aptitude": [
@@ -5880,8 +5880,8 @@
           "old": 202451
         }
       ],
-      "id": 1008,
-      "costume_id": 100846
+      "character_id": 1008,
+      "id": 100846
     },
     {
       "aptitude": [
@@ -5943,8 +5943,8 @@
           "old": 202461
         }
       ],
-      "id": 1009,
-      "costume_id": 100946
+      "character_id": 1009,
+      "id": 100946
     },
     {
       "aptitude": [
@@ -5999,8 +5999,8 @@
           "old": 201113
         }
       ],
-      "id": 1047,
-      "costume_id": 104701
+      "character_id": 1047,
+      "id": 104701
     },
     {
       "aptitude": [
@@ -6052,8 +6052,8 @@
           "old": 202481
         }
       ],
-      "id": 1016,
-      "costume_id": 101602
+      "character_id": 1016,
+      "id": 101602
     },
     {
       "aptitude": [
@@ -6105,8 +6105,8 @@
           "old": 201221
         }
       ],
-      "id": 1067,
-      "costume_id": 106710
+      "character_id": 1067,
+      "id": 106710
     },
     {
       "aptitude": [
@@ -6167,8 +6167,8 @@
           "old": 200531
         }
       ],
-      "id": 1068,
-      "costume_id": 106810
+      "character_id": 1068,
+      "id": 106810
     },
     {
       "aptitude": [
@@ -6223,8 +6223,8 @@
           "old": 201671
         }
       ],
-      "id": 1099,
-      "costume_id": 109901
+      "character_id": 1099,
+      "id": 109901
     },
     {
       "aptitude": [
@@ -6275,8 +6275,8 @@
           "old": 202501
         }
       ],
-      "id": 1065,
-      "costume_id": 106501
+      "character_id": 1065,
+      "id": 106501
     },
     {
       "aptitude": [
@@ -6336,8 +6336,8 @@
           "old": 202171
         }
       ],
-      "id": 1027,
-      "costume_id": 102713
+      "character_id": 1027,
+      "id": 102713
     },
     {
       "aptitude": [
@@ -6389,8 +6389,8 @@
           "old": 201253
         }
       ],
-      "id": 1031,
-      "costume_id": 103113
+      "character_id": 1031,
+      "id": 103113
     },
     {
       "aptitude": [
@@ -6445,8 +6445,8 @@
           "old": 202341
         }
       ],
-      "id": 1043,
-      "costume_id": 104301
+      "character_id": 1043,
+      "id": 104301
     },
     {
       "aptitude": [
@@ -6497,8 +6497,8 @@
           "old": 200641
         }
       ],
-      "id": 1057,
-      "costume_id": 105701
+      "character_id": 1057,
+      "id": 105701
     },
     {
       "aptitude": [
@@ -6550,8 +6550,8 @@
           "old": 200531
         }
       ],
-      "id": 1066,
-      "costume_id": 106601
+      "character_id": 1066,
+      "id": 106601
     },
     {
       "aptitude": [
@@ -6606,8 +6606,8 @@
           "old": 202401
         }
       ],
-      "id": 1085,
-      "costume_id": 108501
+      "character_id": 1085,
+      "id": 108501
     },
     {
       "aptitude": [
@@ -6658,8 +6658,8 @@
           "old": 202561
         }
       ],
-      "id": 1083,
-      "costume_id": 108301
+      "character_id": 1083,
+      "id": 108301
     },
     {
       "aptitude": [
@@ -6711,8 +6711,8 @@
           "old": 202091
         }
       ],
-      "id": 1069,
-      "costume_id": 106920
+      "character_id": 1069,
+      "id": 106920
     },
     {
       "aptitude": [
@@ -6768,8 +6768,8 @@
           "old": 201103
         }
       ],
-      "id": 1071,
-      "costume_id": 107120
+      "character_id": 1071,
+      "id": 107120
     },
     {
       "aptitude": [
@@ -6820,8 +6820,8 @@
           "old": 202591
         }
       ],
-      "id": 1076,
-      "costume_id": 107601
+      "character_id": 1076,
+      "id": 107601
     },
     {
       "aptitude": [
@@ -6872,8 +6872,8 @@
           "old": 202601
         }
       ],
-      "id": 1105,
-      "costume_id": 110501
+      "character_id": 1105,
+      "id": 110501
     },
     {
       "aptitude": [
@@ -6930,8 +6930,8 @@
           "old": 200963
         }
       ],
-      "id": 1041,
-      "costume_id": 104150
+      "character_id": 1041,
+      "id": 104150
     },
     {
       "aptitude": [
@@ -6987,8 +6987,8 @@
           "old": 202081
         }
       ],
-      "id": 1062,
-      "costume_id": 106250
+      "character_id": 1062,
+      "id": 106250
     },
     {
       "aptitude": [
@@ -7043,8 +7043,8 @@
           "old": 202641
         }
       ],
-      "id": 1106,
-      "costume_id": 110601
+      "character_id": 1106,
+      "id": 110601
     },
     {
       "aptitude": [
@@ -7095,8 +7095,8 @@
           "old": 202651
         }
       ],
-      "id": 1084,
-      "costume_id": 108401
+      "character_id": 1084,
+      "id": 108401
     },
     {
       "aptitude": [
@@ -7152,8 +7152,8 @@
           "old": 202491
         }
       ],
-      "id": 1012,
-      "costume_id": 101226
+      "character_id": 1012,
+      "id": 101226
     },
     {
       "aptitude": [
@@ -7209,8 +7209,8 @@
           "old": 202171
         }
       ],
-      "id": 1051,
-      "costume_id": 105126
+      "character_id": 1051,
+      "id": 105126
     },
     {
       "aptitude": [
@@ -7265,8 +7265,8 @@
           "old": 200491
         }
       ],
-      "id": 1055,
-      "costume_id": 105501
+      "character_id": 1055,
+      "id": 105501
     },
     {
       "aptitude": [
@@ -7322,8 +7322,8 @@
           "old": 202121
         }
       ],
-      "id": 1048,
-      "costume_id": 104823
+      "character_id": 1048,
+      "id": 104823
     },
     {
       "aptitude": [
@@ -7375,8 +7375,8 @@
           "old": 200651
         }
       ],
-      "id": 1053,
-      "costume_id": 105323
+      "character_id": 1053,
+      "id": 105323
     },
     {
       "aptitude": [
@@ -7427,8 +7427,8 @@
           "old": 202461
         }
       ],
-      "id": 1104,
-      "costume_id": 110401
+      "character_id": 1104,
+      "id": 110401
     },
     {
       "aptitude": [
@@ -7483,8 +7483,8 @@
           "old": 200721
         }
       ],
-      "id": 1070,
-      "costume_id": 107001
+      "character_id": 1070,
+      "id": 107001
     },
     {
       "aptitude": [
@@ -7547,8 +7547,8 @@
           "old": 202691
         }
       ],
-      "id": 1002,
-      "costume_id": 100230
+      "character_id": 1002,
+      "id": 100230
     },
     {
       "aptitude": [
@@ -7604,8 +7604,8 @@
           "old": 202371
         }
       ],
-      "id": 1032,
-      "costume_id": 103230
+      "character_id": 1032,
+      "id": 103230
     },
     {
       "aptitude": [
@@ -7656,8 +7656,8 @@
           "old": 202011
         }
       ],
-      "id": 1077,
-      "costume_id": 107701
+      "character_id": 1077,
+      "id": 107701
     },
     {
       "aptitude": [
@@ -7709,8 +7709,8 @@
           "old": 200164
         }
       ],
-      "id": 1007,
-      "costume_id": 100702
+      "character_id": 1007,
+      "id": 100702
     },
     {
       "aptitude": [
@@ -7762,8 +7762,8 @@
           "old": 201113
         }
       ],
-      "id": 1067,
-      "costume_id": 106702
+      "character_id": 1067,
+      "id": 106702
     },
     {
       "aptitude": [
@@ -7814,8 +7814,8 @@
           "old": 201901
         }
       ],
-      "id": 1093,
-      "costume_id": 109301
+      "character_id": 1093,
+      "id": 109301
     },
     {
       "aptitude": [
@@ -7871,8 +7871,8 @@
           "old": 200751
         }
       ],
-      "id": 1036,
-      "costume_id": 103640
+      "character_id": 1036,
+      "id": 103640
     },
     {
       "aptitude": [
@@ -7924,8 +7924,8 @@
           "old": 200601
         }
       ],
-      "id": 1083,
-      "costume_id": 108340
+      "character_id": 1083,
+      "id": 108340
     },
     {
       "aptitude": [
@@ -7976,8 +7976,8 @@
           "old": 202531
         }
       ],
-      "id": 1086,
-      "costume_id": 108601
+      "character_id": 1086,
+      "id": 108601
     },
     {
       "aptitude": [
@@ -8037,8 +8037,8 @@
           "old": 200561
         }
       ],
-      "id": 1003,
-      "costume_id": 100343
+      "character_id": 1003,
+      "id": 100343
     },
     {
       "aptitude": [
@@ -8094,8 +8094,8 @@
           "old": 202171
         }
       ],
-      "id": 1039,
-      "costume_id": 103943
+      "character_id": 1039,
+      "id": 103943
     },
     {
       "aptitude": [
@@ -8146,8 +8146,8 @@
           "old": 201612
         }
       ],
-      "id": 1107,
-      "costume_id": 110701
+      "character_id": 1107,
+      "id": 110701
     },
     {
       "aptitude": [
@@ -8199,8 +8199,8 @@
           "old": 202681
         }
       ],
-      "id": 1064,
-      "costume_id": 106446
+      "character_id": 1064,
+      "id": 106446
     },
     {
       "aptitude": [
@@ -8252,8 +8252,8 @@
           "old": 201211
         }
       ],
-      "id": 1074,
-      "costume_id": 107446
+      "character_id": 1074,
+      "id": 107446
     },
     {
       "aptitude": [
@@ -8304,8 +8304,8 @@
           "old": 202081
         }
       ],
-      "id": 1088,
-      "costume_id": 108801
+      "character_id": 1088,
+      "id": 108801
     },
     {
       "aptitude": [
@@ -8356,8 +8356,8 @@
           "old": 200511
         }
       ],
-      "id": 1089,
-      "costume_id": 108901
+      "character_id": 1089,
+      "id": 108901
     },
     {
       "aptitude": [
@@ -8409,8 +8409,8 @@
           "old": 202821
         }
       ],
-      "id": 1068,
-      "costume_id": 106802
+      "character_id": 1068,
+      "id": 106802
     },
     {
       "aptitude": [
@@ -8470,8 +8470,8 @@
           "old": 200601
         }
       ],
-      "id": 1060,
-      "costume_id": 106010
+      "character_id": 1060,
+      "id": 106010
     },
     {
       "aptitude": [
@@ -8522,8 +8522,8 @@
           "old": 202121
         }
       ],
-      "id": 1091,
-      "costume_id": 109101
+      "character_id": 1091,
+      "id": 109101
     },
     {
       "aptitude": [
@@ -8575,8 +8575,8 @@
           "old": 202851
         }
       ],
-      "id": 1025,
-      "costume_id": 102513
+      "character_id": 1025,
+      "id": 102513
     },
     {
       "aptitude": [
@@ -8632,8 +8632,8 @@
           "old": 200341
         }
       ],
-      "id": 1029,
-      "costume_id": 102913
+      "character_id": 1029,
+      "id": 102913
     },
     {
       "aptitude": [
@@ -8685,8 +8685,8 @@
           "old": 200671
         }
       ],
-      "id": 1054,
-      "costume_id": 105401
+      "character_id": 1054,
+      "id": 105401
     },
     {
       "aptitude": [
@@ -8738,8 +8738,8 @@
           "old": 202151
         }
       ],
-      "id": 1063,
-      "costume_id": 106301
+      "character_id": 1063,
+      "id": 106301
     },
     {
       "aptitude": [
@@ -8790,8 +8790,8 @@
           "old": 202871
         }
       ],
-      "id": 1108,
-      "costume_id": 110801
+      "character_id": 1108,
+      "id": 110801
     },
     {
       "aptitude": [
@@ -8842,8 +8842,8 @@
           "old": 202951
         }
       ],
-      "id": 1080,
-      "costume_id": 108001
+      "character_id": 1080,
+      "id": 108001
     },
     {
       "aptitude": [
@@ -8894,8 +8894,8 @@
           "old": 201901
         }
       ],
-      "id": 1109,
-      "costume_id": 110901
+      "character_id": 1109,
+      "id": 110901
     },
     {
       "aptitude": [
@@ -8947,8 +8947,8 @@
           "old": 200681
         }
       ],
-      "id": 1065,
-      "costume_id": 106520
+      "character_id": 1065,
+      "id": 106520
     },
     {
       "aptitude": [
@@ -9000,8 +9000,8 @@
           "old": 202961
         }
       ],
-      "id": 1085,
-      "costume_id": 108520
+      "character_id": 1085,
+      "id": 108520
     },
     {
       "aptitude": [
@@ -9061,8 +9061,8 @@
           "old": 202641
         }
       ],
-      "id": 1035,
-      "costume_id": 103502
+      "character_id": 1035,
+      "id": 103502
     },
     {
       "aptitude": [
@@ -9117,8 +9117,8 @@
           "old": 202541
         }
       ],
-      "id": 1102,
-      "costume_id": 110201
+      "character_id": 1102,
+      "id": 110201
     },
     {
       "aptitude": [
@@ -9174,8 +9174,8 @@
           "old": 202481
         }
       ],
-      "id": 1045,
-      "costume_id": 104550
+      "character_id": 1045,
+      "id": 104550
     },
     {
       "aptitude": [
@@ -9227,8 +9227,8 @@
           "old": 202471
         }
       ],
-      "id": 1072,
-      "costume_id": 107250
+      "character_id": 1072,
+      "id": 107250
     },
     {
       "aptitude": [
@@ -9284,8 +9284,8 @@
           "old": 201592
         }
       ],
-      "id": 1032,
-      "costume_id": 103202
+      "character_id": 1032,
+      "id": 103202
     },
     {
       "aptitude": [
@@ -9336,8 +9336,8 @@
           "old": 202671
         }
       ],
-      "id": 1082,
-      "costume_id": 108201
+      "character_id": 1082,
+      "id": 108201
     },
     {
       "aptitude": [
@@ -9393,8 +9393,8 @@
           "old": 202921
         }
       ],
-      "id": 1044,
-      "costume_id": 104426
+      "character_id": 1044,
+      "id": 104426
     },
     {
       "aptitude": [
@@ -9454,8 +9454,8 @@
           "old": 202751
         }
       ],
-      "id": 1061,
-      "costume_id": 106126
+      "character_id": 1061,
+      "id": 106126
     },
     {
       "aptitude": [
@@ -9510,8 +9510,8 @@
           "old": 202661
         }
       ],
-      "id": 1094,
-      "costume_id": 109401
+      "character_id": 1094,
+      "id": 109401
     },
     {
       "aptitude": [
@@ -9562,8 +9562,8 @@
           "old": 203001
         }
       ],
-      "id": 1119,
-      "costume_id": 111901
+      "character_id": 1119,
+      "id": 111901
     },
     {
       "aptitude": [
@@ -9619,8 +9619,8 @@
           "old": 200064
         }
       ],
-      "id": 1030,
-      "costume_id": 103002
+      "character_id": 1030,
+      "id": 103002
     },
     {
       "aptitude": [
@@ -9671,8 +9671,8 @@
           "old": 201243
         }
       ],
-      "id": 1120,
-      "costume_id": 112001
+      "character_id": 1120,
+      "id": 112001
     },
     {
       "aptitude": [
@@ -9724,8 +9724,8 @@
           "old": 202151
         }
       ],
-      "id": 1037,
-      "costume_id": 103730
+      "character_id": 1037,
+      "id": 103730
     },
     {
       "aptitude": [
@@ -9777,8 +9777,8 @@
           "old": 203081
         }
       ],
-      "id": 1099,
-      "costume_id": 109930
+      "character_id": 1099,
+      "id": 109930
     },
     {
       "aptitude": [
@@ -9833,8 +9833,8 @@
           "old": 203121
         }
       ],
-      "id": 1116,
-      "costume_id": 111601
+      "character_id": 1116,
+      "id": 111601
     },
     {
       "aptitude": [
@@ -9886,8 +9886,8 @@
           "old": 200194
         }
       ],
-      "id": 1047,
-      "costume_id": 104723
+      "character_id": 1047,
+      "id": 104723
     },
     {
       "aptitude": [
@@ -9939,8 +9939,8 @@
           "old": 201632
         }
       ],
-      "id": 1105,
-      "costume_id": 110523
+      "character_id": 1105,
+      "id": 110523
     },
     {
       "aptitude": [
@@ -9991,8 +9991,8 @@
           "old": 203171
         }
       ],
-      "id": 1110,
-      "costume_id": 111001
+      "character_id": 1110,
+      "id": 111001
     },
     {
       "aptitude": [
@@ -10043,8 +10043,8 @@
           "old": 202401
         }
       ],
-      "id": 1121,
-      "costume_id": 112101
+      "character_id": 1121,
+      "id": 112101
     },
     {
       "aptitude": [
@@ -10100,8 +10100,8 @@
           "old": 203201
         }
       ],
-      "id": 1024,
-      "costume_id": 102440
+      "character_id": 1024,
+      "id": 102440
     },
     {
       "aptitude": [
@@ -10153,8 +10153,8 @@
           "old": 202721
         }
       ],
-      "id": 1042,
-      "costume_id": 104240
+      "character_id": 1042,
+      "id": 104240
     },
     {
       "aptitude": [
@@ -10205,8 +10205,8 @@
           "old": 203131
         }
       ],
-      "id": 1124,
-      "costume_id": 112401
+      "character_id": 1124,
+      "id": 112401
     },
     {
       "aptitude": [
@@ -10264,8 +10264,8 @@
           "old": 202581
         }
       ],
-      "id": 1023,
-      "costume_id": 102302
+      "character_id": 1023,
+      "id": 102302
     },
     {
       "aptitude": [
@@ -10317,8 +10317,8 @@
           "old": 202881
         }
       ],
-      "id": 1050,
-      "costume_id": 105002
+      "character_id": 1050,
+      "id": 105002
     },
     {
       "aptitude": [
@@ -10369,8 +10369,8 @@
           "old": 203331
         }
       ],
-      "id": 1111,
-      "costume_id": 111101
+      "character_id": 1111,
+      "id": 111101
     },
     {
       "aptitude": [
@@ -10422,8 +10422,8 @@
           "old": 203171
         }
       ],
-      "id": 1033,
-      "costume_id": 103346
+      "character_id": 1033,
+      "id": 103346
     },
     {
       "aptitude": [
@@ -10475,8 +10475,8 @@
           "old": 203221
         }
       ],
-      "id": 1077,
-      "costume_id": 107746
+      "character_id": 1077,
+      "id": 107746
     },
     {
       "aptitude": [
@@ -10527,8 +10527,8 @@
           "old": 202721
         }
       ],
-      "id": 1117,
-      "costume_id": 111701
+      "character_id": 1117,
+      "id": 111701
     },
     {
       "aptitude": [
@@ -10584,8 +10584,8 @@
           "old": 203371
         }
       ],
-      "id": 1011,
-      "costume_id": 101102
+      "character_id": 1011,
+      "id": 101102
     },
     {
       "aptitude": [
@@ -10637,8 +10637,8 @@
           "old": 202971
         }
       ],
-      "id": 1057,
-      "costume_id": 105710
+      "character_id": 1057,
+      "id": 105710
     },
     {
       "aptitude": [
@@ -10690,8 +10690,8 @@
           "old": 203391
         }
       ],
-      "id": 1104,
-      "costume_id": 110410
+      "character_id": 1104,
+      "id": 110410
     },
     {
       "aptitude": [
@@ -10747,8 +10747,8 @@
           "old": 203461
         }
       ],
-      "id": 1004,
-      "costume_id": 100410
+      "character_id": 1004,
+      "id": 100410
     },
     {
       "aptitude": [
@@ -10799,8 +10799,8 @@
           "old": 203471
         }
       ],
-      "id": 1079,
-      "costume_id": 107901
+      "character_id": 1079,
+      "id": 107901
     },
     {
       "aptitude": [
@@ -10852,8 +10852,8 @@
           "old": 202411
         }
       ],
-      "id": 1078,
-      "costume_id": 107813
+      "character_id": 1078,
+      "id": 107813
     },
     {
       "aptitude": [
@@ -10905,8 +10905,8 @@
           "old": 203481
         }
       ],
-      "id": 1087,
-      "costume_id": 108713
+      "character_id": 1087,
+      "id": 108713
     },
     {
       "aptitude": [
@@ -10958,8 +10958,8 @@
           "old": 201113
         }
       ],
-      "id": 1073,
-      "costume_id": 107301
+      "character_id": 1073,
+      "id": 107301
     },
     {
       "aptitude": [
@@ -11014,8 +11014,8 @@
           "old": 203511
         }
       ],
-      "id": 1115,
-      "costume_id": 111501
+      "character_id": 1115,
+      "id": 111501
     },
     {
       "aptitude": [
@@ -11066,8 +11066,8 @@
           "old": 203541
         }
       ],
-      "id": 1131,
-      "costume_id": 113101
+      "character_id": 1131,
+      "id": 113101
     },
     {
       "aptitude": [
@@ -11118,8 +11118,8 @@
           "old": 202121
         }
       ],
-      "id": 1096,
-      "costume_id": 109601
+      "character_id": 1096,
+      "id": 109601
     },
     {
       "aptitude": [
@@ -11171,8 +11171,8 @@
           "old": 201453
         }
       ],
-      "id": 1084,
-      "costume_id": 108420
+      "character_id": 1084,
+      "id": 108420
     },
     {
       "aptitude": [
@@ -11224,8 +11224,8 @@
           "old": 202391
         }
       ],
-      "id": 1107,
-      "costume_id": 110720
+      "character_id": 1107,
+      "id": 110720
     },
     {
       "aptitude": [
@@ -11277,8 +11277,8 @@
           "old": 202661
         }
       ],
-      "id": 1070,
-      "costume_id": 107002
+      "character_id": 1070,
+      "id": 107002
     },
     {
       "aptitude": [
@@ -11329,8 +11329,8 @@
           "old": 202481
         }
       ],
-      "id": 1127,
-      "costume_id": 112701
+      "character_id": 1127,
+      "id": 112701
     },
     {
       "aptitude": [
@@ -11388,8 +11388,8 @@
           "old": 202831
         }
       ],
-      "id": 1046,
-      "costume_id": 104650
+      "character_id": 1046,
+      "id": 104650
     },
     {
       "aptitude": [
@@ -11441,8 +11441,8 @@
           "old": 202254
         }
       ],
-      "id": 1098,
-      "costume_id": 109850
+      "character_id": 1098,
+      "id": 109850
     },
     {
       "aptitude": [
@@ -11493,8 +11493,8 @@
           "old": 201602
         }
       ],
-      "id": 1090,
-      "costume_id": 109001
+      "character_id": 1090,
+      "id": 109001
     },
     {
       "aptitude": [
@@ -11545,8 +11545,8 @@
           "old": 203631
         }
       ],
-      "id": 1132,
-      "costume_id": 113201
+      "character_id": 1132,
+      "id": 113201
     },
     {
       "aptitude": [
@@ -11598,8 +11598,8 @@
           "old": 200681
         }
       ],
-      "id": 1086,
-      "costume_id": 108626
+      "character_id": 1086,
+      "id": 108626
     },
     {
       "aptitude": [
@@ -11651,8 +11651,8 @@
           "old": 203051
         }
       ],
-      "id": 1110,
-      "costume_id": 111026
+      "character_id": 1110,
+      "id": 111026
     },
     {
       "aptitude": [
@@ -11703,8 +11703,8 @@
           "old": 203441
         }
       ],
-      "id": 1133,
-      "costume_id": 113301
+      "character_id": 1133,
+      "id": 113301
     },
     {
       "aptitude": [
@@ -11756,8 +11756,8 @@
           "old": 203671
         }
       ],
-      "id": 1040,
-      "costume_id": 104002
+      "character_id": 1040,
+      "id": 104002
     },
     {
       "aptitude": [
@@ -11809,8 +11809,8 @@
           "old": 201662
         }
       ],
-      "id": 1031,
-      "costume_id": 103102
+      "character_id": 1031,
+      "id": 103102
     },
     {
       "aptitude": [
@@ -11862,8 +11862,8 @@
           "old": 201341
         }
       ],
-      "id": 1109,
-      "costume_id": 110902
+      "character_id": 1109,
+      "id": 110902
     },
     {
       "aptitude": [
@@ -11914,8 +11914,8 @@
           "old": 201901
         }
       ],
-      "id": 1113,
-      "costume_id": 111301
+      "character_id": 1113,
+      "id": 111301
     },
     {
       "aptitude": [
@@ -11967,8 +11967,8 @@
           "old": 203741
         }
       ],
-      "id": 1088,
-      "costume_id": 108830
+      "character_id": 1088,
+      "id": 108830
     },
     {
       "aptitude": [
@@ -12020,8 +12020,8 @@
           "old": 203711
         }
       ],
-      "id": 1089,
-      "costume_id": 108930
+      "character_id": 1089,
+      "id": 108930
     },
     {
       "aptitude": [
@@ -12073,8 +12073,8 @@
           "old": 202641
         }
       ],
-      "id": 1091,
-      "costume_id": 109130
+      "character_id": 1091,
+      "id": 109130
     },
     {
       "aptitude": [
@@ -12129,8 +12129,8 @@
           "old": 203801
         }
       ],
-      "id": 1097,
-      "costume_id": 109701
+      "character_id": 1097,
+      "id": 109701
     },
     {
       "aptitude": [
@@ -12182,8 +12182,8 @@
           "old": 203871
         }
       ],
-      "id": 1093,
-      "costume_id": 109323
+      "character_id": 1093,
+      "id": 109323
     },
     {
       "aptitude": [
@@ -12235,8 +12235,8 @@
           "old": 202081
         }
       ],
-      "id": 1106,
-      "costume_id": 110623
+      "character_id": 1106,
+      "id": 110623
     },
     {
       "aptitude": [
@@ -12287,8 +12287,8 @@
           "old": 203181
         }
       ],
-      "id": 1081,
-      "costume_id": 108101
+      "character_id": 1081,
+      "id": 108101
     },
     {
       "aptitude": [
@@ -12339,8 +12339,8 @@
           "old": 203931
         }
       ],
-      "id": 1095,
-      "costume_id": 109501
+      "character_id": 1095,
+      "id": 109501
     },
     {
       "aptitude": [
@@ -12392,8 +12392,8 @@
           "old": 201901
         }
       ],
-      "id": 1028,
-      "costume_id": 102840
+      "character_id": 1028,
+      "id": 102840
     },
     {
       "aptitude": [
@@ -12445,8 +12445,8 @@
           "old": 203951
         }
       ],
-      "id": 1055,
-      "costume_id": 105540
+      "character_id": 1055,
+      "id": 105540
     },
     {
       "aptitude": [
@@ -12498,8 +12498,8 @@
           "old": 202711
         }
       ],
-      "id": 1048,
-      "costume_id": 104840
+      "character_id": 1048,
+      "id": 104840
     }
   ]
 }

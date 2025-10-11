@@ -8,7 +8,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gio, Adw
 
-from modules import CardDatabase, ScenarioDatabase, CharacterDatabase
+from modules import CardDatabase, ScenarioDatabase, CharacterDatabase, SkillDatabase
 from modules import (
     Deck,
     CardView,
@@ -52,6 +52,13 @@ class MainApplication(Adw.Application):
         self.card_db = CardDatabase()
         self.scenario_db = ScenarioDatabase()
         self.character_db = CharacterDatabase()
+        self.skill_db = SkillDatabase()
+
+        for character in self.character_db:
+            self.character_db.load_character_portrait_async(character.id, 16, 16, lambda x: x)
+
+        for skill in self.skill_db:
+            self.skill_db.load_skill_icon_async(skill.id, 16, 16, lambda x: x)
 
         self.card_view = CardView()
 
