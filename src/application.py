@@ -55,7 +55,8 @@ class MainApplication(Adw.Application):
         self.skill_db = SkillDatabase()
 
         for character in self.character_db:
-            self.character_db.load_character_portrait_async(character.id, 16, 16, lambda x: x)
+            self.character_db.load_character_portrait_async(character.character_id, 32, 32, lambda x: x)
+            self.character_db.load_character_costume_async(character.id, 32, 32, lambda x: x)
 
         for skill in self.skill_db:
             self.skill_db.load_skill_icon_async(skill.id, 16, 16, lambda x: x)
