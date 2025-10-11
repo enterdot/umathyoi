@@ -14,7 +14,7 @@ from modules import (
     CardView,
     DeckList,
     EfficiencyCalculator,
-    GenericCharacter,
+    Character,
     StatType,
     Aptitude,
 )
@@ -69,12 +69,7 @@ class MainApplication(Adw.Application):
 
         # Initialize with first scenario and a generic character
         # TODO: load from dconf for session persistence
-        character = GenericCharacter(
-            {StatType.speed: 20, StatType.power: 10},
-            Aptitude.A,
-            Aptitude.A,
-            Aptitude.A,
-        )
+        character = Character(0, 0, "placeholder", "placeholder", [0] * 5, [Aptitude.A] * 10)
         scenario = self.scenario_db.scenarios[0]
         self.efficiency_calculator = EfficiencyCalculator(
             self.deck_list, scenario, character

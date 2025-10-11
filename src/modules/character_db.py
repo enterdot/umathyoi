@@ -23,11 +23,10 @@ class CharacterDatabase:
 
     CHARACTERS_JSON = "data/characters.json"
     CHARACTER_PORTRAIT_CACHE_NAME = "character_portraits"
-    
-    # Network constants for character portraits
+    CHARACTER_COSTUME_CACHE_NAME = "character_costumes"
     IMAGE_TIMEOUT_SECONDS = 10
-    # Character portraits use id and character_id fields: https://gametora.com/images/umamusume/characters/chara_stand_{character_id}_{id}.png
-    IMAGE_BASE_URL = "https://gametora.com/images/umamusume/characters/chara_stand_{character_id}_{id}.png"
+    COSTUME_BASE_URL = "https://gametora.com/images/umamusume/characters/chara_stand_{character_id}_{id}.png"
+    PORTRAIT_BASE_URL = "https://gametora.com/images/umamusume/characters/icons/chr_icon_{character_id}.png"
     MAX_CONCURRENT_CONNECTIONS = 10
 
     @stopwatch(show_args=False)
@@ -52,9 +51,14 @@ class CharacterDatabase:
         
         # Setup disk cache directory
         cache_base = Path(user_cache_dir("umathyoi"))
-        self._cache_dir = cache_base / CharacterDatabase.CHARACTER_PORTRAIT_CACHE_NAME
-        self._cache_dir.mkdir(parents=True, exist_ok=True)
-        logger.info(f"Character portrait cache directory: {self._cache_dir}")
+        
+        self._cache_dir_portraits = cache_base / CharacterDatabase.CHARACTER_PORTRAIT_CACHE_NAME
+        self._cache_dir_portraits.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Character portrait cache directory: {self._cache_dir_portraits}")
+
+        self._cache_dir_costumes = cache_base / CharacterDatabase.CHARACTER_PORTRAIT_CACHE_NAME
+        self._cache_dir_costumes.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Character portrait cache directory: {self._cache_dir_costumes}")
         
         try:
             self._load_characters_from_file(characters_file)
@@ -90,23 +94,47 @@ class CharacterDatabase:
         """Load characters from data array."""
         for char_data in characters_data:
             try:
+                # Get required fields
                 id = char_data.get("id")
-   
+                character_id = char_data.get("character_id")
+                
+                if id is None or character_id is None:
+                    logger.warning(f"Skipping character with missing IDs: {char_data.get('name', 'unknown')}")
+                    continue
+                
+                # Parse aptitudes from list of grade strings
+                aptitude_strings = char_data["aptitude"]
+                if len(aptitude_strings) != 10:
+                    logger.warning(f"Skipping character {id} with {len(aptitude_strings)} aptitudes, expected 10")
+                    continue
+                
+                aptitudes = []
+                for apt_str in aptitude_strings:
+                    aptitudes.append(Aptitude[apt_str])
+                
+                # Parse stat bonuses
+                stat_bonus = char_data["stat_bonus"]
+                if len(stat_bonus) != 5:
+                    logger.warning(f"Skipping character {id} with {len(stat_bonus)} stat bonuses, expected 5")
+                    continue
+                
                 # Create Character object
                 self.characters[id] = Character(
                     id=id,
-                    character_id=char_data.get("character_id"),
-                    name=char_data.get("url_name"),
+                    character_id=character_id,
+                    name=char_data.get("url_name", f"character-{id}"),
                     view_name=char_data.get("name", f"Character {id}"),
-                    stat_bonus=[20, 10, 0, 0, 0],
-                    aptitudes=[Aptitude.A, Aptitude.A, Aptitude.A, Aptitude.A, Aptitude.A, Aptitude.A, Aptitude.A, Aptitude.A, Aptitude.A, Aptitude.A]
+                    stat_bonus=stat_bonus,
+                    aptitudes=aptitudes
                 )
-                logger.debug(f"Character {id} ({self.characters[id].name}) added to database")
+                
+                logger.debug(f"Character {self.characters[id]} added to database")
             
             except (KeyError, ValueError) as e:
                 logger.warning(f"Skipping invalid character data: {e}")
+                logger.debug(f"Problematic data: {char_data}")
 
-    def get_character_by_id(self, id: int) -> Character | None:
+    def get_character_costume_by_id(self, id: int) -> Character | None:
         """Get character by ID."""
         return self.characters.get(id)
 
@@ -129,7 +157,7 @@ class CharacterDatabase:
         return len(self.characters)
 
     def __iter__(self) -> Iterator[Character]:
-        """Iterate over all character cards in database."""
+        """Iterate over all character costumes in database."""
         yield from self.characters.values()
 
     def load_character_portrait_async(self, id: int, width: int, height: int, callback: callable) -> None:
@@ -146,30 +174,30 @@ class CharacterDatabase:
         thread = threading.Thread(target=load_in_thread, daemon=True)
         thread.start()
 
-    def _load_character_portrait_sync(self, id: int, width: int, height: int) -> GdkPixbuf.Pixbuf | None:
+    def _load_character_portrait_sync(self, character_id: int, width: int, height: int) -> GdkPixbuf.Pixbuf | None:
         """Synchronous internal method to load character portrait."""
         # Check memory cache first
         with self._cache_lock:
-            if id in self.image_cache:
-                cached_pixbuf = self.image_cache[id]
+            if character_id in self.image_cache:
+                cached_pixbuf = self.image_cache[character_id]
                 return cached_pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
         # Check disk cache
-        disk_pixbuf = self._load_from_disk_cache(id)
+        disk_pixbuf = self._load_from_disk_cache(character_id)
         if disk_pixbuf:
             with self._cache_lock:
-                self.image_cache[id] = disk_pixbuf
-            logger.debug(f"Loaded character card {id} portrait from disk cache")
+                self.image_cache[character_id] = disk_pixbuf
+            logger.debug(f"Loaded character {character_id} portrait from disk cache")
             return disk_pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
         # Download from internet as fallback
-        downloaded_pixbuf = self._download_and_cache_portrait(id)
+        downloaded_pixbuf = self._download_and_cache_portrait(character_id)
         if downloaded_pixbuf:
             with self._cache_lock:
-                self.image_cache[id] = downloaded_pixbuf
+                self.image_cache[character_id] = downloaded_pixbuf
             return downloaded_pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
-        logger.error(f"Could not load portrait data for character costume {id}")
+        logger.error(f"Could not load portrait data for character {character_id}")
         return None
 
     def _get_cache_file_path(self, id: int) -> Path:
@@ -191,22 +219,22 @@ class CharacterDatabase:
             cache_file.unlink(missing_ok=True)
             return None
 
-    def _download_and_cache_portrait(self, id: int) -> GdkPixbuf.Pixbuf | None:
+    def _download_and_cache_portrait(self, character_id: int) -> GdkPixbuf.Pixbuf | None:
         """Download character portrait and save to disk cache."""
         character = self.characters.get(id)
         if not character:
             logger.error(f"Character costume {id} not found in database")
             return None
         
-        url = CharacterDatabase.IMAGE_BASE_URL.format(id=id)
-        logger.debug(f"Downloading portrait for character costume {character.id}")
+        url = CharacterDatabase.PORTRAIT_BASE_URL.format(character_id=character_id)
+        logger.debug(f"Downloading portrait for character {character_id}")
 
         try:
             response = self._session.get(url, timeout=CharacterDatabase.IMAGE_TIMEOUT_SECONDS)
 
             if response.status_code == 200:
                 image_data = response.content
-                logger.debug(f"Downloaded portrait for character card {character.id}: {len(image_data)} bytes")
+                logger.debug(f"Downloaded portrait for character costume {character.id}: {len(image_data)} bytes")
 
                 # Save to disk cache
                 cache_file = self._get_cache_file_path(character.id)

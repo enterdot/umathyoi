@@ -9,7 +9,7 @@ from .card import Card, CardEffect, CardUniqueEffect, CardType
 from .deck import Deck
 from .deck_list import DeckList
 from .scenario import Scenario, FacilityType
-from .character import GenericCharacter, StatType, Mood
+from .character import Character, StatType, Mood
 from .event import Event
 from common import debounce, stopwatch, auto_title_from_instance
 
@@ -26,13 +26,13 @@ class EfficiencyCalculator:
     DEBOUNCE_WAIT = 150
 
     def __init__(
-        self, deck_list, scenario: Scenario, character: GenericCharacter
+        self, deck_list, scenario: Scenario, character: Character
     ):
 
         self._deck_list: DeckList = deck_list
 
         self._scenario: Scenario = scenario
-        self._character: GenericCharacter = character
+        self._character: Character = character
         self._fan_count: int = 150000
         self._mood: Mood = Mood.great
         self._energy: int = 60
@@ -83,11 +83,11 @@ class EfficiencyCalculator:
 
     # Character property
     @property
-    def character(self) -> GenericCharacter:
+    def character(self) -> Character:
         return self._character
 
     @character.setter
-    def character(self, value: GenericCharacter) -> None:
+    def character(self, value: Character) -> None:
         self._character = value
         self.recalculate()
 

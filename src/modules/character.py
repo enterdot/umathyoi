@@ -56,22 +56,31 @@ class Aptitude(Enum):
 
 
 @dataclass(frozen=True)
-class GenericCharacter:
-    """Represents a generic trainee (character)."""
+class Character:
+    """Represents a trainee (character)."""
 
     MAX_TOTAL_STAT_BONUS: ClassVar[int] = 30
 
-    stat_bonus: list[int]
-    aptitudes: list[Aptitude]
+    id: int  # Full costume ID (e.g., 102840)
+    character_id: int  # Base character ID (e.g., 1028)
+    name: str  # URL slug name (e.g., "102802-hishi-akebono")
+    view_name: str  # Display name (e.g., "Hishi Akebono")
+    stat_bonus: list[int]  # [speed, stamina, power, guts, wit] bonuses
+    aptitudes: list[Aptitude]  # 10 aptitudes for different conditions
 
     @property
-    def track_aptitude(self) -> list[Aptitude]:
+    def costume_id(self) -> int:
+        """Calculate costume ID from full ID and character ID."""
+        return self.id - (self.character_id * 100)
+
+    @property
+    def track_aptitudes(self) -> list[Aptitude]:
         return self.aptitudes[0,1]
     @property
-    def distance_aptitude(self) -> list[Aptitude]:
+    def distance_aptitudes(self) -> list[Aptitude]:
         return self.aptitudes[2,5]
     @property
-    def style_aptitude(self) -> list[Aptitude]:
+    def style_aptitudes(self) -> list[Aptitude]:
         return self.aptitudes[6,9]
         
     def __post_init__(self) -> None:
@@ -84,43 +93,18 @@ class GenericCharacter:
             )
 
     def get_stat_bonus(self, stat_type: StatType) -> int:
-        match stat_type:
-            case StatType.speed:
-                return self.stat_bonus[0]
-            case StatType.stamina:
-                return self.stat_bonus[1]
-            case StatType.power:
-                return self.stat_bonus[2]
-            case StatType.guts:
-                return self.stat_bonus[3]
-            case StatType.wit:
-                return self.stat_bonus[4]
+        """Get bonus for a specific stat type."""
+        stat_index = {
+            StatType.speed: 0,
+            StatType.stamina: 1,
+            StatType.power: 2,
+            StatType.guts: 3,
+            StatType.wit: 4,
+        }
+        return self.stat_bonus[stat_index[stat_type]]
 
     def get_stat_bonus_string(self, stat_type: StatType) -> str:
         return f"{self.get_stat_bonus(stat_type)}%"
 
     def get_stat_bonus_multipler(self, stat_type: StatType) -> float:
         return (100 + self.get_stat_bonus(stat_type)) / 100
-
-
-@dataclass(frozen=True)
-class Character(GenericCharacter):
-    """Represents a trainee (character)."""
-
-    id: int
-    character_id: int
-    name: str
-    view_name: str
-    #skills: list[Skill]
-    #unique_skill: Skill
-
-    def costume_id(self) -> int:
-        return self.id - self.character_id * 100
-
-    def __hash__(self) -> int:
-        return hash(self.id)
-
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, self.__class__):
-            return False
-        return self.id == other.id
